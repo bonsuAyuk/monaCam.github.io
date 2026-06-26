@@ -1,0 +1,375 @@
+/* Landing Page Stylesheet */
+
+/* ── Hero Section ─────────────────────────────────────── */
+.hero-section {
+  position: relative;
+  padding: 120px 0 100px;
+  overflow: hidden;
+  background: radial-gradient(100% 100% at 50% 0%, rgba(var(--primary-rgb), 0.1) 0%, transparent 100%);
+}
+
+.hero-content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.hero-tag i {
+  color: var(--primary);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+}
+
+.hero-description {
+  font-size: clamp(15px, 2.5vw, 18px);
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  line-height: 1.7;
+}
+
+.hero-cta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 60px;
+}
+
+/* ── Background Glowing Halos ─────────────────────────── */
+.hero-glow-1 {
+  position: absolute;
+  top: -10%;
+  left: 5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.hero-glow-2 {
+  position: absolute;
+  top: 20%;
+  right: 5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(var(--secondary-rgb), 0.1) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+/* ── Stats Counter Grid ───────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--card-border);
+  padding-top: 48px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 40px);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+/* ── Features Grid ────────────────────────────────────── */
+.features-section {
+  padding: 100px 0;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 60px;
+}
+
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.section-header p {
+  color: var(--text-secondary);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 32px;
+  transition: var(--transition-normal);
+}
+
+.feature-card:hover {
+  border-color: var(--card-hover-border);
+  transform: translateY(-5px);
+}
+
+.feature-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(255, 179, 0, 0.08);
+  border: 1px solid rgba(255, 179, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+
+.feature-card h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── Local Mobile Money Showcase ─────────────────────── */
+.momo-showcase-section {
+  padding: 100px 0;
+  position: relative;
+}
+
+.momo-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.momo-text-panel h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.momo-text-panel p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.momo-badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.momo-badge-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.momo-badge-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(0, 200, 83, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success);
+}
+
+.momo-visual-panel {
+  position: relative;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.08) 0%, transparent 70%);
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid var(--card-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.momo-mock-phone {
+  background: #000;
+  width: 240px;
+  height: 460px;
+  border-radius: 36px;
+  border: 8px solid #222;
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  font-size: 12px;
+}
+
+.phone-screen-header {
+  text-align: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-weight: 700;
+}
+
+.phone-momo-card {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.phone-momo-amount {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.phone-momo-btn {
+  background: var(--primary);
+  color: #000;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: auto;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ── Call to Action ───────────────────────────────────── */
+.cta-section {
+  padding: 80px 0;
+  text-align: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(var(--primary-rgb), 0.05) 100%);
+}
+
+.cta-box {
+  background: linear-gradient(135deg, rgba(23, 25, 35, 0.8) 0%, rgba(15, 17, 26, 0.8) 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 60px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cta-box h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 40px);
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.cta-box p {
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto 32px;
+}
+
+/* ── Responsive Overrides ─────────────────────────────── */
+@media (max-width: 992px) {
+  .features-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .momo-content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .momo-visual-panel {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-section {
+    padding: 80px 0 60px;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .stat-item {
+    padding: 16px;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+  }
+  .hero-cta .btn-lg {
+    width: 100%;
+    padding: 14px 20px;
+  }
+  .cta-box {
+    padding: 40px 20px;
+  }
+  .cta-box .hero-cta .btn-lg {
+    width: 100%;
+  }
+  .features-section {
+    padding: 60px 0;
+  }
+  .momo-showcase-section {
+    padding: 60px 0;
+  }
+  .momo-mock-phone {
+    width: 200px;
+    height: 380px;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero-tag {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+}

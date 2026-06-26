@@ -1,0 +1,188 @@
+/* Authentication Pages Stylesheet */
+
+.auth-wrapper {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.05) 0%, transparent 80%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ── Alert states: hidden by default, shown by JS ─────── */
+.auth-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  /* Default: hidden */
+  display: none;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+}
+
+/* When JS sets style="display:flex" these colours apply */
+.auth-alert-error {
+  background: rgba(255, 23, 68, 0.10);
+  color: var(--error);
+  border-color: rgba(255, 23, 68, 0.20);
+}
+
+.auth-alert-success {
+  background: rgba(0, 200, 83, 0.10);
+  color: var(--success);
+  border-color: rgba(0, 200, 83, 0.20);
+}
+
+/* ── Role Selection Cards ──────────────────────────────── */
+.role-toggle-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.role-card {
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* Touch-friendly minimum size */
+  min-height: 80px;
+  justify-content: center;
+}
+
+.role-card i {
+  font-size: 20px;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+}
+
+.role-card-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.role-card-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.role-card.selected {
+  border-color: var(--primary);
+  background: rgba(255, 179, 0, 0.05);
+}
+
+.role-card.selected i {
+  color: var(--primary);
+}
+
+.role-card.selected .role-card-title {
+  color: var(--text-primary);
+}
+
+/* ── Creator extra fields ──────────────────────────────── */
+.creator-fields {
+  display: none;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auth-footer-links {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.auth-footer-links a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.auth-footer-links a:hover {
+  text-decoration: underline;
+}
+
+.forgot-password-link {
+  display: block;
+  text-align: right;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: -12px;
+  margin-bottom: 20px;
+  transition: var(--transition-fast);
+}
+
+.forgot-password-link:hover {
+  color: var(--text-primary);
+}
+
+/* ── Mobile overrides ──────────────────────────────────── */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .auth-title {
+    font-size: 24px;
+  }
+
+  /* Ensure inputs are at least 16px so iOS doesn't zoom */
+  .form-control {
+    font-size: 16px;
+  }
+}

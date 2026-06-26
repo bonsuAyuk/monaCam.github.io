@@ -1,0 +1,134 @@
+/* Pricing Comparison Stylesheet */
+
+.pricing-header {
+  padding: 60px 0 40px;
+  text-align: center;
+}
+
+.pricing-header h1 {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.pricing-header p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.pricing-toggle-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.pricing-toggle-btn {
+  padding: 8px 24px;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.02);
+  transition: var(--transition-fast);
+}
+
+.pricing-toggle-btn.active {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
+}
+
+/* Plan grid wrappers */
+.plans-grid {
+  display: none;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.plans-grid.active {
+  display: grid;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.plan-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 40px 30px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-normal);
+}
+
+.plan-card:hover {
+  border-color: var(--card-hover-border);
+  transform: translateY(-4px);
+}
+
+.plan-card.popular {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, rgba(var(--primary-rgb), 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  box-shadow: 0 8px 30px rgba(var(--primary-rgb), 0.1);
+}
+
+.popular-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.plan-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.plan-price {
+  margin-bottom: 24px;
+  display: flex;
+  align-items: baseline;
+}
+
+.plan-amount {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.plan-period {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.plan-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+
+.plan-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+}
+
+.plan-feature-item i {
+  color: var(--success);
+}
+
+.plan-btn-wrapper {
+  margin-top: auto;
+}

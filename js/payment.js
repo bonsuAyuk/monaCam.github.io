@@ -103,6 +103,33 @@ export async function submitPaymentRequest(opts) {
   }
 
   await setDoc(doc(db, "paymentRequests", requestId), requestData);
+
+  // Send email notification silently in the background
+  try {
+    // IMPORTANT: Change this to your actual admin email address
+    const adminEmail = "bonsufr@gmail.com";
+
+    if (adminEmail !== "bonsufr@gmail.com") {
+      fetch(`https://formsubmit.co/ajax/${adminEmail}`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `New Payment Request: ${amount} FCFA`,
+          message: `A new payment request (${requestId}) was submitted by ${displayName} for a ${type} pass.`,
+          amount: `${amount} FCFA`,
+          sender_phone: phone,
+          provider: provider,
+          action_required: "Log into the admin dashboard to approve this payment."
+        })
+      });
+    }
+  } catch (e) {
+    console.warn("Could not send email notification", e);
+  }
+
   return requestId;
 }
 
@@ -128,7 +155,7 @@ export async function checkUserAccess(uid, videoId) {
         const expiry = new Date(
           new Date(r.reviewedAt || r.createdAt).getTime() + days * 86400000
         ).getTime();
-        
+
         if (Date.now() < expiry) {
           hasPass = true;
           // Upgrade logic: if we found a monthly, or if this pass expires later, store it
@@ -180,7 +207,7 @@ export async function getAllPaymentRequests(status) {
 // ─────────────────────────────────────────────────────────────────
 export async function approvePaymentRequest(requestId) {
   const reqRef = doc(db, "paymentRequests", requestId);
-  
+
   await setDoc(reqRef,
     { status: "approved", reviewedAt: new Date().toISOString() },
     { merge: true }
@@ -192,17 +219,17 @@ export async function approvePaymentRequest(requestId) {
     if (snap.exists()) {
       const data = snap.data();
       const type = data.type;
-      
+
       if (type === "starter_creator" || type === "premium_creator") {
         const newPlan = type === "premium_creator" ? "premium" : "starter";
         const userRef = doc(db, "users", data.uid);
         const userSnap = await getDoc(userRef);
-        
+
         if (userSnap.exists()) {
           const userData = userSnap.data();
           let updatedProfile = userData.creatorProfile || {};
           updatedProfile.plan = newPlan;
-          
+
           await updateDoc(userRef, {
             creatorProfile: updatedProfile,
             role: "creator" // Ensure they have the creator role

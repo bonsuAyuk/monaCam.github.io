@@ -122,17 +122,17 @@ async function loadEarningsData() {
     
     snapshot.forEach(docSnap => {
       const video = docSnap.data();
-      const views = video.views || 0;
+      const publicViews = video.views || 0;
+      const paidViews = video.paidViews || 0;
       const price = video.priceFCFA || 0;
       
-      // For now, assuming 1 view = 1 sale to generate real-time metrics based on live views
-      const salesCount = views; 
+      const salesCount = paidViews; 
       const gross = salesCount * price;
 
       performanceBreakdown.push({
         title: video.title,
         price: price,
-        views: views,
+        views: publicViews, // Show public views in the table
         salesCount: salesCount,
         earnings: gross
       });

@@ -211,7 +211,7 @@ async function loadVideos(isReset = false) {
             duration: d.duration || "10:00",
             creatorName: d.creatorName || "Anonymous Creator",
             creatorAvatar: d.creatorAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80",
-            thumbnail: d.thumbnailUrl || "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80",
+            thumbnail: d.thumbDriveId ? `https://drive.google.com/uc?export=view&id=${d.thumbDriveId}` : (d.thumbnailUrl || "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80"),
             createdAt: d.createdAt // Need this for newest sort
           });
         });

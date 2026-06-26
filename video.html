@@ -282,7 +282,7 @@
   <script src="js/nav.js"></script>
 
   <script type="module">
-    import { auth, onAuthStateChanged, db, collection, query, where, getDocs, getDoc, doc } from "./js/db-config.js";
+    import { auth, onAuthStateChanged, db, collection, query, where, getDocs, getDoc, doc, updateDoc, increment } from "./js/db-config.js";
     import { DrivePlayer, isDriveUrl, buildDrivePreviewUrl } from "./js/drive-player.js";
     import { PLANS, PAYMENT_NUMBERS, submitPaymentRequest, checkUserAccess } from "./js/payment.js";
 
@@ -415,6 +415,24 @@
       if (!hasAccess && hasPending) {
         // Show "your payment is being reviewed" instead of aggressive paywall
         document.getElementById("preview-mode-bar").style.display = "flex";
+      }
+
+      // ── View Tracking Logic ────────────────────────────────────
+      if (!isAdmin && !isCreator) {
+        const viewKey = `viewed_${videoId}`;
+        if (!sessionStorage.getItem(viewKey)) {
+          sessionStorage.setItem(viewKey, "true");
+          
+          try {
+            const updates = { views: increment(1) };
+            if (hasAccess) {
+              updates.paidViews = increment(1);
+            }
+            await updateDoc(doc(db, "videos", videoId), updates);
+          } catch (e) {
+            console.error("Failed to increment views:", e);
+          }
+        }
       }
     }
 
@@ -633,7 +651,7 @@
 
         container.innerHTML = related.map(v => `
           <div class="related-card" onclick="window.location.href='video.html?id=${v.id}'" role="button" tabindex="0">
-            <img src="${v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80'}" class="related-thumb" alt="${v.title}" loading="lazy">
+            <img src="${v.thumbDriveId ? `https://drive.google.com/uc?export=view&id=${v.thumbDriveId}` : (v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80')}" class="related-thumb" alt="${v.title}" loading="lazy">
             <div class="related-details">
               <h4 class="related-title">${v.title}</h4>
               <div class="related-creator">${v.creatorName}</div>

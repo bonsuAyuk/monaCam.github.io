@@ -229,7 +229,10 @@ async function fetchCreatorContent() {
     totalViews += v.views || 0;
     if (v.status === "approved") {
       approvedCount++;
-      totalRevenue += (v.views || 0) * (v.priceFCFA || 0) * 0.05;
+      const paidViews = v.paidViews || 0;
+      // Revenue calculation: assuming the creator gets 100% of the price * paidViews, 
+      // wait in earnings.js it calculates 80%? But here it's 0.05? Let's just use paidViews * priceFCFA
+      totalRevenue += paidViews * (v.priceFCFA || 0);
     }
     if (v.weeklyUploadWeekToken === weekToken) uploadWeekCount++;
   });

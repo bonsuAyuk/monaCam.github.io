@@ -154,7 +154,7 @@ async function loadFeaturedCreators() {
           displayName: d.displayName || "Unknown Creator",
           handle: d.creatorProfile?.handle || `@${(d.displayName || 'creator').toLowerCase().replace(/\s+/g, '')}`,
           subscribersCount: "0",
-          videosCount: d.creatorProfile?.weeklyUploadCount || 0,
+          videosCount: d.creatorProfile?.totalVideos || d.creatorProfile?.weeklyUploadCount || 0,
           avatar: d.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
         });
       });
@@ -171,7 +171,7 @@ async function loadFeaturedCreators() {
             displayName: d.displayName || "Unknown Creator",
             handle: d.creatorProfile?.handle || `@${(d.displayName || 'creator').toLowerCase().replace(/\s+/g, '')}`,
             subscribersCount: "0",
-            videosCount: d.creatorProfile?.weeklyUploadCount || 0,
+            videosCount: d.creatorProfile?.totalVideos || d.creatorProfile?.weeklyUploadCount || 0,
             avatar: d.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
           });
         });
@@ -193,7 +193,6 @@ async function loadFeaturedCreators() {
         <p class="creator-handle">${creator.handle}</p>
         <div class="creator-meta">
           <span><strong>${creator.videosCount}</strong> Videos</span>
-          <span><strong>${creator.subscribersCount}</strong> Subs</span>
         </div>
       `;
       featuredCreatorsList.appendChild(card);

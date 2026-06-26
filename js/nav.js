@@ -4,6 +4,32 @@
  * Include as: <script src="js/nav.js"></script> (plain script, not module)
  */
 (function () {
+  window.updateNavAuthUI = function(user) {
+    const dashboardLink = document.getElementById("nav-dashboard-link-container");
+    const authActions = document.getElementById("auth-nav-actions");
+    const exclusivesLink = document.querySelector('a.nav-link[href="exclusives.html"]');
+    
+    if (user) {
+      if (exclusivesLink) exclusivesLink.style.display = "inline-block";
+      const role = localStorage.getItem("userRole") || "viewer";
+      let url = "viewer-dashboard.html";
+      if (role === "creator") url = "creator-dashboard.html";
+      if (role === "admin") url = "admin-dashboard.html";
+      
+      if (dashboardLink) dashboardLink.innerHTML = `<a href="${url}" class="nav-link">Dashboard</a>`;
+      if (authActions) authActions.innerHTML = `
+        <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> My Profile</a>
+      `;
+    } else {
+      if (exclusivesLink) exclusivesLink.style.display = "none";
+      if (dashboardLink) dashboardLink.innerHTML = "";
+      if (authActions) authActions.innerHTML = `
+        <a href="login.html" class="btn btn-ghost">Log In</a>
+        <a href="register.html" class="btn btn-primary">Join as Creator</a>
+      `;
+    }
+  };
+
   function buildMobileDrawer(links, authHTML) {
     const drawer = document.createElement("div");
     drawer.className = "mobile-nav-drawer";

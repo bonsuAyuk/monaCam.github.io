@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const creatorId = urlParams.get("creator");
 
   onAuthStateChanged(auth, async (user) => {
+    if (window.updateNavAuthUI) window.updateNavAuthUI(user);
     if (!user) {
       window.location.href = "login.html";
       return;

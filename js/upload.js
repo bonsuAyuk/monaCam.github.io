@@ -100,6 +100,7 @@ function setupTabTransitions() {
 // ── Auth Observer ───────────────────────────────────────────────
 function setupAuthObserver() {
   onAuthStateChanged(auth, async (user) => {
+    if (window.updateNavAuthUI) window.updateNavAuthUI(user);
     if (!user) {
       window.location.href = "login.html";
       return;

@@ -313,7 +313,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       onAuthStateChanged(auth, async (user) => {
         currentUser = user;
-        updateNavAuth(user);
+        if (window.updateNavAuthUI) window.updateNavAuthUI(user);
         loadVideoMeta();
       });
 
@@ -321,25 +321,7 @@
       loadRelatedVideos();
     });
 
-    // ── Nav auth state ────────────────────────────────────────────
-    function updateNavAuth(user) {
-      const dashLink   = document.getElementById("nav-dashboard-link-container");
-      const authEl     = document.getElementById("auth-nav-actions");
-      if (user) {
-        const role = localStorage.getItem("userRole") || "viewer";
-        const url  = role === "creator" ? "creator-dashboard.html"
-                   : role === "admin"   ? "admin-dashboard.html"
-                   : "viewer-dashboard.html";
-        dashLink.innerHTML  = `<a href="${url}" class="nav-link">Dashboard</a>`;
-        authEl.innerHTML    = `<a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> Profile</a>`;
-        window.updateMobileNavAuth?.(`
-          <a href="${url}" class="btn btn-secondary" style="width:100%;justify-content:flex-start;"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-        `);
-      } else {
-        dashLink.innerHTML = "";
-        authEl.innerHTML   = `<a href="login.html" class="btn btn-ghost">Log In</a><a href="register.html" class="btn btn-primary">Join Free</a>`;
-      }
-    }
+
 
     // ── Load video metadata ───────────────────────────────────────
     async function loadVideoMeta() {

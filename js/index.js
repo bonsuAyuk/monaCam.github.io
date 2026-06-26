@@ -14,7 +14,11 @@ const emptyState = document.getElementById("empty-state");
 const loadingSpinner = document.getElementById("loading-spinner");
 
 document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const creatorId = urlParams.get("creator");
+
   onAuthStateChanged(auth, async (user) => {
+    if (window.updateNavAuthUI) window.updateNavAuthUI(user);
     currentUser = user;
     if (user) {
       try {

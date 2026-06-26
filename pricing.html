@@ -348,8 +348,8 @@
           selectedPlan = btn.dataset.plan;
           selectedPrice = parseInt(btn.dataset.price);
 
-          document.getElementById("checkout-title").innerText = Subscribe:  + selectedPlan.toUpperCase().replace('_', ' ');
-          amountDisplay.innerText = selectedPrice.toLocaleString() +  FCFA;
+          document.getElementById("checkout-title").innerText = "Subscribe: " + selectedPlan.toUpperCase().replace('_', ' ');
+          amountDisplay.innerText = selectedPrice.toLocaleString() + " FCFA";
           
           step1.style.display = "block";
           step2.style.display = "none";
@@ -426,7 +426,7 @@
         const submitBtn = document.getElementById("submit-checkout-btn");
         
         submitBtn.disabled = true;
-        submitBtn.innerHTML = <i class="fa-solid fa-spinner fa-spin"></i> Uploading Receipt...;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading Receipt...`;
 
         try {
           // Use unified payment submit function

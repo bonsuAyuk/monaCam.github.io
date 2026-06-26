@@ -149,13 +149,34 @@ const MOCK_VIDEOS = [
 ];
 
 // Initialize Page
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   setupAuthObserver();
   loadFeaturedCreators();
+  await loadCategories();
   loadVideos(true); // Reset and load first page
   setupFilters();
   setupInfiniteScroll();
 });
+
+// Load Categories
+async function loadCategories() {
+  const loadingText = document.getElementById("loading-categories-text");
+  try {
+    const querySnapshot = await getDocs(collection(db, "categories"));
+    if (loadingText) loadingText.remove();
+    querySnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const pill = document.createElement("span");
+      pill.className = "category-pill";
+      pill.dataset.category = docSnap.id;
+      pill.textContent = data.name;
+      categoriesList.appendChild(pill);
+    });
+  } catch (err) {
+    console.error("Error loading categories:", err);
+    if (loadingText) loadingText.textContent = "Error loading categories.";
+  }
+}
 
 // Setup auth observer to change navbar dynamically
 function setupAuthObserver() {

@@ -48,6 +48,13 @@
  *       allow update: if request.auth != null &&
  *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
  *     }
+ *
+ *     // Categories: read all; admin creates/updates/deletes
+ *     match /categories/{categoryId} {
+ *       allow read: if true;
+ *       allow write: if request.auth != null &&
+ *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+ *     }
  *   }
  * }
  */

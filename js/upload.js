@@ -125,8 +125,32 @@ function setupAuthObserver() {
 
     updateDashboardUI();
     await fetchCreatorContent();
+    await fetchCategories();
     setupUploadFormHandler();
   });
+}
+
+// ── Fetch Categories from DB ────────────────────────────────────
+async function fetchCategories() {
+  const categorySelect = document.getElementById("video-category");
+  if (!categorySelect) return;
+  try {
+    const querySnapshot = await getDocs(collection(db, "categories"));
+    if (querySnapshot.empty) {
+      categorySelect.innerHTML = `<option value="" disabled selected>No categories available</option>`;
+      return;
+    }
+    
+    let html = `<option value="" disabled selected>Select category</option>`;
+    querySnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      html += `<option value="${docSnap.id}">${data.name}</option>`;
+    });
+    categorySelect.innerHTML = html;
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    categorySelect.innerHTML = `<option value="" disabled selected>Error loading categories</option>`;
+  }
 }
 
 // ── Update UI with user data ────────────────────────────────────

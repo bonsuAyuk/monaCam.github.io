@@ -541,11 +541,25 @@
             <td>${video.priceFCFA.toLocaleString()} FCFA</td>
             <td>${new Date(video.createdAt).toLocaleDateString()}</td>
             <td>
+              <button class="btn btn-secondary btn-sm preview-btn" data-url="${video.driveEmbedUrl}" style="background:var(--bg-tertiary); color:var(--text-primary); border:1px solid var(--card-border); margin-right: 4px;">
+                <i class="fa-solid fa-play"></i> Preview
+              </button>
               <button class="btn btn-primary btn-sm approve-btn" data-id="${video.videoId}" style="background:var(--success); border:none;"><i class="fa-solid fa-check"></i> Approve</button>
               <button class="btn btn-secondary btn-sm reject-btn" data-id="${video.videoId}" style="color:var(--error); border-color:rgba(255,23,68,0.25);"><i class="fa-solid fa-xmark"></i> Reject</button>
             </td>
           </tr>
         `).join("");
+
+        document.querySelectorAll(".preview-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const url = btn.dataset.url;
+            if (url && url !== "undefined") {
+              window.open(url, "_blank");
+            } else {
+              alert("Video preview URL not available for this upload.");
+            }
+          });
+        });
 
         document.querySelectorAll(".approve-btn").forEach(btn => {
           btn.addEventListener("click", () => handleApprove(btn.dataset.id));

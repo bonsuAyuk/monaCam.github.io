@@ -294,8 +294,6 @@
     let selectedProvider = "MTN";
     const videoId = new URLSearchParams(window.location.search).get("id") || "vid_1";
 
-    };
-
     // ── Resolve the correct video source URL ─────────────────────
     function resolveVideoSource(video, hasFullAccess) {
       const driveId = video.driveFileId || video.driveVideoId;

@@ -291,7 +291,7 @@
   <script src="js/nav.js"></script>
 
   <script type="module">
-    import { auth, onAuthStateChanged, db, collection, query, where, getDocs } from "./js/db-config.js";
+    import { auth, onAuthStateChanged, db, collection, query, where, getDocs, getDoc, doc } from "./js/db-config.js";
     import { DrivePlayer, isDriveUrl, buildDrivePreviewUrl } from "./js/drive-player.js";
     import { PLANS, PAYMENT_NUMBERS, submitPaymentRequest, checkUserAccess } from "./js/payment.js";
 
@@ -384,15 +384,28 @@
     }
 
     // ── Load video metadata ───────────────────────────────────────
-    function loadVideoMeta() {
-      videoData = MOCK_VIDEOS[videoId] || Object.values(MOCK_VIDEOS)[0];
+    async function loadVideoMeta() {
+      try {
+        const docSnap = await getDoc(doc(db, "videos", videoId));
+        if (docSnap.exists()) {
+          videoData = docSnap.data();
+          videoData.id = docSnap.id;
+        } else {
+          alert("Video not found!");
+          return;
+        }
+      } catch (err) {
+        console.error("Error loading video from Firestore:", err);
+        // Fallback for UI testing if Firestore is unavailable
+        videoData = MOCK_VIDEOS[videoId] || Object.values(MOCK_VIDEOS)[0];
+      }
 
-      document.getElementById("video-title").innerText        = videoData.title;
-      document.getElementById("video-description").innerText  = videoData.description;
-      document.getElementById("creator-name").innerText       = videoData.creatorName;
-      document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category}`;
-      document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${videoData.views.toLocaleString()} views`;
-      document.getElementById("ppv-price-label").innerText    = `${videoData.priceFCFA.toLocaleString()} FCFA`;
+      document.getElementById("video-title").innerText        = videoData.title || "Untitled";
+      document.getElementById("video-description").innerText  = videoData.description || "";
+      document.getElementById("creator-name").innerText       = videoData.creatorName || "Anonymous";
+      document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category || 'Uncategorized'}`;
+      document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${(videoData.views || 0).toLocaleString()} views`;
+      document.getElementById("ppv-price-label").innerText    = `${(videoData.priceFCFA || 0).toLocaleString()} FCFA`;
 
       const previewSec = videoData.previewSeconds || 30;
       document.getElementById("preview-limit-text").innerText = `${previewSec} seconds`;
@@ -418,16 +431,22 @@
 
       // Check Firestore access
       let hasPass = false, hasPPV = false, hasPending = false;
-      try {
-        ({ hasPass, hasPPV, hasPending } = await checkUserAccess(currentUser.uid, videoId));
-      } catch (e) {
-        // Firestore not configured yet
-        hasPass    = !!localStorage.getItem(`pass_${currentUser.uid}`);
-        hasPPV     = !!localStorage.getItem(`ppv_${currentUser.uid}_${videoId}`);
-        hasPending = false;
+      const userRole = localStorage.getItem("userRole") || "viewer";
+      const isAdmin = userRole === "admin";
+      const isCreator = videoData.creatorId === currentUser.uid;
+
+      if (!isAdmin && !isCreator) {
+        try {
+          ({ hasPass, hasPPV, hasPending } = await checkUserAccess(currentUser.uid, videoId));
+        } catch (e) {
+          // Firestore not configured yet
+          hasPass    = !!localStorage.getItem(`pass_${currentUser.uid}`);
+          hasPPV     = !!localStorage.getItem(`ppv_${currentUser.uid}_${videoId}`);
+          hasPending = false;
+        }
       }
 
-      const hasAccess = hasPass || hasPPV || videoData.priceFCFA === 0;
+      const hasAccess = isAdmin || isCreator || hasPass || hasPPV || videoData.priceFCFA === 0;
       const source    = resolveVideoSource(videoData, hasAccess);
 
       drivePlayer.load(source, hasAccess);

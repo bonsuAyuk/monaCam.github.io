@@ -25,11 +25,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Modal logic
   const requestModal = document.getElementById("request-modal");
+  
+  // From specific creator profile
   document.getElementById("btn-open-request-modal")?.addEventListener("click", () => {
+    document.getElementById("creator-select-group").style.display = "none";
     requestModal.style.display = "flex";
   });
+
+  // From Viewer Hub
+  document.getElementById("btn-hub-new-request")?.addEventListener("click", async () => {
+    document.getElementById("creator-select-group").style.display = "block";
+    document.getElementById("req-creator-select").required = true;
+    requestModal.style.display = "flex";
+    
+    // Load creators into dropdown
+    const sel = document.getElementById("req-creator-select");
+    if (sel.options.length <= 1) { // Only load once
+      try {
+        const qC = query(collection(db, "users"), where("role", "==", "creator"));
+        const snap = await getDocs(qC);
+        let opts = '<option value="">Select a Creator...</option>';
+        snap.forEach(d => {
+          opts += `<option value="${d.id}" data-name="${d.data().displayName}">${d.data().displayName}</option>`;
+        });
+        sel.innerHTML = opts;
+      } catch(e) { console.error("Error loading creators", e); }
+    }
+  });
+
   document.getElementById("close-request-modal")?.addEventListener("click", () => {
     requestModal.style.display = "none";
+  });
+
+  // Handle Form Submission (Both Cases)
+  const form = document.getElementById("custom-request-form");
+  const submitBtn = document.getElementById("btn-submit-request");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+    submitBtn.disabled = true;
+
+    // Determine target creator
+    let targetCreatorId = creatorId; // From URL
+    let targetCreatorName = "Unknown Creator";
+    
+    if (!targetCreatorId) {
+      const sel = document.getElementById("req-creator-select");
+      targetCreatorId = sel.value;
+      targetCreatorName = sel.options[sel.selectedIndex].dataset.name;
+    } else {
+      targetCreatorName = document.getElementById("cp-name").innerText;
+    }
+
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error("Not authenticated");
+
+      await addDoc(collection(db, "customRequests"), {
+        viewerId: currentUser.uid,
+        viewerName: currentUser.displayName || "Viewer",
+        creatorId: targetCreatorId,
+        creatorName: targetCreatorName,
+        description: document.getElementById("req-desc").value,
+        offeredPriceFCFA: Number(document.getElementById("req-price").value),
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+      alert("Custom video request sent successfully!");
+      window.location.href = "exclusives.html";
+    } catch (error) {
+      console.error("Error sending request:", error);
+      alert("Failed to send request. Please try again.");
+      submitBtn.innerHTML = 'Send Request';
+      submitBtn.disabled = false;
+    }
   });
 });
 
@@ -53,35 +123,6 @@ async function loadCreatorProfile(creatorId, currentUser) {
   } catch (error) {
     console.error("Error loading creator:", error);
   }
-
-  const form = document.getElementById("custom-request-form");
-  const submitBtn = document.getElementById("btn-submit-request");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-    submitBtn.disabled = true;
-
-    try {
-      await addDoc(collection(db, "customRequests"), {
-        viewerId: currentUser.uid,
-        viewerName: currentUser.displayName || "Viewer",
-        creatorId: creatorId,
-        creatorName: creatorName,
-        description: document.getElementById("req-desc").value,
-        offeredPriceFCFA: Number(document.getElementById("req-price").value),
-        status: "pending",
-        createdAt: serverTimestamp()
-      });
-      alert("Custom video request sent successfully!");
-      window.location.href = "exclusives.html";
-    } catch (error) {
-      console.error("Error sending request:", error);
-      alert("Failed to send request. Please try again.");
-      submitBtn.innerHTML = 'Send Request';
-      submitBtn.disabled = false;
-    }
-  });
 }
 
 async function loadMyRequests(currentUser) {

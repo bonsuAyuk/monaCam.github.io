@@ -11,7 +11,7 @@
  */
 import {
   db, auth, onAuthStateChanged,
-  doc, getDoc, setDoc, updateDoc,
+  doc, getDoc, setDoc, updateDoc, increment,
   collection, query, where, getDocs, limit
 } from "./db-config.js";
 import {
@@ -568,6 +568,11 @@ function setupUploadFormHandler() {
           videoId: videoId
         });
       }
+
+      // Update creator's total video count
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        "creatorProfile.totalVideos": increment(1)
+      }).catch(e => console.warn("Could not increment video count", e));
 
       showProgress("Upload complete!", 100, "Your video is pending admin approval. Note: Google Drive may take 5-30 mins to process the video for streaming.");
 

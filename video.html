@@ -422,6 +422,13 @@
               updates.paidViews = increment(1);
             }
             await updateDoc(doc(db, "videos", videoId), updates);
+            
+            // Instantly update the DOM to show the new view count
+            videoData.views = (videoData.views || 0) + 1;
+            const viewsEl = document.getElementById("video-views-count");
+            if (viewsEl) {
+              viewsEl.innerHTML = `<i class="fa-solid fa-eye"></i> ${videoData.views.toLocaleString()} views`;
+            }
           } catch (e) {
             console.error("Failed to increment views:", e);
           }

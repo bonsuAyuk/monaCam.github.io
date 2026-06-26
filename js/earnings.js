@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function setupAuthObserver() {
-  onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async (user) => {
     if (window.updateNavAuthUI) window.updateNavAuthUI(user);
     if (user) {
       currentUser = user;
@@ -62,22 +62,13 @@ function setupAuthObserver() {
           }
         }
       } catch (err) {
-        console.warn("Firestore error loading earnings metadata. Falling back to local mocks.");
+        console.warn("Firestore error loading earnings metadata.");
       }
 
-      // Default mock profile if missing
-      if (!creatorProfile) {
-        creatorProfile = {
-          displayName: user.displayName || "Chevalier Ndole",
-          photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80",
-          creatorProfile: {
-            plan: "starter",
-            paymentDetails: {
-              provider: "MTN",
-              number: "+237 677 123 456"
-            }
-          }
-        };
+      if (!creatorProfile || !creatorProfile.creatorProfile || !creatorProfile.creatorProfile.plan) {
+        alert("You must subscribe to a Creator Plan before accessing your earnings dashboard.");
+        window.location.href = "pricing.html";
+        return;
       }
 
       updateSidebarUI();
@@ -90,8 +81,7 @@ function setupAuthObserver() {
 
 function updateSidebarUI() {
   sidebarName.innerText = creatorProfile.displayName;
-  if (creatorProfile.photoURL) {
-    sidebarAvatar.src = creatorProfile.photoURL;
+  if (creatorProfile.photoURL) {    sidebarAvatar.src = creatorProfile.photoURL;
   }
   const plan = creatorProfile.creatorProfile?.plan || "starter";
   creatorPlanBadge.innerText = plan === "premium" ? "Premium Creator" : "Starter Creator";
@@ -316,4 +306,5 @@ function setupWithdrawalHandler() {
     }, 2000);
   });
 }
+
 

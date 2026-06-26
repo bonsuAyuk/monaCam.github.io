@@ -116,13 +116,10 @@ function setupAuthObserver() {
       console.warn("Could not load profile from Firestore:", err.message);
     }
 
-    if (!userProfile) {
-      userProfile = {
-        displayName: user.displayName || user.email?.split("@")[0] || "Creator",
-        email: user.email,
-        role: localStorage.getItem("userRole") || "creator",
-        creatorProfile: { plan: "starter" }
-      };
+    if (!userProfile || !userProfile.creatorProfile || !userProfile.creatorProfile.plan) {
+      alert("You must subscribe to a Creator Plan before accessing your dashboard.");
+      window.location.href = "pricing.html";
+      return;
     }
 
     updateDashboardUI();

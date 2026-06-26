@@ -225,9 +225,28 @@
     }
 
     function setupAuthObserver() {
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         if (window.updateNavAuthUI) window.updateNavAuthUI(user);
+
+        if (user) {
+          try {
+            const uRef = doc(db, "users", user.uid);
+            const snap = await getDoc(uRef);
+            if (snap.exists()) {
+              const role = snap.data().role;
+              if (role === "creator") {
+                toggleViewers.style.display = "none";
+                toggleCreators.click();
+              } else if (role === "viewer") {
+                toggleCreators.style.display = "none";
+                toggleViewers.click();
+              }
+            }
+          } catch (e) {
+            console.error("Error fetching user role for pricing page", e);
+          }
+        }
       });
     }
 

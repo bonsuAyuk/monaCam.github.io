@@ -156,8 +156,6 @@
 
     </div>
   </section>
-
-    // DOM Elements
 </div>
 
   <!-- Checkout payment modal -->
@@ -362,26 +360,6 @@
       document.getElementById("btn-next-step").addEventListener("click", () => {
         step1.style.display = "none";
         step2.style.display = "block";
-      });
-
-      // Toggle Momo provider cards
-      const cardMtn = document.getElementById("method-mtn");
-      const cardOrange = document.getElementById("method-orange");
-
-      cardMtn.addEventListener("click", () => {
-        cardMtn.style.borderColor = "var(--primary)";
-        cardMtn.style.background = "rgba(255, 179, 0, 0.05)";
-        cardOrange.style.borderColor = "var(--card-border)";
-        cardOrange.style.background = "rgba(255, 255, 255, 0.02)";
-        selectedMethod = "mtn";
-      });
-
-      cardOrange.addEventListener("click", () => {
-        cardOrange.style.borderColor = "var(--secondary)";
-        cardOrange.style.background = "rgba(229, 57, 53, 0.05)";
-        cardMtn.style.borderColor = "var(--card-border)";
-        cardMtn.style.background = "rgba(255, 255, 255, 0.02)";
-        selectedMethod = "orange";
       });
 
       document.getElementById("btn-back-step").addEventListener("click", () => {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -110,24 +110,11 @@
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="recommended-videos-list">
               <tr>
-                <td>
-                  <div style="font-weight:600;">How to Cook Perfect Cameroonian Ndole</div>
+                <td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Loading recommended videos...
                 </td>
-                <td>Chevalier Ndole</td>
-                <td>18:45</td>
-                <td><span class="badge badge-featured">1,500 FCFA</span></td>
-                <td><a href="video.html?id=vid_1" class="btn btn-secondary btn-sm">Watch Now</a></td>
-              </tr>
-              <tr>
-                <td>
-                  <div style="font-weight:600;">Afrobeat Guitar Masterclass for Beginners</div>
-                </td>
-                <td>Xavier Music CM</td>
-                <td>45:30</td>
-                <td><span class="badge badge-featured">3,000 FCFA</span></td>
-                <td><a href="video.html?id=vid_3" class="btn btn-secondary btn-sm">Watch Now</a></td>
               </tr>
             </tbody>
           </table>
@@ -190,12 +177,55 @@
 
   <!-- Dashboard Tab Controller -->
   <script type="module">
-    import { auth, onAuthStateChanged, db, doc, getDoc } from "./js/db-config.js";
+    import { auth, onAuthStateChanged, db, doc, getDoc, collection, query, where, limit, getDocs, orderBy } from "./js/db-config.js";
 
     document.addEventListener("DOMContentLoaded", () => {
       setupTabTransitions();
       setupAuth();
+      loadRecommendedVideos();
     });
+
+    async function loadRecommendedVideos() {
+      const tbody = document.getElementById("recommended-videos-list");
+      if (!tbody) return;
+
+      try {
+        // Query approved videos that have a price (premium)
+        const q = query(
+          collection(db, "videos"), 
+          where("status", "==", "approved"), 
+          where("priceFCFA", ">", 0),
+          limit(5)
+        );
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          tbody.innerHTML = \<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">No premium videos available right now.</td></tr>\;
+          return;
+        }
+
+        let html = "";
+        snap.forEach(docSnap => {
+          const v = docSnap.data();
+          html += \
+            <tr>
+              <td>
+                <div style="font-weight:600;">\</div>
+              </td>
+              <td>\</td>
+              <td>\</td>
+              <td><span class="badge badge-featured">\ FCFA</span></td>
+              <td><a href="video.html?id=\" class="btn btn-secondary btn-sm">Watch Now</a></td>
+            </tr>
+          \;
+        });
+        tbody.innerHTML = html;
+
+      } catch (err) {
+        console.error("Error loading recommended videos:", err);
+        tbody.innerHTML = \<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--error);">Failed to load recommendations.</td></tr>\;
+      }
+    }
 
     function setupTabTransitions() {
       const sidebarMenuItems = document.querySelectorAll(".sidebar-menu-item");
@@ -208,13 +238,14 @@
           dashboardPanels.forEach(p => p.classList.remove("active"));
           
           item.classList.add("active");
-          document.getElementById(`panel-${tab}`).classList.add("active");
+          document.getElementById(\panel-\\).classList.add("active");
         });
       });
     }
 
     function setupAuth() {
       onAuthStateChanged(auth, async (user) => {
+        if (window.updateNavAuthUI) window.updateNavAuthUI(user);
         if (!user) {
           window.location.href = "login.html";
           return;
@@ -224,7 +255,7 @@
         document.getElementById("sidebar-username").innerText = user.displayName || "Viewer User";
         
         // Mock checks for subscriptions & transactions
-        const mockPass = localStorage.getItem(`pass_${user.uid}`);
+        const mockPass = localStorage.getItem(\pass_\\);
         if (mockPass) {
           document.getElementById("current-pass-badge").innerText = mockPass.toUpperCase() + " PASS ACTIVE";
           document.getElementById("current-pass-badge").className = "badge badge-success";
@@ -235,19 +266,19 @@
         }
 
         // Load logs if present
-        const logs = JSON.parse(localStorage.getItem(`tx_log_${user.uid}`)) || [];
+        const logs = JSON.parse(localStorage.getItem(\	x_log_\\)) || [];
         if (logs.length > 0) {
           const table = document.getElementById("payment-logs-table");
-          table.innerHTML = logs.map(log => `
+          table.innerHTML = logs.map(log => \
             <tr>
-              <td><code>${log.id}</code></td>
-              <td>${log.type}</td>
-              <td style="font-weight:700;">${log.amount.toLocaleString()} FCFA</td>
-              <td><span style="text-transform:uppercase;">${log.method}</span></td>
+              <td><code>\</code></td>
+              <td>\</td>
+              <td style="font-weight:700;">\ FCFA</td>
+              <td><span style="text-transform:uppercase;">\</span></td>
               <td><span class="badge badge-success">Completed</span></td>
-              <td>${new Date(log.date).toLocaleDateString()}</td>
+              <td>\</td>
             </tr>
-          `).join("");
+          \).join("");
         }
       });
     }
@@ -255,4 +286,3 @@
   <script src="js/nav.js"></script>
 </body>
 </html>
-

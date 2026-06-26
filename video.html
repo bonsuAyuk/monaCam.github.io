@@ -377,21 +377,16 @@
       drivePlayer = new DrivePlayer(wrapper, {
         previewSeconds: videoData.previewSeconds || 30,
         watermarkText:  "MonaCam",
-        onPreviewEnd:   () => showLockedPaywall(),
+        onPreviewEnd:   () => currentUser ? showLockedPaywall() : showLoggedOutPaywall(),
       });
-
-      if (!currentUser) {
-        showLoggedOutPaywall();
-        return;
-      }
 
       // Check Firestore access
       let hasPass = false, hasPPV = false, hasPending = false;
       const userRole = localStorage.getItem("userRole") || "viewer";
-      const isAdmin = userRole === "admin";
-      const isCreator = videoData.creatorId === currentUser.uid;
+      const isAdmin = currentUser && userRole === "admin";
+      const isCreator = currentUser && videoData.creatorId === currentUser.uid;
 
-      if (!isAdmin && !isCreator) {
+      if (currentUser && !isAdmin && !isCreator) {
         try {
           ({ hasPass, hasPPV, hasPending } = await checkUserAccess(currentUser.uid, videoId));
         } catch (e) {

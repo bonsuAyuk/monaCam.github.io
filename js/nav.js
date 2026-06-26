@@ -60,6 +60,7 @@
 
     // Map icon names
     const iconMap = {
+      "Home": "fa-solid fa-house",
       "Marketplace": "fa-solid fa-store",
       "Pricing Plans": "fa-solid fa-tags",
       "Dashboard": "fa-solid fa-gauge",

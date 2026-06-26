@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MonaCam - Premium Creator Monetization platform for Cameroon. Sell videos, create plans, and earn directly via Mobile Money.">
-  <title>MonaCam | Cameroonian Creator Monetization Platform</title>
+  <meta name="description" content="Discover premium content from the best Cameroonian creators. Video marketplace supporting Mobile Money and Orange Money payments.">
+  <title>Creator Marketplace | Cameroon Monetization Platform</title>
   
   <!-- Styling Sheets -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages/landing.css">
+  <link rel="stylesheet" href="css/pages/marketplace.css">
   
+  <!-- Font Awesome Icons for premium styling -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- Dynamic Navigation Bar -->
   <nav class="navbar">
     <div class="container navbar-content">
       <a href="index.html" class="logo">
@@ -24,173 +25,78 @@
       </a>
       
       <div class="nav-links">
-        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="index.html" class="nav-link active">Home</a>
         <a href="pricing.html" class="nav-link">Pricing Plans</a>
         <span id="nav-dashboard-link-container"></span>
       </div>
       
       <div class="nav-actions" id="auth-nav-actions">
+        <!-- Filled dynamically by JavaScript -->
         <a href="login.html" class="btn btn-ghost">Log In</a>
         <a href="register.html" class="btn btn-primary">Join as Creator</a>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="hero-glow-1"></div>
-    <div class="hero-glow-2"></div>
-    <div class="container hero-content">
-      <div class="hero-tag animate-fade-in">
-        <i class="fa-solid fa-fire-flame-simple"></i>
-        <span>Empowering Cameroonian Digital Creators</span>
-      </div>
-      
-      <h1 class="hero-title animate-fade-in">
-        Monetize Your Videos directly with <span class="text-gradient">Mobile Money</span>
-      </h1>
-      
-      <p class="hero-description animate-fade-in">
-        The ultimate video subscription platform for Cameroon. Upload videos, set your own prices, create subscriber plans, and withdraw your earnings directly to MTN Mobile Money or Orange Money.
-      </p>
-      
-      <div class="hero-cta animate-fade-in">
-        <a href="marketplace.html" class="btn btn-primary btn-lg"><i class="fa-solid fa-play"></i> Watch Previews</a>
-        <a href="register.html" class="btn btn-secondary btn-lg">Start Uploading</a>
-      </div>
-      
-      <!-- Stats Counters -->
-      <div class="stats-grid animate-fade-in">
-        <div class="stat-item">
-          <div class="stat-number text-gradient">100+</div>
-          <div class="stat-label">Cameroon Creators</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number text-gradient">10k+</div>
-          <div class="stat-label">Premium Videos</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number text-gradient">5M+ FCFA</div>
-          <div class="stat-label">Paid to Creators</div>
+  <!-- Marketplace Hero Header -->
+  <header class="marketplace-header">
+    <div class="container animate-fade-in">
+      <h1 class="text-gradient">Welcome to MonaCam</h1>
+      <p>Watch and support premium Cameroonian creators. Quick and secure payments using MTN Mobile Money and Orange Money.</p>
+    </div>
+  </header>
+
+  <!-- Featured Creators Section -->
+  <section class="featured-creators-section container animate-fade-in">
+    <h2 class="section-title">
+      <i class="fa-solid fa-star text-gradient"></i> Featured Creators
+    </h2>
+    
+    <div class="featured-carousel-container">
+      <div class="featured-carousel" id="featured-creators-list">
+        <!-- Rendered dynamically by JavaScript -->
+        <div class="creator-card skeleton">
+          <div style="width: 80px; height: 80px; border-radius:50%; background: #222; margin: 0 auto 16px;"></div>
+          <div style="height: 16px; background: #222; width: 60%; margin: 0 auto 8px;"></div>
+          <div style="height: 12px; background: #222; width: 40%; margin: 0 auto;"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="features-section">
-    <div class="container">
-      <div class="section-header">
-        <h2>Features Designed for Growth</h2>
-        <p>A unified creator pipeline tailored for the Cameroonian market infrastructure.</p>
+  <!-- Filters & Search Section -->
+  <section class="filters-section container animate-fade-in">
+    <div class="filter-bar glass">
+      <div class="search-box-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-bar" class="form-control search-input" placeholder="Search videos by title, creator, or topic...">
       </div>
       
-      <div class="features-grid">
-        <!-- Feature 1 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <i class="fa-solid fa-video"></i>
-          </div>
-          <h3>Flexible Content Pricing</h3>
-          <p>Set a single pay-per-view price or bundle your videos under custom weekly and monthly subscription passes.</p>
+      <div class="filter-actions">
+        <div class="categories-container" id="categories-list">
+          <span class="category-pill active" data-category="all">All Content</span>
+          <span style="font-size: 13px; color: var(--text-muted); margin-left: 10px;" id="loading-categories-text">Loading categories...</span>
         </div>
         
-        <!-- Feature 2 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <i class="fa-solid fa-wallet"></i>
-          </div>
-          <h3>Mobile Money Native</h3>
-          <p>No credit card required. Viewers subscribe and purchase content with Orange Money and MTN Mobile Money instantly via USSD push.</p>
-        </div>
-        
-        <!-- Feature 3 -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <i class="fa-solid fa-shield-halved"></i>
-          </div>
-          <h3>Secure Google Storage</h3>
-          <p>Your video assets are protected. Public access is limited to 30-second previews, while full stream sessions are encrypted and gated.</p>
-        </div>
+        <select id="sort-filter" class="form-control sort-select">
+          <option value="newest">Newest First</option>
+          <option value="popular">Most Viewed</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+        </select>
       </div>
     </div>
   </section>
 
-  <!-- Mobile Money Process Showcase -->
-  <section class="momo-showcase-section container">
-    <div class="momo-content-wrapper">
-      <div class="momo-text-panel">
-        <h2 class="text-gradient">Fast & Local Transactions</h2>
-        <p>We've integrated local telecom API gateways to ensure your viewers pay easily and you get payouts without currency conversions.</p>
-        
-        <div class="momo-badge-list">
-          <div class="momo-badge-item">
-            <div class="momo-badge-icon"><i class="fa-solid fa-check"></i></div>
-            <div>
-              <strong style="color:var(--text-primary);">MTN Mobile Money</strong>
-              <p style="font-size:13px; color:var(--text-secondary); margin-top:2px;">USSD push authentication sent to any Cameroonian MTN SIM card.</p>
-            </div>
-          </div>
-          
-          <div class="momo-badge-item">
-            <div class="momo-badge-icon"><i class="fa-solid fa-check"></i></div>
-            <div>
-              <strong style="color:var(--text-primary);">Orange Money</strong>
-              <p style="font-size:13px; color:var(--text-secondary); margin-top:2px;">Fast payment flow matching standard Cameroonian digital consumer needs.</p>
-            </div>
-          </div>
-          
-          <div class="momo-badge-item">
-            <div class="momo-badge-icon"><i class="fa-solid fa-check"></i></div>
-            <div>
-              <strong style="color:var(--text-primary);">Instant Creator Payouts</strong>
-              <p style="font-size:13px; color:var(--text-secondary); margin-top:2px;">Withdraw funds to your Momo wallet directly from your creator dashboard.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="momo-visual-panel">
-        <div class="momo-mock-phone">
-          <div class="phone-screen-header">
-            <i class="fa-solid fa-lock" style="color: var(--success); margin-right:4px;"></i> Secure Checkout
-          </div>
-          <div class="phone-momo-card">
-            <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;">MONAMCAM PLATFORM</div>
-            <div class="phone-momo-amount">1,500 FCFA</div>
-            <div style="font-size:12px; font-weight:600; color:var(--text-primary);">Cooking Perfect Ndole</div>
-          </div>
-          
-          <div style="margin-top: 30px; display:flex; flex-direction:column; gap:8px;">
-            <div style="padding: 10px; border-radius:6px; border:1px solid var(--primary); display:flex; align-items:center; justify-content:space-between; background: rgba(255,179,0,0.05);">
-              <span>MTN Mobile Money</span>
-              <i class="fa-regular fa-circle-dot" style="color: var(--primary);"></i>
-            </div>
-            <div style="padding: 10px; border-radius:6px; border:1px solid var(--card-border); display:flex; align-items:center; justify-content:space-between;">
-              <span>Orange Money</span>
-              <i class="fa-regular fa-circle"></i>
-            </div>
-          </div>
-          
-          <div class="phone-momo-btn">
-            Confirm & Pay
-          </div>
-        </div>
-      </div>
+  <!-- Video Grid Section -->
+  <section class="videos-grid-section container">
+    <div class="video-grid" id="video-grid-container">
+      <!-- Cards rendered dynamically by JS -->
     </div>
-  </section>
-
-  <!-- CTA Box -->
-  <section class="cta-section">
-    <div class="container">
-      <div class="cta-box">
-        <h2>Ready to Monetize Your Content?</h2>
-        <p>Unlock the digital potential of your video content today. Set up your channel in under 5 minutes.</p>
-        <div class="hero-cta" style="margin-bottom: 0;">
-          <a href="register.html" class="btn btn-primary btn-lg">Create Creator Account</a>
-          <a href="marketplace.html" class="btn btn-secondary btn-lg">Browse Creators</a>
-        </div>
-      </div>
+    
+    <!-- Infinite Scroll Trigger -->
+    <div class="infinite-scroll-trigger" id="infinite-scroll-trigger">
+      <div class="spinner" id="loading-spinner"></div>
     </div>
   </section>
 
@@ -232,30 +138,8 @@
     </div>
   </footer>
 
-  <script type="module">
-    import { auth, onAuthStateChanged } from "./js/db-config.js";
-    onAuthStateChanged(auth, (user) => {
-      const dashboardLink = document.getElementById("nav-dashboard-link-container");
-      const authActions = document.getElementById("auth-nav-actions");
-      if (user) {
-        const role = localStorage.getItem("userRole") || "viewer";
-        let url = "viewer-dashboard.html";
-        if (role === "creator") url = "creator-dashboard.html";
-        if (role === "admin") url = "admin-dashboard.html";
-        dashboardLink.innerHTML = `<a href="${url}" class="nav-link">Dashboard</a>`;
-        authActions.innerHTML = `
-          <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> My Profile</a>
-        `;
-        if (window.updateMobileNavAuth) {
-          window.updateMobileNavAuth(`
-            <a href="${url}" class="btn btn-secondary" style="width:100%;justify-content:flex-start;"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-            <a href="profile.html" class="btn btn-ghost" style="width:100%;justify-content:flex-start;"><i class="fa-solid fa-user"></i> My Profile</a>
-          `);
-        }
-      }
-    });
-  </script>
+  <!-- Core Page Logic (ES Module) -->
+  <script type="module" src="js/marketplace.js"></script>
   <script src="js/nav.js"></script>
 </body>
 </html>
-

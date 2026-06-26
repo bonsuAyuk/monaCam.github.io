@@ -24,6 +24,7 @@ let userProfile     = null;
 let creatorVideos   = [];
 let uploadWeekCount = 0;
 let uploadWeekLimit = 5;
+let selectedVideoDuration = "00:00";
 
 // ── DOM Elements ────────────────────────────────────────────────
 const sidebarName        = document.getElementById("sidebar-username");
@@ -304,8 +305,21 @@ function setupFileTriggers() {
       const f = videoFileInput.files[0];
       if (f) {
         const sizeMB = (f.size / (1024 * 1024)).toFixed(1);
-        selectedVideoFilename.innerText = `${f.name} (${sizeMB} MB)`;
+        selectedVideoFilename.innerText = `${f.name} (${sizeMB} MB) - Calculating duration...`;
         selectedVideoFilename.style.color = "var(--primary)";
+        
+        // Extract real video duration
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.onloadedmetadata = function() {
+          URL.revokeObjectURL(video.src);
+          const duration = video.duration;
+          const m = Math.floor(duration / 60).toString().padStart(2, '0');
+          const s = Math.floor(duration % 60).toString().padStart(2, '0');
+          selectedVideoDuration = `${m}:${s}`;
+          selectedVideoFilename.innerText = `${f.name} (${sizeMB} MB) - ${selectedVideoDuration}`;
+        };
+        video.src = URL.createObjectURL(f);
       }
     });
   }
@@ -420,6 +434,7 @@ function setupUploadFormHandler() {
         thumbnailUrl:  thumbResult.url,      // Direct view URL for thumbnail
         thumbDriveId:  thumbResult.fileId,   // Thumbnail Drive file ID
         weeklyUploadWeekToken: weekToken,
+        duration:    selectedVideoDuration,
         views:     0,
         createdAt: today.toISOString(),
       };

@@ -10,7 +10,7 @@
  */
 
 import {
-  db, doc, setDoc, collection, query, where, getDocs, orderBy,
+  db, doc, setDoc, collection, query, where, getDocs, orderBy, getDoc, updateDoc
 } from "./db-config.js";
 import {
   uploadScreenshotToImgBB,
@@ -111,6 +111,8 @@ export async function submitPaymentRequest(opts) {
 // ─────────────────────────────────────────────────────────────────
 export async function checkUserAccess(uid, videoId) {
   let hasPass = false, hasPPV = false, hasPending = false;
+  let activePassType = null;
+  let maxExpiry = 0;
 
   try {
     const snap = await getDocs(
@@ -125,8 +127,19 @@ export async function checkUserAccess(uid, videoId) {
         const days = r.type === "weekly" ? 7 : 30;
         const expiry = new Date(
           new Date(r.reviewedAt || r.createdAt).getTime() + days * 86400000
-        );
-        if (new Date() < expiry) hasPass = true;
+        ).getTime();
+        
+        if (Date.now() < expiry) {
+          hasPass = true;
+          // Upgrade logic: if we found a monthly, or if this pass expires later, store it
+          if (r.type === "monthly") {
+            activePassType = "monthly"; // monthly always overrides weekly
+            if (expiry > maxExpiry) maxExpiry = expiry;
+          } else if (r.type === "weekly" && activePassType !== "monthly") {
+            activePassType = "weekly";
+            if (expiry > maxExpiry) maxExpiry = expiry;
+          }
+        }
       }
       if (r.type === "ppv" && videoId && r.videoId === videoId) hasPPV = true;
     });
@@ -134,7 +147,22 @@ export async function checkUserAccess(uid, videoId) {
     console.warn("Access check error:", e.message);
   }
 
-  return { hasPass, hasPPV, hasPending };
+  return { hasPass, hasPPV, hasPending, activePassType, activePassExpiry: maxExpiry };
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Get User Payment Requests
+// ─────────────────────────────────────────────────────────────────
+export async function getUserPaymentRequests(uid) {
+  try {
+    const snap = await getDocs(
+      query(collection(db, "paymentRequests"), where("uid", "==", uid), orderBy("createdAt", "desc"))
+    );
+    return snap.docs.map(d => d.data());
+  } catch (err) {
+    console.error("Failed to fetch user payments:", err);
+    return [];
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -151,10 +179,40 @@ export async function getAllPaymentRequests(status) {
 // ADMIN: Approve / Reject
 // ─────────────────────────────────────────────────────────────────
 export async function approvePaymentRequest(requestId) {
-  await setDoc(doc(db, "paymentRequests", requestId),
+  const reqRef = doc(db, "paymentRequests", requestId);
+  
+  await setDoc(reqRef,
     { status: "approved", reviewedAt: new Date().toISOString() },
     { merge: true }
   );
+
+  // Handle automatic plan upgrades for creators
+  try {
+    const snap = await getDoc(reqRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      const type = data.type;
+      
+      if (type === "starter_creator" || type === "premium_creator") {
+        const newPlan = type === "premium_creator" ? "premium" : "starter";
+        const userRef = doc(db, "users", data.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          let updatedProfile = userData.creatorProfile || {};
+          updatedProfile.plan = newPlan;
+          
+          await updateDoc(userRef, {
+            creatorProfile: updatedProfile,
+            role: "creator" // Ensure they have the creator role
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error converting plan on approval:", err);
+  }
 }
 
 export async function rejectPaymentRequest(requestId, note) {

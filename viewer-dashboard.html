@@ -156,8 +156,9 @@
   </div>
 
   <!-- Dashboard Tab Controller -->
-  <script type="module">
+    <script type="module">
     import { auth, onAuthStateChanged, db, doc, getDoc, collection, query, where, limit, getDocs, orderBy } from "./js/db-config.js";
+    import { checkUserAccess, getUserPaymentRequests } from "./js/payment.js";
 
     document.addEventListener("DOMContentLoaded", () => {
       setupTabTransitions();
@@ -191,31 +192,44 @@
         // Prefill name
         document.getElementById("sidebar-username").innerText = user.displayName || "Viewer User";
         
-        // Mock checks for subscriptions & transactions
-        const mockPass = localStorage.getItem(`pass_${user.uid}`);
-        if (mockPass) {
-          document.getElementById("current-pass-badge").innerText = mockPass.toUpperCase() + " PASS ACTIVE";
+        // Fetch real data from Firestore via payment.js
+        const { hasPass, activePassType, activePassExpiry } = await checkUserAccess(user.uid, null);
+        
+        if (hasPass && activePassType) {
+          document.getElementById("current-pass-badge").innerText = activePassType.toUpperCase() + " PASS ACTIVE";
           document.getElementById("current-pass-badge").className = "badge badge-success";
-          document.getElementById("current-pass-status-text").innerText = "Full access enabled. Enjoy all premium video content across the platform.";
+          
+          const daysLeft = Math.ceil((activePassExpiry - Date.now()) / (1000 * 60 * 60 * 24));
+          document.getElementById("current-pass-status-text").innerText = `Full access enabled. You have ${daysLeft} days remaining on your premium pass.`;
+          
           document.getElementById("pass-action-btn").innerText = "Renew Pass";
           document.getElementById("viewer-plan-badge").innerText = "Subscriber Viewer";
           document.getElementById("viewer-plan-badge").className = "sidebar-user-role badge badge-premium";
         }
 
-        // Load logs if present
-        const logs = JSON.parse(localStorage.getItem(`tx_log_${user.uid}`)) || [];
+        // Load logs
+        const logs = await getUserPaymentRequests(user.uid);
+        const table = document.getElementById("payment-logs-table");
+        
         if (logs.length > 0) {
-          const table = document.getElementById("payment-logs-table");
-          table.innerHTML = logs.map(log => `
+          table.innerHTML = logs.map(log => {
+            let statusBadge = `<span class="badge badge-pending">Pending</span>`;
+            if (log.status === "approved") statusBadge = `<span class="badge badge-success">Completed</span>`;
+            if (log.status === "rejected") statusBadge = `<span class="badge" style="background:rgba(255,23,68,0.1);color:var(--error);border-color:rgba(255,23,68,0.2);">Rejected</span>`;
+            
+            return `
             <tr>
-              <td><code>${log.id}</code></td>
-              <td>${log.type}</td>
-              <td style="font-weight:700;">${log.amount.toLocaleString()} FCFA</td>
-              <td><span style="text-transform:uppercase;">${log.method}</span></td>
-              <td><span class="badge badge-success">Completed</span></td>
-              <td>${new Date(log.date).toLocaleDateString()}</td>
+              <td><code>${log.requestId || "N/A"}</code></td>
+              <td>${log.type || "unknown"}</td>
+              <td style="font-weight:700;">${(log.amount||0).toLocaleString()} FCFA</td>
+              <td><span style="text-transform:uppercase;">${log.provider || "N/A"}</span></td>
+              <td>${statusBadge}</td>
+              <td>${new Date(log.createdAt).toLocaleDateString()}</td>
             </tr>
-          `).join("");
+            `;
+          }).join("");
+        } else {
+          table.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">No payment history found.</td></tr>`;
         }
       });
     }
@@ -223,3 +237,4 @@
   <script src="js/nav.js"></script>
 </body>
 </html>
+

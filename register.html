@@ -166,7 +166,19 @@
           }
         }, 1500);
       } catch (error) {
-        errorMsg.innerText = error.message;
+        let displayError = error.message;
+        if (displayError.includes("email-already-in-use")) {
+          displayError = "This email is already registered. Please log in instead.";
+        } else if (displayError.includes("weak-password")) {
+          displayError = "Your password is too weak. Please use at least 6 characters.";
+        } else if (displayError.includes("network-request-failed")) {
+          displayError = "Network error. Please check your internet connection.";
+        } else {
+          // Remove the ugly 'Firebase: Error' prefix for anything else
+          displayError = displayError.replace("Firebase: Error (", "").replace(").", "").replace("FirebaseError: ", "");
+        }
+        
+        errorMsg.innerText = displayError;
         errorAlert.style.display = "flex";
       }
     });

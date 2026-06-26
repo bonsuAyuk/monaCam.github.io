@@ -102,7 +102,21 @@
           else window.location.href = "viewer-dashboard.html";
         }, 1200);
       } catch (error) {
-        errorMsg.innerText = error.message;
+        let displayError = error.message;
+        if (displayError.includes("invalid-credential")) {
+          displayError = "Incorrect email or password. Please try again.";
+        } else if (displayError.includes("user-not-found")) {
+          displayError = "No account found with this email.";
+        } else if (displayError.includes("wrong-password")) {
+          displayError = "Incorrect password. Please try again.";
+        } else if (displayError.includes("too-many-requests")) {
+          displayError = "Too many failed attempts. Please try again later.";
+        } else if (displayError.includes("network-request-failed")) {
+          displayError = "Network error. Please check your internet connection.";
+        } else {
+          displayError = displayError.replace("Firebase: Error (", "").replace(").", "").replace("FirebaseError: ", "");
+        }
+        errorMsg.innerText = displayError;
         errorAlert.style.display = "flex";
       }
     });

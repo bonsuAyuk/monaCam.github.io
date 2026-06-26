@@ -275,7 +275,7 @@
 }
 
 .related-thumb {
-  width: 110px;
+  width: 160px;
   flex-shrink: 0;
   aspect-ratio: 16/9;
   border-radius: 8px;
@@ -289,7 +289,7 @@
 }
 
 .related-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.4;
   margin-bottom: 4px;

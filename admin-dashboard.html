@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Moderation, video approvals, subscriptions, user management, and financials.">
+  <title>Admin Dashboard Console | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+      </div>
+      
+      <div class="nav-actions">
+        <button id="admin-logout-btn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Main Grid -->
+  <div class="dashboard-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu">
+        <div class="sidebar-menu-item active" data-tab="payments">
+          <i class="fa-solid fa-image"></i> Payment Verification
+          <span class="badge badge-featured" id="sidebar-pending-badge" style="margin-left:auto; font-size:10px;"></span>
+        </div>
+        <div class="sidebar-menu-item" data-tab="queue">
+          <i class="fa-solid fa-hourglass-half"></i> Video Approvals
+        </div>
+        <div class="sidebar-menu-item" data-tab="creators">
+          <i class="fa-solid fa-star"></i> Featured Creators
+        </div>
+        <div class="sidebar-menu-item" data-tab="subscriptions">
+          <i class="fa-solid fa-ticket"></i> Subscriptions
+        </div>
+        <div class="sidebar-menu-item" data-tab="users">
+          <i class="fa-solid fa-users-gear"></i> Manage Users
+        </div>
+        <div class="sidebar-menu-item" data-tab="revenue">
+          <i class="fa-solid fa-sack-dollar"></i> Platform Revenue
+        </div>
+        <div class="sidebar-menu-item" data-tab="settings">
+          <i class="fa-solid fa-sliders"></i> Global Settings
+        </div>
+      </div>
+      
+      <!-- Footer Widget -->
+      <div class="sidebar-user">
+        <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" class="sidebar-user-avatar" alt="Avatar">
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">MonaCam Admin</div>
+          <div class="sidebar-user-role badge badge-featured">Root Admin</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Tab Bar (visible on mobile only) -->
+    <div class="mobile-dashboard-tabbar">
+      <div class="mobile-tab-item active" data-tab="payments">
+        <i class="fa-solid fa-image"></i> Payments
+      </div>
+      <div class="mobile-tab-item" data-tab="queue">
+        <i class="fa-solid fa-hourglass-half"></i> Videos
+      </div>
+      <div class="mobile-tab-item" data-tab="creators">
+        <i class="fa-solid fa-star"></i> Creators
+      </div>
+      <div class="mobile-tab-item" data-tab="users">
+        <i class="fa-solid fa-users"></i> Users
+      </div>
+      <div class="mobile-tab-item" data-tab="revenue">
+        <i class="fa-solid fa-chart-line"></i> Revenue
+      </div>
+      <div class="mobile-tab-item" data-tab="settings">
+        <i class="fa-solid fa-sliders"></i> Settings
+      </div>
+    </div>
+
+    <!-- Content Panel Area -->
+    <main class="dashboard-content">
+
+      <!-- 0. PAYMENT VERIFICATION PANEL -->
+      <section class="dashboard-panel active" id="panel-payments">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Payment Verification</h2>
+            <p>Review payment screenshots submitted by users and grant or deny access</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="refresh-payments-btn">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" data-filter="pending" id="filter-pending-btn">Pending</button>
+          <button class="btn btn-secondary btn-sm" data-filter="approved" id="filter-approved-btn">Approved</button>
+          <button class="btn btn-secondary btn-sm" data-filter="rejected" id="filter-rejected-btn">Rejected</button>
+          <button class="btn btn-secondary btn-sm" data-filter="all" id="filter-all-btn">All</button>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="stats-row" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(255,179,0,0.1); border-color:rgba(255,179,0,0.2);"><i class="fa-solid fa-hourglass-half" style="color:var(--primary);"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Pending</div>
+              <div class="stat-card-value" id="pay-stat-pending">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(0,200,83,0.1); border-color:rgba(0,200,83,0.2);"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Approved</div>
+              <div class="stat-card-value" id="pay-stat-approved">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(255,23,68,0.1); border-color:rgba(255,23,68,0.2);"><i class="fa-solid fa-circle-xmark" style="color:var(--error);"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Rejected</div>
+              <div class="stat-card-value" id="pay-stat-rejected">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment requests table -->
+        <div class="card" style="padding:0;">
+          <div class="table-responsive">
+            <table class="data-table" style="min-width:700px;">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Provider</th>
+                  <th>Submitted</th>
+                  <th>Screenshot</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="payments-table-body">
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:20px; margin-bottom:10px; display:block;"></i>
+                    Loading payment requests...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. Approvals Queue Panel -->
+      <section class="dashboard-panel active" id="panel-queue">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Approvals Queue</h2>
+            <p>Review newly uploaded video files before they appear in the public marketplace</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Video Title</th>
+                  <th>Creator</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Upload Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="approvals-queue-table">
+                <!-- Loaded dynamically -->
+                <tr>
+                  <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No videos currently pending review.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Featured Placements Panel -->
+      <section class="dashboard-panel" id="panel-creators">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Featured Placements</h2>
+            <p>Feature creators to position them first on the home marketplace spotlights</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Creator Name</th>
+                  <th>Wallet Account Number</th>
+                  <th>Subscription Tier</th>
+                  <th>Spotlight Placement</th>
+                </tr>
+              </thead>
+              <tbody id="creators-featured-table">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Manage Subscriptions Panel -->
+      <section class="dashboard-panel" id="panel-subscriptions">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Manage Subscriptions</h2>
+            <p>View active viewer/creator passes, extend periods, or expire memberships</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User Details</th>
+                  <th>Pass Plan</th>
+                  <th>Start Date</th>
+                  <th>Expiration Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="subscriptions-table-body">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Manage Users Panel -->
+      <section class="dashboard-panel" id="panel-users">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Manage Users</h2>
+            <p>Monitor user details, modify account access roles, or deactivate accounts</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User Name</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Platform Revenue Panel -->
+      <section class="dashboard-panel" id="panel-revenue">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Platform Financial Ledger</h2>
+            <p>Monitor transaction logs, total volume, and commission splits</p>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Total Platform Volume</div>
+              <div class="stat-card-value" id="revenue-total-volume">0 FCFA</div>
+            </div>
+          </div>
+          <div class="stat-card" style="border-color: var(--primary); background: rgba(255,179,0,0.02);">
+            <div class="stat-card-icon" style="background:rgba(255,179,0,0.1); border-color:rgba(255,179,0,0.3);"><i class="fa-solid fa-percent"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Admin Commission (20%)</div>
+              <div class="stat-card-value text-gradient" id="revenue-admin-cut">0 FCFA</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:20px; font-family:var(--font-display);">Recent Financial Transactions</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Payer ID</th>
+                  <th>Type</th>
+                  <th>Total Amount</th>
+                  <th>Admin Share (20%)</th>
+                  <th>Creator Share (80%)</th>
+                  <th>Method</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="revenue-history-table-body">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Global Settings Panel -->
+      <section class="dashboard-panel" id="panel-settings">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Global Configuration Settings</h2>
+            <p>Control content parameters and system limits</p>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:540px;">
+          <h3 style="margin-bottom:20px; font-family:var(--font-display);"><i class="fa-solid fa-clock text-gradient"></i> Video Preview Durations</h3>
+          
+          <div class="auth-alert auth-alert-success" id="settings-success-alert" style="margin-bottom:20px;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Preview duration settings updated successfully!</span>
+          </div>
+
+          <form id="global-settings-form">
+            <div class="form-group">
+              <label for="preview-duration-input" class="form-label">Default Preview Limit (Seconds)</label>
+              <input type="number" id="preview-duration-input" class="form-control" placeholder="30" min="5" max="300" required>
+              <small style="color:var(--text-muted); font-size:11px; margin-top:6px; display:block;">Sets the maximum playback time before visitors are prompted with paywalls.</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Save Settings</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Rejection Reason Modal -->
+  <div id="rejection-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="width:100%; max-width:440px; background:var(--bg-secondary); border-color:var(--error);">
+      <h3 style="margin-bottom:16px; font-family:var(--font-display);">Reject Video Upload</h3>
+      <div class="form-group">
+        <label for="reject-reason" class="form-label">Reason for Rejection</label>
+        <textarea id="reject-reason" class="form-control" placeholder="e.g. copyright infringement, low video quality..." rows="3" required></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+        <button id="cancel-reject-btn" class="btn btn-secondary btn-sm">Cancel</button>
+        <button id="confirm-reject-btn" class="btn btn-primary btn-sm" style="background:var(--error); border:none;">Confirm Rejection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Controller script module -->
+  <script type="module">
+    import { auth, onAuthStateChanged, db, doc, getDoc } from "./js/firebase-config.js";
+
+    // State lists
+    let pendingVideos = [];
+    let creatorsList = [];
+    let subscriptionsList = [];
+    let usersList = [];
+    let transactionsList = [];
+    let selectedVideoId = null;
+
+    // DOM bindings
+    const approvalsTable = document.getElementById("approvals-queue-table");
+    const creatorsTable = document.getElementById("creators-featured-table");
+    const subscriptionsTable = document.getElementById("subscriptions-table-body");
+    const usersTable = document.getElementById("users-table-body");
+    const transactionsTable = document.getElementById("revenue-history-table-body");
+    
+    const revenueVolume = document.getElementById("revenue-total-volume");
+    const revenueAdminCut = document.getElementById("revenue-admin-cut");
+    
+    const settingsForm = document.getElementById("global-settings-form");
+    const previewDurationInput = document.getElementById("preview-duration-input");
+    const settingsSuccessAlert = document.getElementById("settings-success-alert");
+    const rejectionModal = document.getElementById("rejection-modal");
+    const rejectReasonInput = document.getElementById("reject-reason");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupTabTransitions();
+      setupAuthObserver();
+      setupModalHandlers();
+      setupSettingsHandler();
+    });
+
+    function setupTabTransitions() {
+      const sidebarMenuItems = document.querySelectorAll(".sidebar-menu-item");
+      const dashboardPanels = document.querySelectorAll(".dashboard-panel");
+      
+      sidebarMenuItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const tab = item.dataset.tab;
+          sidebarMenuItems.forEach(m => m.classList.remove("active"));
+          dashboardPanels.forEach(p => p.classList.remove("active"));
+          
+          item.classList.add("active");
+          document.getElementById(`panel-${tab}`).classList.add("active");
+        });
+      });
+    }
+
+    function setupAuthObserver() {
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        // Logout listener
+        document.getElementById("admin-logout-btn").addEventListener("click", () => {
+          auth.signOut().then(() => {
+            localStorage.removeItem("userRole");
+            window.location.href = "index.html";
+          });
+        });
+
+        // Initialize lists
+        loadApprovalsQueue();
+        loadCreatorsFeatured();
+        loadSubscriptions();
+        loadUsers();
+        loadRevenue();
+        loadSettings();
+      });
+    }
+
+    // 1. Approvals Queue loader
+    function loadApprovalsQueue() {
+      let allVideos = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("uploads_")) {
+          allVideos = [...allVideos, ...(JSON.parse(localStorage.getItem(key)) || [])];
+        }
+      }
+
+      if (allVideos.length === 0) {
+        allVideos = [
+          { videoId: "v_pend_1", creatorId: "c1", creatorName: "Chevalier Ndole", title: "Traditional Sanga Recipe Tutorial", category: "culinary", priceFCFA: 1000, status: "pending", createdAt: new Date().toISOString() }
+        ];
+      }
+
+      pendingVideos = allVideos.filter(v => v.status === "pending");
+
+      if (pendingVideos.length > 0) {
+        approvalsTable.innerHTML = pendingVideos.map(video => `
+          <tr>
+            <td style="font-weight:700;">${video.title}</td>
+            <td>${video.creatorName}</td>
+            <td style="text-transform:capitalize;">${video.category}</td>
+            <td>${video.priceFCFA.toLocaleString()} FCFA</td>
+            <td>${new Date(video.createdAt).toLocaleDateString()}</td>
+            <td>
+              <button class="btn btn-primary btn-sm approve-btn" data-id="${video.videoId}" style="background:var(--success); border:none;"><i class="fa-solid fa-check"></i> Approve</button>
+              <button class="btn btn-secondary btn-sm reject-btn" data-id="${video.videoId}" style="color:var(--error); border-color:rgba(255,23,68,0.25);"><i class="fa-solid fa-xmark"></i> Reject</button>
+            </td>
+          </tr>
+        `).join("");
+
+        document.querySelectorAll(".approve-btn").forEach(btn => {
+          btn.addEventListener("click", () => handleApprove(btn.dataset.id));
+        });
+
+        document.querySelectorAll(".reject-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            selectedVideoId = btn.dataset.id;
+            rejectionModal.style.display = "flex";
+          });
+        });
+      } else {
+        approvalsTable.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No videos currently pending review.</td></tr>`;
+      }
+    }
+
+    // 2. Featured placement loader
+    function loadCreatorsFeatured() {
+      creatorsList = [
+        { uid: "creator_1", displayName: "Chevalier Ndole", phone: "+237 677 123 456", plan: "starter", featured: true },
+        { uid: "creator_2", displayName: "Murielle Comedy", phone: "+237 655 456 789", plan: "premium", featured: true },
+        { uid: "creator_3", displayName: "Xavier Music CM", phone: "+237 699 987 654", plan: "starter", featured: false }
+      ];
+
+      creatorsTable.innerHTML = creatorsList.map(c => `
+        <tr>
+          <td style="font-weight:700;">${c.displayName}</td>
+          <td><code>${c.phone}</code></td>
+          <td style="text-transform:capitalize;">${c.plan}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm toggle-feature-btn" data-uid="${c.uid}">
+              ${c.featured ? `<i class="fa-solid fa-star text-gradient"></i> Featured` : `<i class="fa-regular fa-star"></i> Feature Creator`}
+            </button>
+          </td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".toggle-feature-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const uid = btn.dataset.uid;
+          creatorsList = creatorsList.map(c => {
+            if (c.uid === uid) c.featured = !c.featured;
+            return c;
+          });
+          loadCreatorsFeatured();
+        });
+      });
+    }
+
+    // 3. Subscriptions loader
+    function loadSubscriptions() {
+      subscriptionsList = [
+        { id: "sub_01", username: "Elvis Yaounde", email: "elvis@domain.cm", type: "Monthly Viewer Pass", start: "2026-06-01", end: "2026-07-01", status: "active" },
+        { id: "sub_02", username: "Vanessa Ngoue", email: "vanessa@domain.cm", type: "Weekly Viewer Pass", start: "2026-06-15", end: "2026-06-22", status: "active" },
+        { id: "sub_03", username: "Chevalier Ndole", email: "ndole@domain.cm", type: "Starter Creator Plan", start: "2026-05-10", end: "2026-06-10", status: "expired" }
+      ];
+
+      subscriptionsTable.innerHTML = subscriptionsList.map(sub => {
+        const badgeClass = sub.status === "active" ? "badge badge-success" : "badge";
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:700;">${sub.username}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${sub.email}</div>
+            </td>
+            <td>${sub.type}</td>
+            <td>${sub.start}</td>
+            <td>${sub.end}</td>
+            <td><span class="${badgeClass}">${sub.status}</span></td>
+            <td style="display:flex; gap:8px;">
+              ${sub.status === 'active' 
+                ? `<button class="btn btn-secondary btn-sm cancel-sub-btn" data-id="${sub.id}" style="color:var(--error); border-color:rgba(255,23,68,0.25);">Cancel</button>`
+                : `<button class="btn btn-secondary btn-sm extend-sub-btn" data-id="${sub.id}">Reactivate</button>`}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".cancel-sub-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          subscriptionsList = subscriptionsList.map(s => {
+            if (s.id === id) s.status = "expired";
+            return s;
+          });
+          loadSubscriptions();
+        });
+      });
+
+      document.querySelectorAll(".extend-sub-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          subscriptionsList = subscriptionsList.map(s => {
+            if (s.id === id) {
+              s.status = "active";
+              s.end = "2026-07-22"; // Extend
+            }
+            return s;
+          });
+          loadSubscriptions();
+        });
+      });
+    }
+
+    // 4. Users list management
+    function loadUsers() {
+      usersList = [
+        { uid: "u_1", displayName: "Elvis Yaounde", email: "elvis@domain.cm", phone: "+237 670 111 222", role: "viewer" },
+        { uid: "u_2", displayName: "Chevalier Ndole", email: "ndole@domain.cm", phone: "+237 677 123 456", role: "creator" },
+        { uid: "u_3", displayName: "Root Admin CM", email: "admin@monacam.cm", phone: "+237 699 999 999", role: "admin" }
+      ];
+
+      usersTable.innerHTML = usersList.map(u => `
+        <tr>
+          <td style="font-weight:700;">${u.displayName}</td>
+          <td>${u.email}</td>
+          <td><code>${u.phone}</code></td>
+          <td>
+            <select class="form-control role-select-dropdown" data-uid="${u.uid}" style="padding:6px 12px; font-size:12px; min-width:110px;">
+              <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+              <option value="creator" ${u.role === 'creator' ? 'selected' : ''}>Creator</option>
+              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn btn-secondary btn-sm delete-user-btn" data-uid="${u.uid}" style="color:var(--error); border-color:rgba(255,23,68,0.25);"><i class="fa-solid fa-trash"></i> Delete</button>
+          </td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".role-select-dropdown").forEach(select => {
+        select.addEventListener("change", (e) => {
+          const uid = select.dataset.uid;
+          const role = e.target.value;
+          alert(`User Role updated for ${uid} to ${role}`);
+        });
+      });
+
+      document.querySelectorAll(".delete-user-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const uid = btn.dataset.uid;
+          if (confirm("Are you sure you want to delete this user?")) {
+            usersList = usersList.filter(u => u.uid !== uid);
+            loadUsers();
+          }
+        });
+      });
+    }
+
+    // 5. Financial volume loader
+    function loadRevenue() {
+      transactionsList = [
+        { id: "TX_01", buyer: "Elvis Yaounde", type: "Monthly Pass", amount: 2500, method: "mtn", date: "2026-06-12" },
+        { id: "TX_02", buyer: "Vanessa Ngoue", type: "Video: Ndole cooking", amount: 1500, method: "orange", date: "2026-06-15" },
+        { id: "TX_03", buyer: "Amadou Diallo", type: "Weekly Pass", amount: 1000, method: "mtn", date: "2026-06-16" }
+      ];
+
+      let totalVolume = 0;
+      transactionsList.forEach(t => totalVolume += t.amount);
+      const adminCommission = Math.floor(totalVolume * 0.2);
+
+      revenueVolume.innerText = `${totalVolume.toLocaleString()} FCFA`;
+      revenueAdminCut.innerText = `${adminCommission.toLocaleString()} FCFA`;
+
+      transactionsTable.innerHTML = transactionsList.map(tx => {
+        const adminShare = Math.floor(tx.amount * 0.2);
+        const creatorShare = Math.floor(tx.amount * 0.8);
+        return `
+          <tr>
+            <td><code>${tx.id}</code></td>
+            <td>${tx.buyer}</td>
+            <td>${tx.type}</td>
+            <td style="font-weight:700;">${tx.amount.toLocaleString()} FCFA</td>
+            <td style="color:var(--text-muted);">${adminShare.toLocaleString()} FCFA</td>
+            <td style="color:var(--primary); font-weight:700;">${creatorShare.toLocaleString()} FCFA</td>
+            <td><span style="text-transform:uppercase;">${tx.method}</span></td>
+            <td>${tx.date}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // 6. Global settings managers
+    function loadSettings() {
+      const duration = localStorage.getItem("globalPreviewDuration") || "30";
+      previewDurationInput.value = duration;
+    }
+
+    function setupSettingsHandler() {
+      settingsForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        settingsSuccessAlert.style.display = "none";
+
+        const val = previewDurationInput.value;
+        localStorage.setItem("globalPreviewDuration", val);
+        
+        settingsSuccessAlert.style.display = "flex";
+        setTimeout(() => {
+          settingsSuccessAlert.style.display = "none";
+        }, 3000);
+      });
+    }
+
+    // Status helpers
+    function handleApprove(videoId) {
+      updateVideoStatus(videoId, "approved");
+      loadApprovalsQueue();
+    }
+
+    function handleReject(videoId, reason) {
+      updateVideoStatus(videoId, "rejected", reason);
+      loadApprovalsQueue();
+      rejectionModal.style.display = "none";
+      rejectReasonInput.value = "";
+    }
+
+    function updateVideoStatus(videoId, status, reason = "") {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("uploads_")) {
+          let v = JSON.parse(localStorage.getItem(key)) || [];
+          let updated = false;
+          v = v.map(video => {
+            if (video.videoId === videoId) {
+              video.status = status;
+              if (status === "rejected") video.rejectionReason = reason;
+              updated = true;
+            }
+            return video;
+          });
+          if (updated) {
+            localStorage.setItem(key, JSON.stringify(v));
+          }
+        }
+      }
+    }
+
+    function setupModalHandlers() {
+      document.getElementById("cancel-reject-btn").addEventListener("click", () => {
+        rejectionModal.style.display = "none";
+        rejectReasonInput.value = "";
+      });
+
+      document.getElementById("confirm-reject-btn").addEventListener("click", () => {
+        const reason = rejectReasonInput.value;
+        if (!reason) {
+          alert("Please specify a reason.");
+          return;
+        }
+        handleReject(selectedVideoId, reason);
+      });
+    }
+
+    // ════════════════════════════════════════════════════
+    //  PAYMENT VERIFICATION
+    // ════════════════════════════════════════════════════
+    let allPaymentRequests = [];
+    let currentFilter = "pending";
+
+    async function loadPaymentRequests() {
+      const tbody = document.getElementById("payments-table-body");
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:20px; margin-bottom:10px; display:block;"></i>
+        Loading...</td></tr>`;
+
+      try {
+        const { getAllPaymentRequests } = await import("./js/payment.js");
+        allPaymentRequests = await getAllPaymentRequests();
+      } catch (e) {
+        // Fallback demo data when Firebase not yet configured
+        allPaymentRequests = [
+          {
+            requestId: "PAY_DEMO_001",
+            displayName: "Amara Diallo",
+            email: "amara@mail.com",
+            type: "monthly",
+            amount: 2500,
+            provider: "MTN",
+            phone: "+237 670 123 456",
+            screenshotURL: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
+            status: "pending",
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+          },
+          {
+            requestId: "PAY_DEMO_002",
+            displayName: "Vanessa Ngoue",
+            email: "vanessa@mail.com",
+            type: "ppv",
+            videoTitle: "How to Cook Ndole",
+            amount: 1500,
+            provider: "Orange",
+            phone: "+237 695 987 654",
+            screenshotURL: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
+            status: "pending",
+            createdAt: new Date(Date.now() - 7200000).toISOString(),
+          },
+          {
+            requestId: "PAY_DEMO_003",
+            displayName: "Elvis Yaounde",
+            email: "elvis@mail.com",
+            type: "weekly",
+            amount: 1000,
+            provider: "MTN",
+            phone: "+237 677 000 111",
+            screenshotURL: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
+            status: "approved",
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+          },
+        ];
+      }
+
+      renderPaymentTable();
+    }
+
+    function renderPaymentTable() {
+      const tbody   = document.getElementById("payments-table-body");
+      const pending  = allPaymentRequests.filter(r => r.status === "pending");
+      const approved = allPaymentRequests.filter(r => r.status === "approved");
+      const rejected = allPaymentRequests.filter(r => r.status === "rejected");
+
+      // Update stats
+      document.getElementById("pay-stat-pending").innerText  = pending.length;
+      document.getElementById("pay-stat-approved").innerText = approved.length;
+      document.getElementById("pay-stat-rejected").innerText = rejected.length;
+
+      // Update sidebar badge
+      const badge = document.getElementById("sidebar-pending-badge");
+      if (badge) badge.innerText = pending.length > 0 ? pending.length : "";
+
+      // Filter
+      const filtered = currentFilter === "all" ? allPaymentRequests
+                     : allPaymentRequests.filter(r => r.status === currentFilter);
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">No ${currentFilter} requests found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(req => {
+        const date    = new Date(req.createdAt).toLocaleString();
+        const typeMap = { ppv: "Pay-per-view", weekly: "Weekly Pass", monthly: "Monthly Pass" };
+        const typeLabel = typeMap[req.type] || req.type;
+        const videoInfo = req.videoTitle ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${req.videoTitle}</div>` : "";
+
+        const statusBadge = req.status === "pending"
+          ? `<span class="badge badge-pending">Pending</span>`
+          : req.status === "approved"
+          ? `<span class="badge badge-success">Approved</span>`
+          : `<span class="badge" style="background:rgba(255,23,68,0.1);color:var(--error);border-color:rgba(255,23,68,0.2);">Rejected</span>`;
+
+        const actions = req.status === "pending" ? `
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-sm" style="background:rgba(0,200,83,0.1);color:var(--success);border:1px solid rgba(0,200,83,0.3);"
+              onclick="approvePayment('${req.requestId}')">
+              <i class="fa-solid fa-check"></i> Approve
+            </button>
+            <button class="btn btn-secondary btn-sm"
+              onclick="promptRejectPayment('${req.requestId}')">
+              <i class="fa-solid fa-xmark"></i> Reject
+            </button>
+          </div>
+        ` : `<span style="font-size:12px; color:var(--text-muted);">Reviewed</span>`;
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:700;">${req.displayName || "Unknown"}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${req.email}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${req.phone}</div>
+            </td>
+            <td>${typeLabel}${videoInfo}</td>
+            <td style="font-weight:700; color:var(--primary);">${(req.amount||0).toLocaleString()} FCFA</td>
+            <td>
+              <span class="badge ${req.provider==='MTN' ? 'badge-featured' : 'badge-premium'}">${req.provider}</span>
+            </td>
+            <td style="font-size:12px; color:var(--text-muted); white-space:nowrap;">${date}</td>
+            <td>
+              <img src="${req.screenshotURL}" alt="Screenshot"
+                class="payment-screenshot-preview"
+                onclick="openScreenshotLightbox('${req.screenshotURL}')"
+                title="Click to enlarge">
+            </td>
+            <td>${statusBadge}</td>
+            <td>${actions}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Approve
+    window.approvePayment = async function(requestId) {
+      if (!confirm(`Approve payment request ${requestId}?`)) return;
+      try {
+        const { approvePaymentRequest } = await import("./js/payment.js");
+        await approvePaymentRequest(requestId);
+      } catch (e) {
+        // Demo fallback
+        const req = allPaymentRequests.find(r => r.requestId === requestId);
+        if (req) { req.status = "approved"; req.reviewedAt = new Date().toISOString(); }
+      }
+      renderPaymentTable();
+    };
+
+    // Reject
+    let rejectTargetId = null;
+    window.promptRejectPayment = function(requestId) {
+      rejectTargetId = requestId;
+      const note = prompt("Enter rejection reason (shown to user):", "Payment screenshot could not be verified. Please resubmit.");
+      if (note === null) return; // cancelled
+      rejectPaymentAsync(requestId, note);
+    };
+
+    async function rejectPaymentAsync(requestId, note) {
+      try {
+        const { rejectPaymentRequest } = await import("./js/payment.js");
+        await rejectPaymentRequest(requestId, note);
+      } catch (e) {
+        const req = allPaymentRequests.find(r => r.requestId === requestId);
+        if (req) { req.status = "rejected"; req.rejectionNote = note; req.reviewedAt = new Date().toISOString(); }
+      }
+      renderPaymentTable();
+    }
+
+    // Screenshot lightbox
+    window.openScreenshotLightbox = function(url) {
+      const lb  = document.getElementById("screenshot-lightbox");
+      const img = document.getElementById("lightbox-img");
+      img.src = url;
+      lb.classList.add("open");
+    };
+
+    document.getElementById("screenshot-lightbox").addEventListener("click", () => {
+      document.getElementById("screenshot-lightbox").classList.remove("open");
+    });
+
+    // Filter buttons
+    ["pending","approved","rejected","all"].forEach(f => {
+      document.getElementById(`filter-${f}-btn`)?.addEventListener("click", () => {
+        currentFilter = f;
+        ["pending","approved","rejected","all"].forEach(x => {
+          const btn = document.getElementById(`filter-${x}-btn`);
+          btn.className = x === f ? "btn btn-primary btn-sm" : "btn btn-secondary btn-sm";
+        });
+        renderPaymentTable();
+      });
+    });
+
+    document.getElementById("refresh-payments-btn")?.addEventListener("click", loadPaymentRequests);
+
+    // Extend tab switcher to handle new panel + mobile tab bar
+    const allTabItems = document.querySelectorAll(".sidebar-menu-item, .mobile-tab-item");
+    allTabItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const tab = item.dataset.tab;
+        if (!tab) return;
+        // Deactivate all
+        allTabItems.forEach(i => i.classList.remove("active"));
+        document.querySelectorAll(".dashboard-panel").forEach(p => p.classList.remove("active"));
+        // Activate matching
+        document.querySelectorAll(`[data-tab="${tab}"]`).forEach(i => i.classList.add("active"));
+        const panel = document.getElementById(`panel-${tab}`);
+        if (panel) panel.classList.add("active");
+        // Load payment data when switching to payments tab
+        if (tab === "payments") loadPaymentRequests();
+      });
+    });
+
+    // Auto-load payments on start
+    loadPaymentRequests();
+  </script>
+
+  <!-- Screenshot Lightbox -->
+  <div class="screenshot-lightbox" id="screenshot-lightbox">
+    <img src="" alt="Payment Screenshot" id="lightbox-img">
+  </div>
+
+  <!-- Mobile nav hamburger -->
+  <script src="js/nav.js"></script>
+
+</body>
+</html>

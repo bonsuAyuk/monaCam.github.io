@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in to your MonaCam monetization platform profile.">
+  <title>Log In | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/auth.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost">Log In</a>
+        <a href="register.html" class="btn btn-primary">Join as Creator</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Card Layout -->
+  <main class="auth-wrapper">
+    <div class="auth-card glass animate-fade-in">
+      <div class="auth-header">
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-subtitle">Log in to manage your creator channels and purchases</p>
+      </div>
+
+      <!-- Verification Alert Dialog -->
+      <div class="auth-alert auth-alert-error" id="auth-error-alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="auth-error-msg">Incorrect credentials. Please try again.</span>
+      </div>
+      
+      <div class="auth-alert auth-alert-success" id="auth-success-alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Login successful! Routing...</span>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email Address</label>
+          <input type="email" id="login-email" class="form-control" placeholder="name@domain.cm" required>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <a href="password-reset.html" class="forgot-password-link">Forgot password?</a>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Log In</button>
+      </form>
+
+      <div class="auth-footer-links">
+        Don't have an account yet? <a href="register.html">Join MonaCam</a>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { signInUser } from "./js/auth.js";
+
+    const loginForm = document.getElementById("login-form");
+    const errorAlert = document.getElementById("auth-error-alert");
+    const successAlert = document.getElementById("auth-success-alert");
+    const errorMsg = document.getElementById("auth-error-msg");
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorAlert.style.display = "none";
+      successAlert.style.display = "none";
+
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      try {
+        const { user, profile } = await signInUser(email, password);
+        localStorage.setItem("userRole", profile.role);
+        successAlert.style.display = "flex";
+        setTimeout(() => {
+          if (profile.role === "creator") window.location.href = "creator-dashboard.html";
+          else if (profile.role === "admin") window.location.href = "admin-dashboard.html";
+          else window.location.href = "viewer-dashboard.html";
+        }, 1200);
+      } catch (error) {
+        errorMsg.innerText = error.message;
+        errorAlert.style.display = "flex";
+      }
+    });
+  </script>
+  <script src="js/nav.js"></script>
+</body>
+</html>
+

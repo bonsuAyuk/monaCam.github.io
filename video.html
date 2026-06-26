@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Watch premium content on MonaCam. Powered by Google Drive streaming.">
+  <title>Watch Video | MonaCam</title>
+
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/video.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Extra styles for Drive iframe player */
+    .player-wrapper {
+      position: relative;
+    }
+    .player-wrapper iframe.drive-player-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+        <span id="nav-dashboard-link-container"></span>
+      </div>
+      <div class="nav-actions" id="auth-nav-actions"></div>
+    </div>
+  </nav>
+
+  <!-- Main Layout -->
+  <div class="container">
+    <main class="video-player-container">
+
+      <!-- Left: Player + Info -->
+      <section>
+
+        <!-- Player wrapper — DrivePlayer injects iframe or video here -->
+        <div class="player-wrapper animate-fade-in" id="player-wrapper">
+
+          <!-- Paywall overlay (shown when access is denied after preview) -->
+          <div class="paywall-overlay" id="paywall-overlay" style="display:none; z-index:10;">
+            <div class="paywall-lock-icon"><i class="fa-solid fa-lock"></i></div>
+            <h2 class="paywall-title" id="paywall-title">Preview Ended</h2>
+            <p class="paywall-description" id="paywall-desc">
+              Unlock full access by paying with MTN Mobile Money or Orange Money.
+            </p>
+            <div class="paywall-options" id="paywall-options-container"></div>
+          </div>
+        </div>
+
+        <!-- Preview info bar -->
+        <div class="card preview-mode-bar" id="preview-mode-bar" style="display:none;">
+          <div class="preview-mode-bar-inner">
+            <i class="fa-solid fa-circle-exclamation" style="color:var(--primary); font-size:18px; flex-shrink:0;"></i>
+            <div>
+              <strong style="color:var(--text-primary);">Preview Mode</strong>
+              <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+                You're watching the first <span id="preview-limit-text">30 seconds</span> for free.
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="preview-unlock-btn" style="flex-shrink:0;">
+            <i class="fa-solid fa-unlock"></i> Unlock Full Video
+          </button>
+        </div>
+
+        <!-- Pending verification notice -->
+        <div class="card" id="pending-notice" style="display:none; margin-top:16px; border-color:rgba(0,176,255,0.3); background:rgba(0,176,255,0.03);">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <i class="fa-solid fa-clock" style="color:var(--accent); font-size:20px; flex-shrink:0;"></i>
+            <div>
+              <strong style="color:var(--text-primary);">Payment Under Review</strong>
+              <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
+                Your screenshot was received. Access is usually granted within <strong>1–3 hours</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Info -->
+        <div class="video-info-box animate-fade-in">
+          <h1 class="video-info-title" id="video-title">Loading...</h1>
+          <div class="video-info-meta">
+            <span id="video-views-count"><i class="fa-solid fa-eye"></i> 0 views</span>
+            <span id="video-category"><i class="fa-solid fa-tag"></i> —</span>
+            <span id="video-upload-date"><i class="fa-solid fa-calendar"></i> —</span>
+          </div>
+          <div class="video-creator-widget">
+            <img id="creator-avatar"
+              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
+              class="video-creator-avatar" alt="Creator">
+            <div>
+              <div style="font-weight:700; color:var(--text-primary);" id="creator-name">Creator</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Verified Cameroonian Creator</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:0;">
+            <h3 style="margin-bottom:10px; font-family:var(--font-display); font-size:15px;">Description</h3>
+            <p style="color:var(--text-secondary); font-size:14px; line-height:1.7;" id="video-description">Loading...</p>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="comments-section animate-fade-in">
+          <h3 class="comments-title"><i class="fa-solid fa-comments text-gradient"></i> Comments</h3>
+          <div class="comment-input-box">
+            <input type="text" class="form-control" id="comment-input" placeholder="Write a comment..." style="flex:1; font-size:16px;">
+            <button class="btn btn-secondary" id="post-comment-btn">Post</button>
+          </div>
+          <div class="comments-list" id="comments-list">
+            <div class="comment-item">
+              <div class="comment-avatar" style="background-image:url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80);"></div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-username">Elvis Yaounde</span>
+                  <span class="comment-date">1 day ago</span>
+                </div>
+                <p class="comment-text">Super helpful content, worth every franc!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Related Videos -->
+      <aside class="animate-fade-in">
+        <h3 class="related-videos-title"><i class="fa-solid fa-clapperboard" style="color:var(--primary); margin-right:6px;"></i> You May Also Like</h3>
+        <div class="related-list" id="related-videos-list"></div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       MANUAL PAYMENT MODAL
+  ════════════════════════════════════════════════════ -->
+  <div class="checkout-modal" id="checkout-modal">
+    <div class="card checkout-card glass" style="background:var(--bg-secondary);">
+
+      <!-- Step 1: Choose plan -->
+      <div id="checkout-step-1">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800;">Unlock Access</h3>
+          <button class="btn btn-ghost btn-sm" id="close-checkout-btn" style="font-size:20px; padding:4px 10px; line-height:1;">&times;</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+          <div class="checkout-method-card" id="opt-ppv" style="text-align:left; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Buy This Video</div>
+                <div style="font-size:12px; color:var(--text-muted);">One-time, lifetime access to this video</div>
+              </div>
+              <div style="font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--primary); white-space:nowrap;" id="ppv-price-label">0 FCFA</div>
+            </div>
+          </div>
+          <div class="checkout-method-card" id="opt-weekly" style="text-align:left; padding:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Weekly Pass</div>
+                <div style="font-size:12px; color:var(--text-muted);">All videos, 7 days</div>
+              </div>
+              <div style="font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--primary); white-space:nowrap;">1,000 FCFA</div>
+            </div>
+          </div>
+          <div class="checkout-method-card" id="opt-monthly" style="text-align:left; padding:16px; position:relative; border-color:rgba(255,179,0,0.3);">
+            <span class="badge badge-featured" style="position:absolute; top:-10px; right:12px;">Best Value</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Monthly Pass</div>
+                <div style="font-size:12px; color:var(--text-muted);">All videos, 30 days</div>
+              </div>
+              <div style="font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--primary); white-space:nowrap;">2,500 FCFA</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="continue-to-payment-btn" style="width:100%;" disabled>
+          Continue <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:12px;">
+          Payment is manual via MTN MoMo or Orange Money
+        </p>
+      </div>
+
+      <!-- Step 2: Payment instructions + screenshot upload -->
+      <div id="checkout-step-2" style="display:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+          <button class="btn btn-ghost btn-sm" id="back-to-step1-btn" style="padding:6px 10px;">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800;">Send Payment</h3>
+        </div>
+
+        <!-- Amount -->
+        <div class="payment-instructions">
+          <p style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:4px; text-align:center;">Send Exactly This Amount</p>
+          <div class="payment-amount-display" id="payment-amount-display">0 FCFA</div>
+          <p style="font-size:13px; color:var(--text-secondary); text-align:center;" id="payment-plan-label">—</p>
+        </div>
+
+        <!-- Provider selector -->
+        <p style="font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:10px;">Choose Provider:</p>
+        <div class="checkout-methods-grid" style="margin-bottom:16px;">
+          <div class="checkout-method-card selected" id="method-mtn" data-method="MTN">
+            <i class="fa-solid fa-mobile-screen-button" style="font-size:18px; color:var(--primary); display:block; margin-bottom:6px;"></i>
+            <div class="checkout-method-title">MTN MoMo</div>
+          </div>
+          <div class="checkout-method-card" id="method-orange" data-method="Orange">
+            <i class="fa-solid fa-mobile-screen-button" style="font-size:18px; color:var(--secondary); display:block; margin-bottom:6px;"></i>
+            <div class="checkout-method-title">Orange Money</div>
+          </div>
+        </div>
+
+        <!-- Number to send to -->
+        <div class="payment-number-row">
+          <span style="font-size:12px; color:var(--text-muted);">Send to number:</span>
+          <strong id="momo-number-text" style="font-family:monospace; font-size:16px; letter-spacing:0.05em;">6XX XXX XXX</strong>
+          <button class="copy-btn" id="copy-number-btn"><i class="fa-regular fa-copy"></i> Copy</button>
+        </div>
+        <p style="font-size:11px; color:var(--text-muted); margin:8px 0 20px; text-align:center;">
+          After sending, screenshot the MoMo confirmation and upload it below.
+        </p>
+
+        <!-- Upload form -->
+        <form id="payment-submit-form">
+          <div class="form-group">
+            <label class="form-label">Your Phone Number</label>
+            <input type="tel" id="payer-phone" class="form-control" placeholder="+237 6XX XXX XXX" required style="font-size:16px;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Payment Screenshot</label>
+            <div class="payment-upload-zone" id="screenshot-upload-zone">
+              <i class="fa-solid fa-camera" id="upload-zone-icon" style="display:block; margin-bottom:8px;"></i>
+              <div style="font-weight:700; font-size:14px; margin-bottom:4px;" id="upload-zone-title">
+                Tap to Upload Screenshot
+              </div>
+              <div style="font-size:12px; color:var(--text-muted);" id="upload-zone-subtitle">
+                JPG or PNG — your confirmation message
+              </div>
+              <input type="file" id="screenshot-file-input" accept="image/*" capture="environment" style="display:none;" required>
+            </div>
+          </div>
+
+          <div class="auth-alert auth-alert-error" id="payment-error-alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="payment-error-msg">Something went wrong.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-payment-btn" style="width:100%;" disabled>
+            <i class="fa-solid fa-paper-plane"></i> Submit for Verification
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div id="checkout-step-3" style="display:none; text-align:center; padding:10px 0;">
+        <div style="width:64px; height:64px; border-radius:50%; background:rgba(0,200,83,0.1); border:1px solid rgba(0,200,83,0.3); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px; color:var(--success);">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:800; margin-bottom:12px;">Screenshot Received!</h3>
+        <p style="color:var(--text-secondary); font-size:14px; line-height:1.7; margin-bottom:20px;">
+          Your payment is being reviewed. You'll get full access within <strong style="color:var(--text-primary);">1–3 hours</strong>.
+        </p>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:24px;">
+          Reference: <strong id="payment-ref-id" style="color:var(--primary); font-family:monospace;"></strong>
+        </p>
+        <button class="btn btn-secondary" id="close-success-btn" style="width:100%;">Got it, I'll check back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared nav hamburger -->
+  <script src="js/nav.js"></script>
+
+  <script type="module">
+    import { auth, onAuthStateChanged, db, collection, query, where, getDocs } from "./js/firebase-config.js";
+    import { DrivePlayer, isDriveUrl, buildDrivePreviewUrl } from "./js/drive-player.js";
+    import { PLANS, PAYMENT_NUMBERS, submitPaymentRequest, checkUserAccess } from "./js/payment.js";
+
+    // ── State ─────────────────────────────────────────────────────
+    let currentUser = null;
+    let videoData   = null;
+    let drivePlayer = null;
+    let selectedPurchaseType = null;
+    let selectedProvider = "MTN";
+    const videoId = new URLSearchParams(window.location.search).get("id") || "vid_1";
+
+    // ── Mock video catalog (replace with Firestore queries in production)
+    // driveVideoId: paste the Google Drive file ID or full share URL
+    const MOCK_VIDEOS = {
+      "vid_1": {
+        title: "How to Cook Perfect Cameroonian Ndole",
+        description: "The ultimate guide to preparing Ndole with bitterleaves, groundnuts, beef, and prawns — cooked the authentic way. Perfect for any occasion.",
+        priceFCFA: 1500,
+        category: "Culinary",
+        views: 1240,
+        creatorName: "Chevalier Ndole",
+        thumbnail: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=800&q=80",
+        // ← Replace with your actual Google Drive file ID or share URL:
+        driveVideoId: "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE",
+        // Fallback direct video URL (used if driveVideoId is a placeholder):
+        fallbackUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        previewUrl:  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        previewSeconds: 30,
+      },
+      "vid_2": {
+        title: "La Famille Camerounaise — Episode 5 (Comedy)",
+        description: "Hilarious home jokes that everyone in Cameroon knows too well. Share with family!",
+        priceFCFA: 500,
+        category: "Comedy",
+        views: 4890,
+        creatorName: "Murielle Comedy",
+        thumbnail: "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?auto=format&fit=crop&w=800&q=80",
+        driveVideoId: "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE",
+        fallbackUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        previewUrl:  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        previewSeconds: 30,
+      },
+    };
+
+    // ── Resolve the correct video source URL ─────────────────────
+    function resolveVideoSource(video, hasFullAccess) {
+      const driveId = video.driveVideoId;
+      const isRealDriveId = driveId &&
+        driveId !== "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE" &&
+        driveId.length > 10;
+
+      if (hasFullAccess) {
+        return isRealDriveId ? driveId : video.fallbackUrl;
+      } else {
+        // Preview: use the shorter preview clip (or blur the Drive video)
+        return isRealDriveId ? driveId : video.previewUrl;
+      }
+    }
+
+    // ── Init ─────────────────────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+      onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        updateNavAuth(user);
+        loadVideoMeta();
+      });
+
+      setupCheckoutModal();
+      loadRelatedVideos();
+    });
+
+    // ── Nav auth state ────────────────────────────────────────────
+    function updateNavAuth(user) {
+      const dashLink   = document.getElementById("nav-dashboard-link-container");
+      const authEl     = document.getElementById("auth-nav-actions");
+      if (user) {
+        const role = localStorage.getItem("userRole") || "viewer";
+        const url  = role === "creator" ? "creator-dashboard.html"
+                   : role === "admin"   ? "admin-dashboard.html"
+                   : "viewer-dashboard.html";
+        dashLink.innerHTML  = `<a href="${url}" class="nav-link">Dashboard</a>`;
+        authEl.innerHTML    = `<a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> Profile</a>`;
+        window.updateMobileNavAuth?.(`
+          <a href="${url}" class="btn btn-secondary" style="width:100%;justify-content:flex-start;"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+        `);
+      } else {
+        dashLink.innerHTML = "";
+        authEl.innerHTML   = `<a href="login.html" class="btn btn-ghost">Log In</a><a href="register.html" class="btn btn-primary">Join Free</a>`;
+      }
+    }
+
+    // ── Load video metadata ───────────────────────────────────────
+    function loadVideoMeta() {
+      videoData = MOCK_VIDEOS[videoId] || Object.values(MOCK_VIDEOS)[0];
+
+      document.getElementById("video-title").innerText        = videoData.title;
+      document.getElementById("video-description").innerText  = videoData.description;
+      document.getElementById("creator-name").innerText       = videoData.creatorName;
+      document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category}`;
+      document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${videoData.views.toLocaleString()} views`;
+      document.getElementById("ppv-price-label").innerText    = `${videoData.priceFCFA.toLocaleString()} FCFA`;
+
+      const previewSec = videoData.previewSeconds || 30;
+      document.getElementById("preview-limit-text").innerText = `${previewSec} seconds`;
+
+      checkAndInitPlayer();
+    }
+
+    // ── Check access, init player ─────────────────────────────────
+    async function checkAndInitPlayer() {
+      const wrapper = document.getElementById("player-wrapper");
+
+      // Init DrivePlayer (handles both Drive and regular video)
+      drivePlayer = new DrivePlayer(wrapper, {
+        previewSeconds: videoData.previewSeconds || 30,
+        watermarkText:  "MonaCam",
+        onPreviewEnd:   () => showLockedPaywall(),
+      });
+
+      if (!currentUser) {
+        showLoggedOutPaywall();
+        return;
+      }
+
+      // Check Firestore access
+      let hasPass = false, hasPPV = false, hasPending = false;
+      try {
+        ({ hasPass, hasPPV, hasPending } = await checkUserAccess(currentUser.uid, videoId));
+      } catch (e) {
+        // Firestore not configured yet
+        hasPass    = !!localStorage.getItem(`pass_${currentUser.uid}`);
+        hasPPV     = !!localStorage.getItem(`ppv_${currentUser.uid}_${videoId}`);
+        hasPending = false;
+      }
+
+      const hasAccess = hasPass || hasPPV || videoData.priceFCFA === 0;
+      const source    = resolveVideoSource(videoData, hasAccess);
+
+      drivePlayer.load(source, hasAccess);
+
+      document.getElementById("preview-mode-bar").style.display = hasAccess ? "none" : "flex";
+      document.getElementById("pending-notice").style.display   = hasPending ? "flex" : "none";
+
+      if (!hasAccess && hasPending) {
+        // Show "your payment is being reviewed" instead of aggressive paywall
+        document.getElementById("preview-mode-bar").style.display = "flex";
+      }
+    }
+
+    // ── Paywalls ──────────────────────────────────────────────────
+    function showLoggedOutPaywall() {
+      const overlay = document.getElementById("paywall-overlay");
+      overlay.style.display = "flex";
+      document.getElementById("paywall-title").innerText = "Log In to Watch";
+      document.getElementById("paywall-desc").innerText  = "Create a free account to watch previews and purchase content.";
+      document.getElementById("paywall-options-container").innerHTML = `
+        <a href="login.html" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i> Log In</a>
+        <a href="register.html" class="btn btn-secondary">Create Account</a>
+      `;
+    }
+
+    function showLockedPaywall() {
+      const overlay = document.getElementById("paywall-overlay");
+      overlay.style.display = "flex";
+      document.getElementById("paywall-title").innerText = "Preview Ended";
+      document.getElementById("paywall-desc").innerText  = "Pay with MTN MoMo or Orange Money to watch the full video.";
+      document.getElementById("paywall-options-container").innerHTML = `
+        <div class="paywall-card" id="paywall-ppv-btn">
+          <div class="paywall-card-price">${videoData.priceFCFA.toLocaleString()} FCFA</div>
+          <div style="font-size:12px; font-weight:600; margin-top:4px;">Buy This Video</div>
+        </div>
+        <div class="paywall-card" id="paywall-pass-btn">
+          <div class="paywall-card-price">2,500 FCFA</div>
+          <div style="font-size:12px; font-weight:600; margin-top:4px;">Monthly Pass</div>
+        </div>
+      `;
+      document.getElementById("paywall-ppv-btn")?.addEventListener("click",  () => openCheckout("ppv"));
+      document.getElementById("paywall-pass-btn")?.addEventListener("click", () => openCheckout("monthly"));
+    }
+
+    // ── Checkout Modal ────────────────────────────────────────────
+    function openCheckout(preselect) {
+      document.getElementById("checkout-modal").style.display = "flex";
+      showCheckoutStep(1);
+      if (preselect) selectPurchaseType(preselect);
+    }
+
+    function showCheckoutStep(n) {
+      [1,2,3].forEach(i => {
+        document.getElementById(`checkout-step-${i}`).style.display = i === n ? "block" : "none";
+      });
+    }
+
+    function selectPurchaseType(type) {
+      selectedPurchaseType = type;
+      ["opt-ppv","opt-weekly","opt-monthly"].forEach(id =>
+        document.getElementById(id).classList.remove("selected")
+      );
+      const map = { ppv:"opt-ppv", weekly:"opt-weekly", monthly:"opt-monthly" };
+      document.getElementById(map[type])?.classList.add("selected");
+      document.getElementById("continue-to-payment-btn").disabled = false;
+    }
+
+    function setupCheckoutModal() {
+      ["opt-ppv","opt-weekly","opt-monthly"].forEach(id => {
+        document.getElementById(id)?.addEventListener("click", () => {
+          selectPurchaseType({ "opt-ppv":"ppv","opt-weekly":"weekly","opt-monthly":"monthly" }[id]);
+        });
+      });
+
+      document.getElementById("continue-to-payment-btn").addEventListener("click", () => {
+        if (!selectedPurchaseType) return;
+        populateStep2();
+        showCheckoutStep(2);
+      });
+
+      document.getElementById("close-checkout-btn").addEventListener("click", () => {
+        document.getElementById("checkout-modal").style.display = "none";
+      });
+
+      document.getElementById("back-to-step1-btn").addEventListener("click", () => showCheckoutStep(1));
+
+      document.getElementById("preview-unlock-btn").addEventListener("click", () => openCheckout(null));
+
+      // Provider selector
+      ["method-mtn","method-orange"].forEach(id => {
+        document.getElementById(id).addEventListener("click", () => {
+          document.getElementById("method-mtn").classList.remove("selected");
+          document.getElementById("method-orange").classList.remove("selected");
+          document.getElementById(id).classList.add("selected");
+          selectedProvider = document.getElementById(id).dataset.method;
+          updatePaymentNumber();
+        });
+      });
+
+      // Copy number
+      document.getElementById("copy-number-btn").addEventListener("click", () => {
+        const num = document.getElementById("momo-number-text").innerText;
+        navigator.clipboard.writeText(num).then(() => {
+          const btn = document.getElementById("copy-number-btn");
+          btn.innerHTML = "<i class='fa-solid fa-check'></i> Copied!";
+          setTimeout(() => { btn.innerHTML = "<i class='fa-regular fa-copy'></i> Copy"; }, 2000);
+        });
+      });
+
+      // Screenshot upload
+      const zone      = document.getElementById("screenshot-upload-zone");
+      const fileInput = document.getElementById("screenshot-file-input");
+      const submitBtn = document.getElementById("submit-payment-btn");
+
+      zone.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (file) {
+          zone.classList.add("has-file");
+          document.getElementById("upload-zone-icon").className = "fa-solid fa-circle-check";
+          document.getElementById("upload-zone-title").innerText = file.name;
+          document.getElementById("upload-zone-subtitle").innerText = `${(file.size/1024).toFixed(0)} KB — ready to submit`;
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Form submit
+      document.getElementById("payment-submit-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file  = fileInput.files[0];
+        const phone = document.getElementById("payer-phone").value;
+        const errEl = document.getElementById("payment-error-alert");
+        errEl.style.display = "none";
+
+        if (!file) {
+          document.getElementById("payment-error-msg").innerText = "Please upload a screenshot of your MoMo payment confirmation.";
+          errEl.style.display = "flex";
+          return;
+        }
+        if (!currentUser) { window.location.href = "login.html"; return; }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...`;
+
+        const amountMap = { ppv: videoData.priceFCFA, weekly: 1000, monthly: 2500 };
+
+        try {
+          const requestId = await submitPaymentRequest({
+            uid: currentUser.uid, email: currentUser.email,
+            displayName: currentUser.displayName || "User",
+            type: selectedPurchaseType,
+            videoId: selectedPurchaseType === "ppv" ? videoId : null,
+            videoTitle: selectedPurchaseType === "ppv" ? videoData.title : null,
+            amount: amountMap[selectedPurchaseType],
+            provider: selectedProvider, phone, screenshotFile: file,
+          });
+          document.getElementById("payment-ref-id").innerText = requestId;
+          showCheckoutStep(3);
+        } catch (err) {
+          document.getElementById("payment-error-msg").innerText = err.message || "Submission failed. Please try again.";
+          errEl.style.display = "flex";
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Submit for Verification`;
+        }
+      });
+
+      document.getElementById("close-success-btn").addEventListener("click", () => {
+        document.getElementById("checkout-modal").style.display = "none";
+        document.getElementById("pending-notice").style.display = "flex";
+      });
+    }
+
+    function populateStep2() {
+      const amountMap = { ppv: videoData.priceFCFA, weekly: 1000, monthly: 2500 };
+      const labelMap  = {
+        ppv:     `"${videoData.title.substring(0, 40)}..."`,
+        weekly:  "Weekly Viewer Pass (7 days)",
+        monthly: "Monthly Viewer Pass (30 days)",
+      };
+      document.getElementById("payment-amount-display").innerText = `${amountMap[selectedPurchaseType].toLocaleString()} FCFA`;
+      document.getElementById("payment-plan-label").innerText = labelMap[selectedPurchaseType];
+      updatePaymentNumber();
+      // Reset form
+      document.getElementById("payment-submit-form").reset();
+      document.getElementById("screenshot-upload-zone").classList.remove("has-file");
+      document.getElementById("upload-zone-icon").className = "fa-solid fa-camera";
+      document.getElementById("upload-zone-title").innerText = "Tap to Upload Screenshot";
+      document.getElementById("upload-zone-subtitle").innerText = "JPG or PNG — your confirmation message";
+      document.getElementById("submit-payment-btn").disabled = true;
+      document.getElementById("payment-error-alert").style.display = "none";
+      // Reset provider to MTN
+      document.getElementById("method-mtn").classList.add("selected");
+      document.getElementById("method-orange").classList.remove("selected");
+      selectedProvider = "MTN";
+      updatePaymentNumber();
+    }
+
+    function updatePaymentNumber() {
+      document.getElementById("momo-number-text").innerText = PAYMENT_NUMBERS[selectedProvider].number;
+    }
+
+    // ── Related videos ────────────────────────────────────────────
+    function loadRelatedVideos() {
+      const container = document.getElementById("related-videos-list");
+      const related = Object.entries(MOCK_VIDEOS).filter(([id]) => id !== videoId);
+      if (!related.length) {
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
+        return;
+      }
+      container.innerHTML = related.map(([id, v]) => `
+        <div class="related-card" onclick="window.location.href='video.html?id=${id}'" role="button" tabindex="0">
+          <img src="${v.thumbnail}" class="related-thumb" alt="${v.title}" loading="lazy">
+          <div class="related-details">
+            <h4 class="related-title">${v.title}</h4>
+            <div class="related-creator">${v.creatorName}</div>
+            <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">
+              ${v.priceFCFA.toLocaleString()} FCFA
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View pricing options for viewers and creators on MonaCam.">
+  <title>Pricing Plans | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/pricing.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link active">Pricing Plans</a>
+        <span id="nav-dashboard-link-container"></span>
+      </div>
+      
+      <div class="nav-actions" id="auth-nav-actions">
+        <!-- Managed by JS -->
+      </div>
+    </div>
+  </nav>
+
+  <!-- Pricing Header -->
+  <header class="pricing-header">
+    <div class="container animate-fade-in">
+      <h1>Subscription Plans</h1>
+      <p style="margin-top:8px;">Choose the pass that matches your digital streaming or creator upload needs.</p>
+    </div>
+  </header>
+
+  <!-- Toggle Switcher -->
+  <section class="container animate-fade-in">
+    <div class="pricing-toggle-container">
+      <button class="pricing-toggle-btn active" id="toggle-viewers">Viewer Passes</button>
+      <button class="pricing-toggle-btn" id="toggle-creators">Creator Plan Tiers</button>
+    </div>
+  </section>
+
+  <!-- Viewer Plans Grid -->
+  <section class="container">
+    <div class="plans-grid active" id="grid-viewers">
+      
+      <!-- Free Pass -->
+      <div class="plan-card glass">
+        <div class="plan-name">Visitor Pass</div>
+        <div class="plan-price">
+          <span class="plan-amount">0 FCFA</span>
+          <span class="plan-period">/ forever</span>
+        </div>
+        <div class="plan-features-list">
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> 30-Second Previews only</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Standard search discoverability</div>
+          <div class="plan-feature-item" style="opacity: 0.5;"><i class="fa-solid fa-circle-xmark" style="color:var(--error);"></i> Watch full-length videos</div>
+        </div>
+        <div class="plan-btn-wrapper">
+          <button class="btn btn-secondary" style="width: 100%;" disabled>Current Free Tier</button>
+        </div>
+      </div>
+
+      <!-- Weekly Pass -->
+      <div class="plan-card glass">
+        <div class="plan-name">Weekly Viewer Pass</div>
+        <div class="plan-price">
+          <span class="plan-amount">1,000 FCFA</span>
+          <span class="plan-period">/ week</span>
+        </div>
+        <div class="plan-features-list">
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Unlimited full video streaming</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> No ads or previews lock</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> High Quality HD playback</div>
+        </div>
+        <div class="plan-btn-wrapper">
+          <button class="btn btn-primary buy-pass-btn" data-plan="weekly" data-price="1000" style="width: 100%;">Buy Weekly Pass</button>
+        </div>
+      </div>
+
+      <!-- Monthly Pass -->
+      <div class="plan-card glass popular">
+        <div class="popular-badge badge badge-featured">Best Value</div>
+        <div class="plan-name">Monthly Viewer Pass</div>
+        <div class="plan-price">
+          <span class="plan-amount">2,500 FCFA</span>
+          <span class="plan-period">/ month</span>
+        </div>
+        <div class="plan-features-list">
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Unlimited full video streaming</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> No ads or previews lock</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> High Quality HD playback</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Save videos to wishlist</div>
+        </div>
+        <div class="plan-btn-wrapper">
+          <button class="btn btn-primary buy-pass-btn" data-plan="monthly" data-price="2500" style="width: 100%; background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border:none; color:#000;">Buy Monthly Pass</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Creator Plans Grid -->
+  <section class="container">
+    <div class="plans-grid" id="grid-creators">
+      
+      <!-- Starter Creator -->
+      <div class="plan-card glass">
+        <div class="plan-name">Starter Creator</div>
+        <div class="plan-price">
+          <span class="plan-amount">5,000 FCFA</span>
+          <span class="plan-period">/ month</span>
+        </div>
+        <div class="plan-features-list">
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Upload up to 5 videos weekly</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Set individual video prices</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Earnings payouts via Mobile Money</div>
+          <div class="plan-feature-item" style="opacity: 0.5;"><i class="fa-solid fa-circle-xmark" style="color:var(--error);"></i> Featured Placements</div>
+        </div>
+        <div class="plan-btn-wrapper">
+          <button class="btn btn-secondary buy-pass-btn" data-plan="starter_creator" data-price="5000" style="width: 100%;">Select Starter Plan</button>
+        </div>
+      </div>
+
+      <!-- Premium Creator -->
+      <div class="plan-card glass popular">
+        <div class="popular-badge badge badge-featured">Pro Choice</div>
+        <div class="plan-name">Premium Creator</div>
+        <div class="plan-price">
+          <span class="plan-amount">10,000 FCFA</span>
+          <span class="plan-period">/ month</span>
+        </div>
+        <div class="plan-features-list">
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Upload up to 15 videos weekly</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Set individual video prices</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Earnings payouts via Mobile Money</div>
+          <div class="plan-feature-item"><i class="fa-solid fa-circle-check"></i> Featured Homepage Placement</div>
+        </div>
+        <div class="plan-btn-wrapper">
+          <button class="btn btn-primary buy-pass-btn" data-plan="premium_creator" data-price="10000" style="width: 100%; background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border:none; color:#000;">Select Premium Plan</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Checkout payment modal -->
+  <div class="checkout-modal" id="checkout-modal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div class="card glass" style="width: 100%; max-width: 440px; background:var(--bg-secondary); border-color:var(--card-hover-border); padding:24px;">
+      <h3 style="margin-bottom:12px; font-family:var(--font-display);" id="checkout-title">Purchase Plan Pass</h3>
+      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:24px;" id="checkout-subtitle">Secure billing connection using Orange and MTN Momo push notifications.</p>
+
+      <form id="checkout-form">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+          <div class="checkout-method-card selected" id="method-mtn" style="border: 1px solid var(--primary); background: rgba(255, 179, 0, 0.05); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;">
+            <i class="fa-solid fa-mobile-screen" style="font-size:20px; color:var(--primary); margin-bottom:8px;"></i>
+            <div style="font-size: 12px; font-weight: 700;">MTN Mobile Money</div>
+          </div>
+          <div class="checkout-method-card" id="method-orange" style="border: 1px solid var(--card-border); background: rgba(255, 255, 255, 0.02); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;">
+            <i class="fa-solid fa-mobile-screen" style="font-size:20px; color:var(--secondary); margin-bottom:8px;"></i>
+            <div style="font-size: 12px; font-weight: 700;">Orange Money</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="checkout-phone" class="form-label">Billing Phone Number</label>
+          <input type="tel" id="checkout-phone" class="form-control" placeholder="+237 6xx xxx xxx" required>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:30px;">
+          <button type="button" id="close-checkout-btn" class="btn btn-secondary btn-sm">Cancel</button>
+          <button type="submit" id="submit-checkout-btn" class="btn btn-primary btn-sm">Confirm & Pay</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pricing Controller logic module -->
+  <script type="module">
+    import { auth, onAuthStateChanged, db, doc, setDoc, getDoc } from "./js/firebase-config.js";
+
+    // DOM Elements
+    const toggleViewers = document.getElementById("toggle-viewers");
+    const toggleCreators = document.getElementById("toggle-creators");
+    const gridViewers = document.getElementById("grid-viewers");
+    const gridCreators = document.getElementById("grid-creators");
+    const checkoutModal = document.getElementById("checkout-modal");
+    
+    let currentUser = null;
+    let selectedPlan = "";
+    let selectedPrice = 0;
+    let selectedMethod = "mtn";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupToggles();
+      setupAuthObserver();
+      setupPaymentFlows();
+    });
+
+    function setupToggles() {
+      toggleViewers.addEventListener("click", () => {
+        toggleViewers.classList.add("active");
+        toggleCreators.classList.remove("active");
+        gridViewers.classList.add("active");
+        gridCreators.classList.remove("active");
+      });
+
+      toggleCreators.addEventListener("click", () => {
+        toggleCreators.classList.add("active");
+        toggleViewers.classList.remove("active");
+        gridCreators.classList.add("active");
+        gridViewers.classList.remove("active");
+      });
+    }
+
+    function setupAuthObserver() {
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        const dashboardLink = document.getElementById("nav-dashboard-link-container");
+        const authActions = document.getElementById("auth-nav-actions");
+        
+        if (user) {
+          const role = localStorage.getItem("userRole") || "viewer";
+          let url = "viewer-dashboard.html";
+          if (role === "creator") url = "creator-dashboard.html";
+          if (role === "admin") url = "admin-dashboard.html";
+          
+          dashboardLink.innerHTML = `<a href="${url}" class="nav-link">Dashboard</a>`;
+          authActions.innerHTML = `
+            <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> My Profile</a>
+          `;
+        } else {
+          dashboardLink.innerHTML = "";
+          authActions.innerHTML = `
+            <a href="login.html" class="btn btn-ghost">Log In</a>
+            <a href="register.html" class="btn btn-primary">Join as Creator</a>
+          `;
+        }
+      });
+    }
+
+    function setupPaymentFlows() {
+      // Open Checkout triggers
+      document.querySelectorAll(".buy-pass-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (!currentUser) {
+            alert("Please log in first to purchase a plan.");
+            window.location.href = "login.html";
+            return;
+          }
+
+          selectedPlan = btn.dataset.plan;
+          selectedPrice = parseInt(btn.dataset.price);
+
+          document.getElementById("checkout-title").innerText = `Subscribe: ${selectedPlan.toUpperCase().replace('_', ' ')}`;
+          document.getElementById("checkout-subtitle").innerText = `Confirm payment of ${selectedPrice.toLocaleString()} FCFA using Mobile Money.`;
+          
+          checkoutModal.style.display = "flex";
+        });
+      });
+
+      // Toggle Momo provider cards
+      const cardMtn = document.getElementById("method-mtn");
+      const cardOrange = document.getElementById("method-orange");
+
+      cardMtn.addEventListener("click", () => {
+        cardMtn.style.borderColor = "var(--primary)";
+        cardMtn.style.background = "rgba(255, 179, 0, 0.05)";
+        cardOrange.style.borderColor = "var(--card-border)";
+        cardOrange.style.background = "rgba(255, 255, 255, 0.02)";
+        selectedMethod = "mtn";
+      });
+
+      cardOrange.addEventListener("click", () => {
+        cardOrange.style.borderColor = "var(--secondary)";
+        cardOrange.style.background = "rgba(229, 57, 53, 0.05)";
+        cardMtn.style.borderColor = "var(--card-border)";
+        cardMtn.style.background = "rgba(255, 255, 255, 0.02)";
+        selectedMethod = "orange";
+      });
+
+      document.getElementById("close-checkout-btn").addEventListener("click", () => {
+        checkoutModal.style.display = "none";
+      });
+
+      // Form submit
+      document.getElementById("checkout-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const phone = document.getElementById("checkout-phone").value;
+        const submitBtn = document.getElementById("submit-checkout-btn");
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Triggering USSD...`;
+
+        setTimeout(async () => {
+          const txRef = "MOMOPAY_" + Math.random().toString(36).substring(2, 9).toUpperCase();
+
+          // Update DB state depending on plan type
+          if (selectedPlan.endsWith("_creator")) {
+            const planType = selectedPlan === "premium_creator" ? "premium" : "starter";
+            // Update role in localStorage
+            localStorage.setItem("userRole", "creator");
+            
+            // Try updating Firestore
+            try {
+              const uRef = doc(db, "users", currentUser.uid);
+              await setDoc(uRef, {
+                creatorProfile: {
+                  plan: planType
+                }
+              }, { merge: true });
+            } catch (fsErr) {
+              console.warn("Firestore access error. Syncing locally.");
+            }
+          } else {
+            // Viewer Pass
+            localStorage.setItem(`pass_${currentUser.uid}`, selectedPlan);
+          }
+
+          // Write receipt log
+          const logs = JSON.parse(localStorage.getItem(`tx_log_${currentUser.uid}`)) || [];
+          logs.push({
+            id: txRef,
+            type: `Plan Subscription: ${selectedPlan}`,
+            amount: selectedPrice,
+            method: selectedMethod,
+            date: new Date().toISOString()
+          });
+          localStorage.setItem(`tx_log_${currentUser.uid}`, JSON.stringify(logs));
+
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Confirm & Pay";
+          checkoutModal.style.display = "none";
+
+          alert(`Subscription Confirmed! Payout wallet connected. Reference: ${txRef}`);
+          
+          if (selectedPlan.endsWith("_creator")) {
+            window.location.href = "creator-dashboard.html";
+          } else {
+            window.location.href = "viewer-dashboard.html";
+          }
+        }, 2000);
+      });
+    }
+  </script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

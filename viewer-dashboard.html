@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your viewer passes and purchases.">
+  <title>Viewer Dashboard | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> Profile</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Container -->
+  <div class="dashboard-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu">
+        <div class="sidebar-menu-item active" data-tab="passes">
+          <i class="fa-solid fa-ticket"></i> Active Passes
+        </div>
+        <div class="sidebar-menu-item" data-tab="purchases">
+          <i class="fa-solid fa-circle-play"></i> Purchased Videos
+        </div>
+        <div class="sidebar-menu-item" data-tab="history">
+          <i class="fa-solid fa-clock-rotate-left"></i> Payment Log
+        </div>
+      </div>
+      
+      <div class="sidebar-user">
+        <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="sidebar-user-avatar" alt="Avatar">
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebar-username">Viewer Profile</div>
+          <div class="sidebar-user-role" id="viewer-plan-badge">Free Viewer</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Tab Bar -->
+    <div class="mobile-dashboard-tabbar">
+      <div class="mobile-tab-item active" data-tab="passes">
+        <i class="fa-solid fa-ticket"></i> Passes
+      </div>
+      <div class="mobile-tab-item" data-tab="purchases">
+        <i class="fa-solid fa-circle-play"></i> Videos
+      </div>
+      <div class="mobile-tab-item" data-tab="history">
+        <i class="fa-solid fa-clock-rotate-left"></i> History
+      </div>
+    </div>
+
+    <!-- Content Panel Area -->
+    <main class="dashboard-content">
+      
+      <!-- Passes Tab Panel -->
+      <section class="dashboard-panel active" id="panel-passes">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Active Passes</h2>
+            <p>Your subscription plans to watch premium content</p>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="card" style="flex:1; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+            <div>
+              <span class="badge badge-premium" style="margin-bottom:8px;" id="current-pass-badge">No Active Pass</span>
+              <h3 style="font-family:var(--font-display); font-size:22px; font-weight:700;">Premium Viewer Pass</h3>
+              <p style="color:var(--text-secondary); font-size:13px; margin-top:4px;" id="current-pass-status-text">Unlock full access to all video uploads by purchasing a Weekly or Monthly Pass.</p>
+            </div>
+            <div>
+              <a href="pricing.html" class="btn btn-primary" id="pass-action-btn">Subscribe Now</a>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom: 20px; font-family: var(--font-display);">Recommended Premium Videos</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Video Title</th>
+                <th>Creator</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="font-weight:600;">How to Cook Perfect Cameroonian Ndole</div>
+                </td>
+                <td>Chevalier Ndole</td>
+                <td>18:45</td>
+                <td><span class="badge badge-featured">1,500 FCFA</span></td>
+                <td><a href="video.html?id=vid_1" class="btn btn-secondary btn-sm">Watch Now</a></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight:600;">Afrobeat Guitar Masterclass for Beginners</div>
+                </td>
+                <td>Xavier Music CM</td>
+                <td>45:30</td>
+                <td><span class="badge badge-featured">3,000 FCFA</span></td>
+                <td><a href="video.html?id=vid_3" class="btn btn-secondary btn-sm">Watch Now</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Purchases Tab Panel -->
+      <section class="dashboard-panel" id="panel-purchases">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Purchased Videos</h2>
+            <p>Single video checkouts you own permanently</p>
+          </div>
+        </div>
+
+        <div class="card" id="purchases-empty-state">
+          <div style="text-align:center; padding: 40px; color:var(--text-muted);">
+            <i class="fa-solid fa-film" style="font-size:48px; margin-bottom:16px;"></i>
+            <h3>No Videos Purchased Yet</h3>
+            <p style="margin-top:8px;">Videos you unlock via individual Mobile Money payments will appear here.</p>
+            <a href="marketplace.html" class="btn btn-primary" style="margin-top:20px;">Browse Marketplace</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- History Tab Panel -->
+      <section class="dashboard-panel" id="panel-history">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Payment Log</h2>
+            <p>Receipt ledger of your mobile money transactions</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="payment-logs-table">
+                <tr>
+                  <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No transactions completed yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Dashboard Tab Controller -->
+  <script type="module">
+    import { auth, onAuthStateChanged, db, doc, getDoc } from "./js/firebase-config.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupTabTransitions();
+      setupAuth();
+    });
+
+    function setupTabTransitions() {
+      const sidebarMenuItems = document.querySelectorAll(".sidebar-menu-item");
+      const dashboardPanels = document.querySelectorAll(".dashboard-panel");
+      
+      sidebarMenuItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const tab = item.dataset.tab;
+          sidebarMenuItems.forEach(m => m.classList.remove("active"));
+          dashboardPanels.forEach(p => p.classList.remove("active"));
+          
+          item.classList.add("active");
+          document.getElementById(`panel-${tab}`).classList.add("active");
+        });
+      });
+    }
+
+    function setupAuth() {
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        // Prefill name
+        document.getElementById("sidebar-username").innerText = user.displayName || "Viewer User";
+        
+        // Mock checks for subscriptions & transactions
+        const mockPass = localStorage.getItem(`pass_${user.uid}`);
+        if (mockPass) {
+          document.getElementById("current-pass-badge").innerText = mockPass.toUpperCase() + " PASS ACTIVE";
+          document.getElementById("current-pass-badge").className = "badge badge-success";
+          document.getElementById("current-pass-status-text").innerText = "Full access enabled. Enjoy all premium video content across the platform.";
+          document.getElementById("pass-action-btn").innerText = "Renew Pass";
+          document.getElementById("viewer-plan-badge").innerText = "Subscriber Viewer";
+          document.getElementById("viewer-plan-badge").className = "sidebar-user-role badge badge-premium";
+        }
+
+        // Load logs if present
+        const logs = JSON.parse(localStorage.getItem(`tx_log_${user.uid}`)) || [];
+        if (logs.length > 0) {
+          const table = document.getElementById("payment-logs-table");
+          table.innerHTML = logs.map(log => `
+            <tr>
+              <td><code>${log.id}</code></td>
+              <td>${log.type}</td>
+              <td style="font-weight:700;">${log.amount.toLocaleString()} FCFA</td>
+              <td><span style="text-transform:uppercase;">${log.method}</span></td>
+              <td><span class="badge badge-success">Completed</span></td>
+              <td>${new Date(log.date).toLocaleDateString()}</td>
+            </tr>
+          `).join("");
+        }
+      });
+    }
+  </script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

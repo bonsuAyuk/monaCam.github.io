@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your videos, monetization, and withdrawals on MonaCam.">
+  <title>Creator Dashboard | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> Profile</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Container -->
+  <div class="dashboard-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu">
+        <div class="sidebar-menu-item active" data-tab="overview">
+          <i class="fa-solid fa-chart-line"></i> Overview
+        </div>
+        <div class="sidebar-menu-item" data-tab="upload">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Upload Video
+        </div>
+        <div class="sidebar-menu-item" data-tab="videos">
+          <i class="fa-solid fa-clapperboard"></i> My Videos
+        </div>
+        <div class="sidebar-menu-item" data-tab="earnings">
+          <i class="fa-solid fa-wallet"></i> Earnings & Payouts
+        </div>
+      </div>
+      
+      <!-- Profile Widget bottom -->
+      <div class="sidebar-user">
+        <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="sidebar-user-avatar" alt="Avatar">
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebar-username">Creator Profile</div>
+          <div class="sidebar-user-role" id="creator-plan-badge">Starter Plan</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Tab Bar -->
+    <div class="mobile-dashboard-tabbar">
+      <div class="mobile-tab-item active" data-tab="overview">
+        <i class="fa-solid fa-chart-line"></i> Overview
+      </div>
+      <div class="mobile-tab-item" data-tab="upload">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+      </div>
+      <div class="mobile-tab-item" data-tab="videos">
+        <i class="fa-solid fa-clapperboard"></i> Videos
+      </div>
+      <div class="mobile-tab-item" data-tab="earnings">
+        <i class="fa-solid fa-wallet"></i> Earnings
+      </div>
+    </div>
+
+    <!-- Content Workspace -->
+    <main class="dashboard-content">
+      
+      <!-- Overview Section Panel -->
+      <section class="dashboard-panel active" id="panel-overview">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Creator Dashboard</h2>
+            <p>Monitor your performance, uploads quota, and mobile money revenue</p>
+          </div>
+        </div>
+
+        <!-- Weekly Quota progress monitor card -->
+        <div class="card quota-card" id="quota-warning-card">
+          <div class="quota-header">
+            <span class="quota-title"><i class="fa-solid fa-chart-bar text-gradient"></i> Weekly Upload Limits Monitor</span>
+            <span class="badge badge-featured" id="quota-numerical-ratio">0 / 5 uploads used</span>
+          </div>
+          <div class="quota-progress-bar">
+            <div class="quota-progress-fill" id="quota-progress-bar-fill"></div>
+          </div>
+          <p class="quota-footer-text">Starter Creator: 5 videos weekly limit. <a href="pricing.html" style="color:var(--primary); font-weight:700;">Upgrade to Premium</a> to unlock 15 videos weekly & Featured Placements.</p>
+        </div>
+
+        <!-- Grid of metrics -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Total Earnings</div>
+              <div class="stat-card-value" id="stats-total-earnings">0 FCFA</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-eye"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Video Views</div>
+              <div class="stat-card-value" id="stats-total-views">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-film"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Approved Videos</div>
+              <div class="stat-card-value" id="stats-total-videos">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Videos short view -->
+        <div class="card">
+          <h3 style="margin-bottom: 20px; font-family: var(--font-display);">Recent Upload Statuses</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Video Details</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Views</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="overview-recent-table">
+                <!-- Filled dynamically by JS -->
+                <tr>
+                  <td colspan="5" style="text-align:center; padding: 24px; color: var(--text-muted);">No videos uploaded yet. Go to the Upload tab to add content!</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Upload Video Form Panel -->
+      <section class="dashboard-panel" id="panel-upload">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Publish Video</h2>
+            <p>Upload new files and configuration settings</p>
+          </div>
+        </div>
+
+        <div class="auth-alert auth-alert-error" id="upload-error-alert" style="margin-bottom: 24px;">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="upload-error-msg">Upload failed. Check your fields or weekly limits.</span>
+        </div>
+        <div class="auth-alert auth-alert-success" id="upload-success-alert" style="margin-bottom: 24px;">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Video uploaded successfully and is pending admin approval!</span>
+        </div>
+
+        <div class="card">
+          <form id="upload-video-form">
+            <div class="form-group">
+              <label for="video-title" class="form-label">Video Title</label>
+              <input type="text" id="video-title" class="form-control" placeholder="e.g. Traditional Makossa Dance Lessons" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="video-desc" class="form-label">Description</label>
+              <textarea id="video-desc" class="form-control" placeholder="Describe what viewers will learn or watch in this video..." rows="4" required></textarea>
+            </div>
+
+            <div class="upload-two-col">
+              <div class="form-group">
+                <label for="video-price" class="form-label">Access Price (FCFA)</label>
+                <input type="number" id="video-price" class="form-control" placeholder="1000" min="0" required>
+                <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Enter 0 to make it available via active Viewer Passes only.</small>
+              </div>
+              <div class="form-group">
+                <label for="video-category" class="form-label">Category</label>
+                <select id="video-category" class="form-control" required>
+                  <option value="" disabled selected>Select category</option>
+                  <option value="comedy">Comedy</option>
+                  <option value="music">Music & Art</option>
+                  <option value="education">Education</option>
+                  <option value="culinary">Culinary Arts</option>
+                  <option value="lifestyle">Lifestyle</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Video File Picker -->
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fa-solid fa-film" style="color:var(--primary);"></i>
+                Video File
+              </label>
+              <div class="upload-dropzone" id="video-file-trigger">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size:28px; color:var(--primary); margin-bottom:8px;"></i>
+                <div class="upload-dropzone-title">Tap to select your video</div>
+                <div class="upload-dropzone-subtitle" id="selected-video-filename">MP4 or WebM — max 150MB</div>
+                <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime" style="display:none;" required>
+              </div>
+            </div>
+
+            <!-- Thumbnail File Picker -->
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fa-solid fa-image" style="color:var(--text-muted);"></i>
+                Cover Thumbnail
+              </label>
+              <div class="upload-dropzone" id="thumb-file-trigger" style="padding: 20px;">
+                <i class="fa-solid fa-camera" style="font-size:22px; color:var(--text-muted); margin-bottom:6px;"></i>
+                <div class="upload-dropzone-title">Tap to select a thumbnail</div>
+                <div class="upload-dropzone-subtitle" id="selected-thumb-filename">JPG or PNG — max 10MB</div>
+                <input type="file" id="thumb-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" required>
+              </div>
+              <!-- Thumbnail preview -->
+              <div id="thumb-preview-wrapper" style="display:none; margin-top:10px;">
+                <img id="thumb-preview-img" src="" alt="Thumbnail preview"
+                  style="width:100%; max-width:320px; aspect-ratio:16/9; object-fit:cover; border-radius:8px; border:1px solid var(--card-border);">
+              </div>
+            </div>
+
+            <!-- Upload progress bar (hidden by default) -->
+            <div id="upload-progress-container" style="display:none; margin-top:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:13px; font-weight:600; color:var(--text-secondary);" id="upload-progress-label">Uploading video...</span>
+                <span style="font-size:13px; font-weight:700; color:var(--primary);" id="upload-progress-pct">0%</span>
+              </div>
+              <div style="width:100%; height:8px; background:var(--bg-tertiary); border-radius:99px; overflow:hidden;">
+                <div id="upload-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); border-radius:99px; transition:width 0.3s ease;"></div>
+              </div>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:6px; text-align:center;" id="upload-progress-note">
+                Please keep this page open until upload completes.
+              </p>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="upload-submit-btn" style="width:100%; margin-top:20px;">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit for Review
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- My Videos panel -->
+      <section class="dashboard-panel" id="panel-videos">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>My Videos</h2>
+            <p>Manage existing uploads and view feedback comments</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Video details</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Views</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="videos-list-table">
+                <!-- Filled dynamically by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Earnings panel -->
+      <section class="dashboard-panel" id="panel-earnings">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Earnings & Payouts</h2>
+            <p>Withdraw accumulated channel revenue directly to Mobile Money</p>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Available Balance</div>
+              <div class="stat-card-value" id="earnings-balance">0 FCFA</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-circle-down"></i></div>
+            <div class="stat-card-data">
+              <div class="stat-card-label">Total Withdrawn</div>
+              <div class="stat-card-value" id="earnings-withdrawn">0 FCFA</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Withdraw interface -->
+        <div class="card">
+          <h3 style="margin-bottom: 20px; font-family: var(--font-display);">Initiate Mobile Money Payout</h3>
+          
+          <div class="auth-alert auth-alert-success" id="payout-success-alert" style="margin-bottom: 24px;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Payout request initiated! You will receive confirmation on your phone.</span>
+          </div>
+
+          <form id="payout-form">
+            <div class="form-group">
+              <label for="payout-amount" class="form-label">Withdrawal Amount (FCFA)</label>
+              <input type="number" id="payout-amount" class="form-control" placeholder="Enter amount to withdraw" min="100" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="payout-provider" class="form-label">Payment Wallet Provider</label>
+              <select id="payout-provider" class="form-control" required>
+                <option value="MTN">MTN Mobile Money</option>
+                <option value="Orange">Orange Money</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="payout-number" class="form-label">Wallet Mobile Number</label>
+              <input type="tel" id="payout-number" class="form-control" placeholder="+237 6xx xxx xxx" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="payout-submit-btn" style="width:100%; margin-top:20px;">
+              <i class="fa-solid fa-paper-plane"></i> Send to Wallet
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Dashboard Logic Module -->
+  <script type="module" src="js/upload.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>
+

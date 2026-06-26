@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View earnings analytics, video sales performance, and request mobile money withdrawals.">
+  <title>Creator Earnings Hub | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> Profile</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Grid -->
+  <div class="dashboard-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu">
+        <a href="creator-dashboard.html" class="sidebar-menu-item">
+          <i class="fa-solid fa-chart-line"></i> Overview
+        </a>
+        <a href="creator-dashboard.html" class="sidebar-menu-item">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Upload Video
+        </a>
+        <a href="creator-earnings.html" class="sidebar-menu-item active">
+          <i class="fa-solid fa-wallet"></i> Earnings Hub
+        </a>
+      </div>
+      
+      <div class="sidebar-user">
+        <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="sidebar-user-avatar" alt="Avatar">
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebar-username">Creator Profile</div>
+          <div class="sidebar-user-role badge badge-featured" id="creator-plan-badge">Starter Creator</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main class="dashboard-content">
+      
+      <!-- Dashboard Title Header -->
+      <div class="dashboard-header">
+        <div class="dashboard-title">
+          <h2>Earnings & Payouts Analytics</h2>
+          <p>Track your channel sales performance, monthly commissions, and Mobile Money withdrawals</p>
+        </div>
+      </div>
+
+      <!-- Financial Counter Cards Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+          <div class="stat-card-data">
+            <div class="stat-card-label">Total Sales (Historical)</div>
+            <div class="stat-card-value" id="total-historical-sales">0 FCFA</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="stat-card-data">
+            <div class="stat-card-label">Monthly Sales (June 2026)</div>
+            <div class="stat-card-value" id="current-monthly-sales">0 FCFA</div>
+          </div>
+        </div>
+        <div class="stat-card" style="border-color: var(--primary); background: rgba(255,179,0,0.02);">
+          <div class="stat-card-icon" style="background:rgba(255,179,0,0.1); border-color:rgba(255,179,0,0.3);"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="stat-card-data">
+            <div class="stat-card-label">Available for Withdrawal</div>
+            <div class="stat-card-value text-gradient" id="available-cashout-balance">0 FCFA</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i></div>
+          <div class="stat-card-data">
+            <div class="stat-card-label">Total Withdrawn</div>
+            <div class="stat-card-value" id="total-withdrawn-balance">0 FCFA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Columns splits: Left = Performance Table, Right = Payout Form -->
+      <div style="display:grid; grid-template-columns: 1fr 320px; gap:30px; margin-bottom:40px; align-items:start;">
+        
+        <!-- Video Sales Performance -->
+        <div class="card">
+          <h3 style="margin-bottom:20px; font-family:var(--font-display);"><i class="fa-solid fa-film text-gradient"></i> Video Performance Breakdown</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Video Title</th>
+                  <th>Price</th>
+                  <th>Views</th>
+                  <th>Sales Count</th>
+                  <th>Conversion</th>
+                  <th>Net Earnings</th>
+                </tr>
+              </thead>
+              <tbody id="video-performance-table-body">
+                <tr>
+                  <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No uploads available to report performance.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Withdrawal Form Card -->
+        <div class="card" style="position:sticky; top:100px;">
+          <h3 style="margin-bottom:16px; font-family:var(--font-display);"><i class="fa-solid fa-mobile-screen-button text-gradient"></i> Withdraw Funds</h3>
+          
+          <div class="auth-alert auth-alert-success" id="withdraw-success-alert" style="margin-bottom:16px; padding:10px;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span style="font-size:12px;">Disbursement request initiated!</span>
+          </div>
+
+          <form id="withdraw-balance-form">
+            <div class="form-group">
+              <label for="withdraw-amount" class="form-label">Amount (FCFA)</label>
+              <input type="number" id="withdraw-amount" class="form-control" placeholder="Min 500 FCFA" min="500" required>
+            </div>
+            <div class="form-group">
+              <label for="withdraw-provider" class="form-label">Wallet Provider</label>
+              <select id="withdraw-provider" class="form-control" required>
+                <option value="MTN">MTN Mobile Money</option>
+                <option value="Orange">Orange Money</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="withdraw-phone" class="form-label">Momo Wallet Number</label>
+              <input type="tel" id="withdraw-phone" class="form-control" placeholder="+237 6xx xxx xxx" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="withdraw-submit-btn" style="width:100%; margin-top:10px;">
+              <i class="fa-solid fa-paper-plane"></i> Withdraw Now
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Detailed Revenue Transaction Ledger History -->
+      <div class="card">
+        <h3 style="margin-bottom:20px; font-family:var(--font-display);"><i class="fa-solid fa-clock-rotate-left text-gradient"></i> Detailed Revenue History</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Payment Date</th>
+                <th>Type</th>
+                <th>Gross Paid</th>
+                <th>Platform split (20%)</th>
+                <th>Net Earned (80%)</th>
+                <th>Method</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="revenue-history-table-body">
+              <tr>
+                <td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No transaction records found in ledger.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Javascript Logic Controller Module -->
+  <script type="module" src="js/earnings.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+</html>

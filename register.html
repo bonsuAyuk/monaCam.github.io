@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign up as a Viewer or Creator on MonaCam monetization platform.">
+  <title>Join MonaCam | Create Account</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/auth.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost">Log In</a>
+        <a href="register.html" class="btn btn-primary">Join as Creator</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Registration Frame -->
+  <main class="auth-wrapper">
+    <div class="auth-card glass animate-fade-in">
+      <div class="auth-header">
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join the leading video community in Cameroon</p>
+      </div>
+
+      <!-- Verification Alert Dialog -->
+      <div class="auth-alert auth-alert-error" id="auth-error-alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="auth-error-msg">An error occurred. Please check your fields.</span>
+      </div>
+      
+      <div class="auth-alert auth-alert-success" id="auth-success-alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Account created successfully! Redirecting...</span>
+      </div>
+
+      <form id="register-form">
+        <!-- Role Selection -->
+        <div class="form-label">I want to join as a:</div>
+        <div class="role-toggle-container">
+          <div class="role-card selected" id="role-viewer" data-role="viewer">
+            <i class="fa-solid fa-play"></i>
+            <span class="role-card-title">Viewer</span>
+            <span class="role-card-desc">Watch premium content</span>
+          </div>
+          <div class="role-card" id="role-creator" data-role="creator">
+            <i class="fa-solid fa-video"></i>
+            <span class="role-card-title">Creator</span>
+            <span class="role-card-desc">Publish and earn money</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-name" class="form-label">Full Name</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="Amadou Diallo" required>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email" class="form-label">Email Address</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="name@domain.cm" required>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-phone" class="form-label">Mobile Money Number</label>
+          <input type="tel" id="reg-phone" class="form-control" placeholder="+237 6xx xxx xxx" required>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password" class="form-label">Password</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="••••••••" minlength="6" required>
+        </div>
+
+        <!-- Creator Specific Custom Settings (Shown dynamically) -->
+        <div class="creator-fields" id="creator-additional-fields">
+          <div class="form-group">
+            <label for="creator-handle" class="form-label">Creator Handle</label>
+            <input type="text" id="creator-handle" class="form-control" placeholder="e.g. chef_amadou">
+          </div>
+          <div class="form-group">
+            <label for="creator-bio" class="form-label">Biography / Category</label>
+            <textarea id="creator-bio" class="form-control" placeholder="Share a short description about what kind of videos you create..." rows="3"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Sign Up</button>
+      </form>
+
+      <div class="auth-footer-links">
+        Already have an account? <a href="login.html">Log In</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Module Script Execution -->
+  <script type="module">
+    import { signUpUser } from "./js/auth.js";
+
+    let selectedRole = "viewer";
+
+    const roleViewerCard = document.getElementById("role-viewer");
+    const roleCreatorCard = document.getElementById("role-creator");
+    const creatorFields = document.getElementById("creator-additional-fields");
+    const registerForm = document.getElementById("register-form");
+    const errorAlert = document.getElementById("auth-error-alert");
+    const successAlert = document.getElementById("auth-success-alert");
+    const errorMsg = document.getElementById("auth-error-msg");
+
+    // Toggle Role Actions
+    roleViewerCard.addEventListener("click", () => {
+      selectedRole = "viewer";
+      roleViewerCard.classList.add("selected");
+      roleCreatorCard.classList.remove("selected");
+      creatorFields.style.display = "none";
+    });
+
+    roleCreatorCard.addEventListener("click", () => {
+      selectedRole = "creator";
+      roleCreatorCard.classList.add("selected");
+      roleViewerCard.classList.remove("selected");
+      creatorFields.style.display = "block";
+    });
+
+    // Form Submission
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorAlert.style.display = "none";
+      successAlert.style.display = "none";
+
+      const name = document.getElementById("reg-name").value;
+      const email = document.getElementById("reg-email").value;
+      const phone = document.getElementById("reg-phone").value;
+      const password = document.getElementById("reg-password").value;
+
+      try {
+        const user = await signUpUser(email, password, name, phone, selectedRole);
+        
+        // Save role details locally for fast UI routing before full DB checks
+        localStorage.setItem("userRole", selectedRole);
+
+        successAlert.style.display = "flex";
+        setTimeout(() => {
+          if (selectedRole === "creator") {
+            window.location.href = "creator-dashboard.html";
+          } else {
+            window.location.href = "viewer-dashboard.html";
+          }
+        }, 1500);
+      } catch (error) {
+        errorMsg.innerText = error.message;
+        errorAlert.style.display = "flex";
+      }
+    });
+  </script>
+  <script src="js/nav.js"></script>
+</body>
+</html>
+

@@ -59,6 +59,9 @@
         <div class="sidebar-menu-item" data-tab="revenue">
           <i class="fa-solid fa-sack-dollar"></i> Platform Revenue
         </div>
+        <div class="sidebar-menu-item" data-tab="categories">
+          <i class="fa-solid fa-list"></i> Categories
+        </div>
         <div class="sidebar-menu-item" data-tab="settings">
           <i class="fa-solid fa-sliders"></i> Global Settings
         </div>
@@ -90,6 +93,9 @@
       </div>
       <div class="mobile-tab-item" data-tab="revenue">
         <i class="fa-solid fa-chart-line"></i> Revenue
+      </div>
+      <div class="mobile-tab-item" data-tab="categories">
+        <i class="fa-solid fa-list"></i> Categories
       </div>
       <div class="mobile-tab-item" data-tab="settings">
         <i class="fa-solid fa-sliders"></i> Settings
@@ -343,7 +349,49 @@
         </div>
       </section>
 
-      <!-- 6. Global Settings Panel -->
+      <!-- 6. Manage Categories Panel -->
+      <section class="dashboard-panel" id="panel-categories">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Video Categories</h2>
+            <p>Manage the list of categories available to creators when uploading videos</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <h3 style="margin-bottom:20px; font-family:var(--font-display);"><i class="fa-solid fa-plus text-gradient"></i> Add New Category</h3>
+          <form id="add-category-form" style="display:flex; gap:16px; align-items:flex-end; max-width:600px;">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+              <label class="form-label">Category ID (e.g., 'comedy')</label>
+              <input type="text" id="cat-id-input" class="form-control" placeholder="Lowercase, no spaces" required pattern="[a-z0-9_]+">
+            </div>
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+              <label class="form-label">Display Name (e.g., 'Comedy & Humor')</label>
+              <input type="text" id="cat-name-input" class="form-control" placeholder="Display Name" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="add-category-btn">Add Category</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Category ID</th>
+                  <th>Display Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="categories-table-body">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Global Settings Panel -->
       <section class="dashboard-panel" id="panel-settings">
         <div class="dashboard-header">
           <div class="dashboard-title">
@@ -392,7 +440,7 @@
 
   <!-- Admin Controller script module -->
   <script type="module">
-    import { auth, onAuthStateChanged, db, doc, getDoc } from "./js/firebase-config.js";
+    import { auth, onAuthStateChanged, db, doc, getDoc, collection, getDocs, setDoc, deleteDoc } from "./js/db-config.js";
 
     // State lists
     let pendingVideos = [];
@@ -400,6 +448,7 @@
     let subscriptionsList = [];
     let usersList = [];
     let transactionsList = [];
+    let categoriesList = [];
     let selectedVideoId = null;
 
     // DOM bindings
@@ -408,6 +457,8 @@
     const subscriptionsTable = document.getElementById("subscriptions-table-body");
     const usersTable = document.getElementById("users-table-body");
     const transactionsTable = document.getElementById("revenue-history-table-body");
+    const categoriesTable = document.getElementById("categories-table-body");
+    const addCategoryForm = document.getElementById("add-category-form");
     
     const revenueVolume = document.getElementById("revenue-total-volume");
     const revenueAdminCut = document.getElementById("revenue-admin-cut");
@@ -463,6 +514,7 @@
         loadUsers();
         loadRevenue();
         loadSettings();
+        loadCategories();
       });
     }
 
@@ -963,6 +1015,77 @@
         // Load payment data when switching to payments tab
         if (tab === "payments") loadPaymentRequests();
       });
+    });
+
+    // --- 7. Manage Categories ---
+    async function loadCategories() {
+      categoriesTable.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:24px; color:var(--text-muted);">Loading categories...</td></tr>`;
+      try {
+        const querySnapshot = await getDocs(collection(db, "categories"));
+        categoriesList = [];
+        querySnapshot.forEach((d) => {
+          categoriesList.push({ id: d.id, ...d.data() });
+        });
+
+        if (categoriesList.length > 0) {
+          categoriesTable.innerHTML = categoriesList.map(c => `
+            <tr>
+              <td><code>${c.id}</code></td>
+              <td style="font-weight:600;">${c.name}</td>
+              <td>
+                <button class="btn btn-secondary btn-sm delete-category-btn" data-id="${c.id}" style="color:var(--error); border-color:rgba(255,23,68,0.25);">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </td>
+            </tr>
+          `).join("");
+
+          document.querySelectorAll(".delete-category-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+              if (confirm("Are you sure you want to delete this category?")) {
+                const id = btn.dataset.id;
+                try {
+                  await deleteDoc(doc(db, "categories", id));
+                  loadCategories();
+                } catch (e) {
+                  alert("Error deleting category: " + e.message);
+                }
+              }
+            });
+          });
+        } else {
+          categoriesTable.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:24px; color:var(--text-muted);">No categories added yet.</td></tr>`;
+        }
+      } catch (err) {
+        console.error(err);
+        categoriesTable.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:24px; color:var(--error);">Error loading categories. Check rules.</td></tr>`;
+      }
+    }
+
+    addCategoryForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const idInput = document.getElementById("cat-id-input").value.trim().toLowerCase();
+      const nameInput = document.getElementById("cat-name-input").value.trim();
+      const btn = document.getElementById("add-category-btn");
+
+      if (!idInput || !nameInput) return;
+      btn.innerText = "Adding...";
+      btn.disabled = true;
+
+      try {
+        await setDoc(doc(db, "categories", idInput), {
+          name: nameInput,
+          createdAt: new Date().toISOString()
+        });
+        document.getElementById("cat-id-input").value = "";
+        document.getElementById("cat-name-input").value = "";
+        loadCategories();
+      } catch (err) {
+        alert("Error adding category: " + err.message);
+      } finally {
+        btn.innerText = "Add Category";
+        btn.disabled = false;
+      }
     });
 
     // Auto-load payments on start

@@ -307,6 +307,11 @@ select.form-control {
   cursor: pointer;
 }
 
+select.form-control option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
 /* ── Premium Card Layouts ─────────────────────────────── */
 .card {
   background: var(--card-bg);

@@ -233,7 +233,7 @@
   </footer>
 
   <script type="module">
-    import { auth, onAuthStateChanged } from "./js/firebase-config.js";
+    import { auth, onAuthStateChanged } from "./js/db-config.js";
     onAuthStateChanged(auth, (user) => {
       const dashboardLink = document.getElementById("nav-dashboard-link-container");
       const authActions = document.getElementById("auth-nav-actions");

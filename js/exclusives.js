@@ -157,7 +157,7 @@ async function loadMyExclusiveVideos(currentUser) {
       
       card.innerHTML = `
         <div class="video-thumbnail">
-          <img src="${v.thumbnailUrl || 'https://via.placeholder.com/640x360?text=No+Thumbnail'}" alt="${v.title}">
+          <img src="${v.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail'}" alt="${v.title}">
           <div class="video-duration">${v.duration || '0:00'}</div>
           <div class="video-price-tag" style="background:var(--primary); color:white;">
             <i class="fa-solid fa-lock"></i> Exclusive

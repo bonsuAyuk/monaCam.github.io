@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function setupAuthObserver() {
   onAuthStateChanged(auth, async (user) => {
+    if (window.updateNavAuthUI) window.updateNavAuthUI(user);
     if (user) {
       currentUser = user;
       
@@ -315,3 +316,4 @@ function setupWithdrawalHandler() {
     }, 2000);
   });
 }
+

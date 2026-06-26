@@ -99,7 +99,7 @@ async function fetchFeaturedCreators() {
       const videosCount = creator.creatorProfile?.totalVideos || creator.creatorProfile?.weeklyUploadCount || 0;
       html += `
         <a href="exclusives.html?creator=${d.id}" class="creator-card" style="text-decoration:none;">
-          <img src="${creator.photoURL || 'https://via.placeholder.com/80'}" class="creator-avatar" alt="${creator.displayName}">
+          <img src="${creator.photoURL || 'https://placehold.co/80'}" class="creator-avatar" alt="${creator.displayName}">
           <h3 class="creator-name">${creator.displayName} <i class="fa-solid fa-circle-check text-gradient" style="font-size: 12px;"></i></h3>
           <p class="creator-meta">${videosCount} Videos</p>
         </a>
@@ -154,7 +154,7 @@ async function loadVideos(reset = false) {
         videosHTML += `
           <a href="video.html?id=${docSnap.id}" class="video-card">
             <div class="video-thumbnail">
-              <img src="${video.thumbnailUrl || 'https://via.placeholder.com/640x360?text=No+Thumbnail'}" alt="${video.title}">
+              <img src="${video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail'}" alt="${video.title}">
               <div class="video-duration">${video.duration || '0:00'}</div>
               <div class="video-price-tag">
                 <i class="fa-solid fa-money-bill"></i> ${video.priceFCFA ? video.priceFCFA.toLocaleString() + ' FCFA' : 'Free'}

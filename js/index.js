@@ -126,16 +126,13 @@ async function loadVideos(reset = false) {
     
     if (currentCategory !== "all") constraints.push(where("category", "==", currentCategory));
 
-    // Exclude exclusives from main feed
-    constraints.push(where("isExclusive", "==", false));
-
     // Sort order
     if (currentSort === "newest") constraints.push(orderBy("createdAt", "desc"));
     if (currentSort === "popular") constraints.push(orderBy("views", "desc"));
     if (currentSort === "price-low") constraints.push(orderBy("priceFCFA", "asc"));
     if (currentSort === "price-high") constraints.push(orderBy("priceFCFA", "desc"));
 
-    constraints.push(limit(12));
+    constraints.push(limit(30)); // Increased limit slightly to account for client-side filtering
 
     const q = query(videosRef, ...constraints);
     const snapshot = await getDocs(q);
@@ -149,7 +146,10 @@ async function loadVideos(reset = false) {
       let videosHTML = "";
       snapshot.forEach(docSnap => {
         const video = docSnap.data();
+        
+        // Client-side filtering
         if (currentSearch && !video.title.toLowerCase().includes(currentSearch)) return;
+        if (video.isExclusive === true) return; // Hide exclusives (handles older videos missing the field)
 
         videosHTML += `
           <a href="video.html?id=${docSnap.id}" class="video-card">

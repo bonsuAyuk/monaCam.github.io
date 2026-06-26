@@ -34,7 +34,7 @@ export async function signUpUser(email, password, displayName, phoneNumber, role
 
     if (role === "creator") {
       userProfile.creatorProfile = {
-        plan: "starter", // Default creator plan
+        plan: "none", // Pending payment verification
         bio: "Welcome to my creator profile!",
         featured: false,
         weeklyUploadCount: 0,

@@ -7,6 +7,8 @@ import {
   query, 
   where, 
   getDocs, 
+  getDoc,
+  doc,
   limit, 
   orderBy, 
   startAfter 
@@ -65,16 +67,29 @@ async function loadCategories() {
 
 // Setup auth observer to change navbar dynamically
 function setupAuthObserver() {
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       // User is logged in
-      // Fetch user role from localStorage or Firestore (fallback to local mock role)
-      const userRole = localStorage.getItem("userRole") || "viewer";
-      let dashboardUrl = "viewer-dashboard.html";
+      let userRole = "viewer";
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          userRole = userDoc.data().role || "viewer";
+          localStorage.setItem("userRole", userRole); // Cache it
+        }
+      } catch (e) {
+        userRole = localStorage.getItem("userRole") || "viewer";
+      }
+
+      let dashboardUrl = "";
       if (userRole === "creator") dashboardUrl = "creator-dashboard.html";
       if (userRole === "admin") dashboardUrl = "admin-dashboard.html";
 
-      navDashboardLinkContainer.innerHTML = `<a href="${dashboardUrl}" class="nav-link">Dashboard</a>`;
+      if (dashboardUrl) {
+        navDashboardLinkContainer.innerHTML = `<a href="${dashboardUrl}" class="nav-link">Dashboard</a>`;
+      } else {
+        navDashboardLinkContainer.innerHTML = "";
+      }
       
       authNavActions.innerHTML = `
         <div style="display:flex; align-items:center; gap: 12px;">
@@ -182,26 +197,12 @@ async function loadVideos(isReset = false) {
         conditions.push(where("category", "==", currentCategory));
       }
 
-      // Add ordering logic based on sort filter
-      if (currentSort === "newest") {
-        conditions.push(orderBy("createdAt", "desc"));
-      } else if (currentSort === "popular") {
-        conditions.push(orderBy("views", "desc"));
-      } else if (currentSort === "price-low") {
-        conditions.push(orderBy("priceFCFA", "asc"));
-      } else if (currentSort === "price-high") {
-        conditions.push(orderBy("priceFCFA", "desc"));
-      }
-
-      if (lastVisibleDoc) {
-        q = query(q, ...conditions, startAfter(lastVisibleDoc), limit(8));
-      } else {
-        q = query(q, ...conditions, limit(8));
-      }
+      // Add ordering logic based on sort filter - BYPASSED to avoid Firestore Composite Index errors
+      // We will fetch all matching videos (up to 50) and sort client-side.
+      q = query(q, ...conditions, limit(50));
 
       const snapshot = await getDocs(q);
       if (snapshot.docs.length > 0) {
-        lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
         snapshot.forEach(doc => {
           const d = doc.data();
           videos.push({
@@ -214,13 +215,12 @@ async function loadVideos(isReset = false) {
             duration: d.duration || "10:00",
             creatorName: d.creatorName || "Anonymous Creator",
             creatorAvatar: d.creatorAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80",
-            thumbnail: d.thumbnailUrl || "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80"
+            thumbnail: d.thumbnailUrl || "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80",
+            createdAt: d.createdAt // Need this for newest sort
           });
         });
       }
-      if (snapshot.docs.length < 8) {
-        hasMore = false;
-      }
+      hasMore = false; // Disabled pagination due to client-side sorting
     } catch (dbErr) {
       console.error("Firestore error loading videos:", dbErr);
     }
@@ -232,6 +232,19 @@ async function loadVideos(isReset = false) {
         (v.description && v.description.toLowerCase().includes(currentSearch.toLowerCase())) ||
         (v.creatorName && v.creatorName.toLowerCase().includes(currentSearch.toLowerCase()))
       );
+    }
+
+    // Client-side sorting
+    if (videos.length > 0) {
+      if (currentSort === "newest") {
+        videos.sort((a, b) => b.createdAt - a.createdAt);
+      } else if (currentSort === "popular") {
+        videos.sort((a, b) => b.views - a.views);
+      } else if (currentSort === "price-low") {
+        videos.sort((a, b) => a.priceFCFA - b.priceFCFA);
+      } else if (currentSort === "price-high") {
+        videos.sort((a, b) => b.priceFCFA - a.priceFCFA);
+      }
     }
 
     if (videos.length === 0) {

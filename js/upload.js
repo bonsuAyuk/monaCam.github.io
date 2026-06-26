@@ -156,12 +156,19 @@ async function fetchCategories() {
 // ── Update UI with user data ────────────────────────────────────
 function updateDashboardUI() {
   if (sidebarName) sidebarName.innerText = userProfile.displayName || "Creator";
-  const plan = userProfile.creatorProfile?.plan || "starter";
+  const plan = userProfile.creatorProfile?.plan || "none";
   if (creatorPlanBadge) {
-    creatorPlanBadge.innerText = plan === "premium" ? "Premium Creator" : "Starter Creator";
-    creatorPlanBadge.className = plan === "premium"
-      ? "sidebar-user-role badge badge-featured"
-      : "sidebar-user-role";
+    if (plan === "none") {
+      creatorPlanBadge.innerText = "Pending Activation";
+      creatorPlanBadge.className = "sidebar-user-role badge";
+      creatorPlanBadge.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+      creatorPlanBadge.style.color = "var(--primary)";
+    } else {
+      creatorPlanBadge.innerText = plan === "premium" ? "Premium Creator" : "Starter Creator";
+      creatorPlanBadge.className = plan === "premium"
+        ? "sidebar-user-role badge badge-featured"
+        : "sidebar-user-role badge";
+    }
   }
   uploadWeekLimit = plan === "premium" ? 15 : 5;
 
@@ -173,6 +180,26 @@ function updateDashboardUI() {
   }
   if (payProv && userProfile.creatorProfile?.paymentDetails?.provider) {
     payProv.value = userProfile.creatorProfile.paymentDetails.provider;
+  }
+
+  // Enforce Access Control
+  if (plan === "none" || plan === "pending") {
+    // Hide all normal panels
+    document.querySelectorAll(".dashboard-panel").forEach(panel => panel.classList.remove("active"));
+    // Show upgrade panel
+    const upgradePanel = document.getElementById("panel-upgrade");
+    if (upgradePanel) upgradePanel.classList.add("active");
+    
+    // Disable navigation sidebar links
+    document.querySelectorAll(".sidebar-menu-item").forEach(item => {
+      item.style.opacity = "0.5";
+      item.style.pointerEvents = "none";
+    });
+    // Disable mobile nav tabs
+    document.querySelectorAll(".mobile-tab-item").forEach(item => {
+      item.style.opacity = "0.5";
+      item.style.pointerEvents = "none";
+    });
   }
 }
 

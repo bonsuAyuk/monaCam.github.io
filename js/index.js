@@ -153,8 +153,8 @@ async function loadVideos(reset = false) {
 
         videosHTML += `
           <a href="video.html?id=${docSnap.id}" class="video-card">
-            <div class="video-thumbnail">
-              <img src="${video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail'}" alt="${video.title}">
+            <div class="video-thumbnail-container">
+              <img src="${video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail'}" class="video-thumbnail" alt="${video.title}">
               <div class="video-duration">${video.duration || '0:00'}</div>
               <div class="video-price-tag">
                 <i class="fa-solid fa-money-bill"></i> ${video.priceFCFA ? video.priceFCFA.toLocaleString() + ' FCFA' : 'Free'}

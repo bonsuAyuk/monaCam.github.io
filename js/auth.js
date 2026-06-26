@@ -11,7 +11,7 @@ import {
   doc,
   setDoc,
   getDoc
-} from "./firebase-config.js";
+} from "./db-config.js";
 
 /**
  * Register a new user and create their Firestore profile.

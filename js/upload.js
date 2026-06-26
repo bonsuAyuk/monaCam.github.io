@@ -13,7 +13,7 @@ import {
   db, auth, onAuthStateChanged,
   doc, getDoc, setDoc,
   collection, query, where, getDocs, limit
-} from "./firebase-config.js";
+} from "./db-config.js";
 import {
   uploadVideoToDrive, uploadThumbnailToDrive, isUploadConfigured
 } from "./drive-upload.js";
@@ -171,21 +171,7 @@ async function fetchCreatorContent() {
 
   // Merge with localStorage cache
   const localUploads = JSON.parse(localStorage.getItem(`uploads_${currentUser.uid}`)) || [];
-  if (creatorVideos.length === 0 && localUploads.length === 0) {
-    // Seed mock data for new creators
-    creatorVideos = [
-      {
-        videoId: "mock_c1", title: "Introduction to Cameroonian Spices",
-        category: "culinary", priceFCFA: 1000, views: 120,
-        status: "approved", createdAt: new Date(Date.now() - 3600000 * 72)
-      },
-      {
-        videoId: "mock_c2", title: "Bikutsi Rhythm Guitar Basics",
-        category: "music", priceFCFA: 2500, views: 45,
-        status: "pending", createdAt: new Date(Date.now() - 3600000 * 12)
-      }
-    ];
-  } else {
+  if (localUploads.length > 0) {
     creatorVideos = [...creatorVideos, ...localUploads];
   }
 

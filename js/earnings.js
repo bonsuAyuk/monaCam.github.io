@@ -10,7 +10,7 @@ import {
   query,
   where,
   getDocs
-} from "./firebase-config.js";
+} from "./db-config.js";
 
 // State
 let currentUser = null;

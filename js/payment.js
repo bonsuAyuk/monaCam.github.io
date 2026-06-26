@@ -11,7 +11,7 @@
 
 import {
   db, doc, setDoc, collection, query, where, getDocs, orderBy,
-} from "./firebase-config.js";
+} from "./db-config.js";
 import {
   uploadScreenshotToDrive, isUploadConfigured,
 } from "./drive-upload.js";

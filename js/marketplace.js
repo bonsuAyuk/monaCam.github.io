@@ -10,7 +10,7 @@ import {
   limit, 
   orderBy, 
   startAfter 
-} from "./firebase-config.js";
+} from "./db-config.js";
 
 // Page State Variables
 let lastVisibleDoc = null;

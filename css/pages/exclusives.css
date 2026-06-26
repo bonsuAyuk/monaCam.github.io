@@ -384,17 +384,10 @@
     font-size: 28px;
   }
   .video-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   .video-title {
     font-size: 13px;
-    height: 36px;
-  }
-}
-
-@media (max-width: 360px) {
-  .video-grid {
-    grid-template-columns: 1fr;
   }
 }

@@ -1,25 +1,5 @@
-
-1
-rules_version = '2';
-2
-
-3
-service cloud.firestore {
-  4
-  match / databases / { database } / documents {
-    5
-    match / { document=**} {
-      6
-      allow read, write: if false;
-      7
-    }
-    8
-  }
-  9
-}
-
 /**
- * firebase-config.js — Firebase initialization and exports
+ * db-config.js — Firebase initialization and exports
  *
  * SETUP INSTRUCTIONS:
  * 1. Go to https://console.firebase.google.com

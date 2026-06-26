@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -43,6 +43,7 @@
     </div>
   </header>
 
+<div id="pricing-content-wrapper" style="opacity: 0; transition: opacity 0.3s ease;">
   <!-- Toggle Switcher -->
   <section class="container animate-fade-in">
     <div class="pricing-toggle-container">
@@ -110,6 +111,7 @@
 
     </div>
   </section>
+</div>
 
   <!-- Creator Plans Grid -->
   <section class="container">
@@ -154,7 +156,8 @@
 
     </div>
   </section>
-
+  </section>
+</div>
   <!-- Checkout payment modal -->
   <div class="checkout-modal" id="checkout-modal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px;">
     <div class="card glass" style="width: 100%; max-width: 440px; background:var(--bg-secondary); border-color:var(--card-hover-border); padding:24px;">
@@ -229,6 +232,8 @@
         currentUser = user;
         if (window.updateNavAuthUI) window.updateNavAuthUI(user);
 
+        const contentWrapper = document.getElementById("pricing-content-wrapper");
+
         if (user) {
           try {
             const uRef = doc(db, "users", user.uid);
@@ -246,6 +251,11 @@
           } catch (e) {
             console.error("Error fetching user role for pricing page", e);
           }
+        }
+        
+        // Reveal content after auth logic is processed
+        if (contentWrapper) {
+          contentWrapper.style.opacity = "1";
         }
       });
     }

@@ -193,12 +193,6 @@ async function fetchCreatorContent() {
     console.warn("Firestore query error:", err.message);
   }
 
-  // Merge with localStorage cache
-  const localUploads = JSON.parse(localStorage.getItem(`uploads_${currentUser.uid}`)) || [];
-  if (localUploads.length > 0) {
-    creatorVideos = [...creatorVideos, ...localUploads];
-  }
-
   // ── Compute stats ──
   let totalViews = 0, approvedCount = 0, totalRevenue = 0;
   const weekToken = `${new Date().getFullYear()}-${getWeekNumber(new Date())}`;
@@ -400,16 +394,7 @@ function setupUploadFormHandler() {
         createdAt: today.toISOString(),
       };
 
-      try {
-        await setDoc(doc(db, "videos", videoId), newVideo);
-      } catch (dbErr) {
-        console.warn("Could not save to Firestore, using localStorage:", dbErr.message);
-      }
-
-      // Local cache
-      const local = JSON.parse(localStorage.getItem(`uploads_${currentUser.uid}`)) || [];
-      local.push(newVideo);
-      localStorage.setItem(`uploads_${currentUser.uid}`, JSON.stringify(local));
+      await setDoc(doc(db, "videos", videoId), newVideo);
 
       showProgress("Upload complete!", 100, "Your video is pending admin approval.");
 

@@ -31,122 +31,7 @@ const infiniteTrigger = document.getElementById("infinite-scroll-trigger");
 const authNavActions = document.getElementById("auth-nav-actions");
 const navDashboardLinkContainer = document.getElementById("nav-dashboard-link-container");
 
-// Cameroonian Premium Mock Data (fallback if Firebase is not yet connected/empty)
-const MOCK_FEATURED_CREATORS = [
-  {
-    uid: "creator_1",
-    displayName: "Chevalier Ndole",
-    handle: "@ndole_master",
-    subscribersCount: "12.4K",
-    videosCount: 42,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
-  },
-  {
-    uid: "creator_2",
-    displayName: "Murielle Comedy",
-    handle: "@muri_laughs",
-    subscribersCount: "28.1K",
-    videosCount: 68,
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80"
-  },
-  {
-    uid: "creator_3",
-    displayName: "Xavier Music CM",
-    handle: "@xavier_sounds",
-    subscribersCount: "5.8K",
-    videosCount: 15,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
-  },
-  {
-    uid: "creator_4",
-    displayName: "Tech Savvy Cameroon",
-    handle: "@tech_cameroon",
-    subscribersCount: "8.2K",
-    videosCount: 31,
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80"
-  }
-];
-
-const MOCK_VIDEOS = [
-  {
-    videoId: "vid_1",
-    title: "How to Cook Perfect Cameroonian Ndole",
-    description: "The ultimate guide to preparing Ndole with bitterleaves, groundnuts, beef, and prawns.",
-    priceFCFA: 1500,
-    category: "culinary",
-    views: 1240,
-    duration: "18:45",
-    creatorName: "Chevalier Ndole",
-    creatorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=500&q=80",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 2) // 2 days ago
-  },
-  {
-    videoId: "vid_2",
-    title: "La Famille Camerounaise - Episode 5 (Comedy)",
-    description: "Hilarious home jokes that everyone in Cameroon knows too well. Get ready to laugh!",
-    priceFCFA: 500,
-    category: "comedy",
-    views: 4890,
-    duration: "12:10",
-    creatorName: "Murielle Comedy",
-    creatorAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=80&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?auto=format&fit=crop&w=500&q=80",
-    createdAt: new Date(Date.now() - 3600000 * 4) // 4 hours ago
-  },
-  {
-    videoId: "vid_3",
-    title: "Afrobeat Guitar Masterclass for Beginners",
-    description: "Learn to play local makossa, bikutsi and modern afrobeat patterns on the guitar.",
-    priceFCFA: 3000,
-    category: "music",
-    views: 840,
-    duration: "45:30",
-    creatorName: "Xavier Music CM",
-    creatorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&w=500&q=80",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 5) // 5 days ago
-  },
-  {
-    videoId: "vid_4",
-    title: "Cameroon's Tech Ecosystem: Opportunities in Douala & Yaounde",
-    description: "A comprehensive analysis of software development, mobile money API integrations, and tech startups.",
-    priceFCFA: 0, // Free preview or subscription pass only
-    category: "education",
-    views: 310,
-    duration: "24:15",
-    creatorName: "Tech Savvy Cameroon",
-    creatorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80",
-    createdAt: new Date(Date.now() - 3600000 * 24) // 1 day ago
-  },
-  {
-    videoId: "vid_5",
-    title: "Douala City Tour - Vlog",
-    description: "Taking a look at Bonanjo, Akwa, and the vibrant street foods at night.",
-    priceFCFA: 1000,
-    category: "lifestyle",
-    views: 2200,
-    duration: "15:20",
-    creatorName: "Tech Savvy Cameroon",
-    creatorAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=500&q=80",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 10) // 10 days ago
-  },
-  {
-    videoId: "vid_6",
-    title: "Cooking Eru & Waterfufu - Step by Step",
-    description: "Learn how to prepare clean Eru with skin, meat, and crayfish.",
-    priceFCFA: 2000,
-    category: "culinary",
-    views: 1890,
-    duration: "22:40",
-    creatorName: "Chevalier Ndole",
-    creatorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80",
-    thumbnail: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 7) // 7 days ago
-  }
-];
+// Mock data removed in favor of real Firestore data
 
 // Initialize Page
 document.addEventListener("DOMContentLoaded", async () => {
@@ -225,33 +110,29 @@ async function loadFeaturedCreators() {
   try {
     featuredCreatorsList.innerHTML = "";
     
-    // Attempt to read from Firestore if project initialized
+    // Attempt to read from Firestore
     let creators = [];
     try {
       const q = query(
         collection(db, "users"), 
         where("role", "==", "creator"), 
-        where("creatorProfile.featured", "==", true), 
+        where("featured", "==", true), 
         limit(4)
       );
       const snapshot = await getDocs(q);
       snapshot.forEach(doc => {
         const d = doc.data();
         creators.push({
-          uid: d.uid,
+          uid: d.uid || doc.id,
           displayName: d.displayName,
-          handle: d.creatorProfile?.handle || `@${d.displayName.toLowerCase().replace(/\s+/g, '')}`,
+          handle: d.creatorProfile?.handle || `@${(d.displayName || 'creator').toLowerCase().replace(/\s+/g, '')}`,
           subscribersCount: "0",
           videosCount: d.creatorProfile?.weeklyUploadCount || 0,
           avatar: d.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
         });
       });
     } catch (dbErr) {
-      console.warn("Firestore not active or config is missing API key. Falling back to mock creators.");
-    }
-
-    if (creators.length === 0) {
-      creators = MOCK_FEATURED_CREATORS;
+      console.warn("Firestore error loading featured creators:", dbErr);
     }
 
     creators.forEach(creator => {
@@ -341,37 +222,16 @@ async function loadVideos(isReset = false) {
         hasMore = false;
       }
     } catch (dbErr) {
-      console.warn("Firestore config not configured. Falling back to local mock videos.");
+      console.error("Firestore error loading videos:", dbErr);
     }
 
-    // Fallback Mock loading logic
-    if (videos.length === 0 && isReset) {
-      // Filter mock videos locally
-      let filtered = [...MOCK_VIDEOS];
-      if (currentCategory !== "all") {
-        filtered = filtered.filter(v => v.category === currentCategory);
-      }
-      if (currentSearch) {
-        filtered = filtered.filter(v => 
-          v.title.toLowerCase().includes(currentSearch.toLowerCase()) ||
-          v.description.toLowerCase().includes(currentSearch.toLowerCase()) ||
-          v.creatorName.toLowerCase().includes(currentSearch.toLowerCase())
-        );
-      }
-
-      // Sort mocks
-      if (currentSort === "newest") {
-        filtered.sort((a, b) => b.createdAt - a.createdAt);
-      } else if (currentSort === "popular") {
-        filtered.sort((a, b) => b.views - a.views);
-      } else if (currentSort === "price-low") {
-        filtered.sort((a, b) => a.priceFCFA - b.priceFCFA);
-      } else if (currentSort === "price-high") {
-        filtered.sort((a, b) => b.priceFCFA - a.priceFCFA);
-      }
-
-      videos = filtered;
-      hasMore = false; // Mock data is single page
+    // Client-side search filtering if currentSearch exists
+    if (currentSearch && videos.length > 0) {
+      videos = videos.filter(v => 
+        (v.title && v.title.toLowerCase().includes(currentSearch.toLowerCase())) ||
+        (v.description && v.description.toLowerCase().includes(currentSearch.toLowerCase())) ||
+        (v.creatorName && v.creatorName.toLowerCase().includes(currentSearch.toLowerCase()))
+      );
     }
 
     if (videos.length === 0) {

@@ -440,7 +440,7 @@
 
   <!-- Admin Controller script module -->
   <script type="module">
-    import { auth, onAuthStateChanged, db, doc, getDoc, collection, getDocs, setDoc, deleteDoc } from "./js/db-config.js";
+    import { auth, onAuthStateChanged, db, doc, getDoc, collection, getDocs, setDoc, deleteDoc, updateDoc, query, where } from "./js/db-config.js";
 
     // State lists
     let pendingVideos = [];
@@ -519,22 +519,18 @@
     }
 
     // 1. Approvals Queue loader
-    function loadApprovalsQueue() {
-      let allVideos = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith("uploads_")) {
-          allVideos = [...allVideos, ...(JSON.parse(localStorage.getItem(key)) || [])];
-        }
+    async function loadApprovalsQueue() {
+      approvalsTable.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">Loading pending videos...</td></tr>`;
+      pendingVideos = [];
+      try {
+        const q = query(collection(db, "videos"), where("status", "==", "pending"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(docSnap => {
+          pendingVideos.push(docSnap.data());
+        });
+      } catch (err) {
+        console.error("Error loading approvals:", err);
       }
-
-      if (allVideos.length === 0) {
-        allVideos = [
-          { videoId: "v_pend_1", creatorId: "c1", creatorName: "Chevalier Ndole", title: "Traditional Sanga Recipe Tutorial", category: "culinary", priceFCFA: 1000, status: "pending", createdAt: new Date().toISOString() }
-        ];
-      }
-
-      pendingVideos = allVideos.filter(v => v.status === "pending");
 
       if (pendingVideos.length > 0) {
         approvalsTable.innerHTML = pendingVideos.map(video => `
@@ -567,36 +563,51 @@
     }
 
     // 2. Featured placement loader
-    function loadCreatorsFeatured() {
-      creatorsList = [
-        { uid: "creator_1", displayName: "Chevalier Ndole", phone: "+237 677 123 456", plan: "starter", featured: true },
-        { uid: "creator_2", displayName: "Murielle Comedy", phone: "+237 655 456 789", plan: "premium", featured: true },
-        { uid: "creator_3", displayName: "Xavier Music CM", phone: "+237 699 987 654", plan: "starter", featured: false }
-      ];
-
-      creatorsTable.innerHTML = creatorsList.map(c => `
-        <tr>
-          <td style="font-weight:700;">${c.displayName}</td>
-          <td><code>${c.phone}</code></td>
-          <td style="text-transform:capitalize;">${c.plan}</td>
-          <td>
-            <button class="btn btn-secondary btn-sm toggle-feature-btn" data-uid="${c.uid}">
-              ${c.featured ? `<i class="fa-solid fa-star text-gradient"></i> Featured` : `<i class="fa-regular fa-star"></i> Feature Creator`}
-            </button>
-          </td>
-        </tr>
-      `).join("");
-
-      document.querySelectorAll(".toggle-feature-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const uid = btn.dataset.uid;
-          creatorsList = creatorsList.map(c => {
-            if (c.uid === uid) c.featured = !c.featured;
-            return c;
-          });
-          loadCreatorsFeatured();
+    // 2. Featured placement loader
+    async function loadCreatorsFeatured() {
+      creatorsTable.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text-muted);">Loading creators...</td></tr>`;
+      creatorsList = [];
+      try {
+        const q = query(collection(db, "users"), where("role", "==", "creator"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(docSnap => {
+          creatorsList.push({ uid: docSnap.id, ...docSnap.data() });
         });
-      });
+      } catch (err) {
+        console.error("Error loading creators:", err);
+      }
+
+      if (creatorsList.length > 0) {
+        creatorsTable.innerHTML = creatorsList.map(c => `
+          <tr>
+            <td style="font-weight:700;">${c.displayName || 'Unknown'}</td>
+            <td><code>${c.phone || c.email || 'N/A'}</code></td>
+            <td style="text-transform:capitalize;">${c.creatorProfile?.plan || 'starter'}</td>
+            <td>
+              <button class="btn btn-secondary btn-sm toggle-feature-btn" data-uid="${c.uid}" data-featured="${c.featured === true}">
+                ${c.featured ? `<i class="fa-solid fa-star text-gradient"></i> Featured` : `<i class="fa-regular fa-star"></i> Feature Creator`}
+              </button>
+            </td>
+          </tr>
+        `).join("");
+
+        document.querySelectorAll(".toggle-feature-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const uid = btn.dataset.uid;
+            const currentFeatured = btn.dataset.featured === "true";
+            try {
+              btn.disabled = true;
+              await updateDoc(doc(db, "users", uid), { featured: !currentFeatured });
+              loadCreatorsFeatured();
+            } catch (err) {
+              alert("Error updating featured status: " + err.message);
+              btn.disabled = false;
+            }
+          });
+        });
+      } else {
+        creatorsTable.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text-muted);">No creators found.</td></tr>`;
+      }
     }
 
     // 3. Subscriptions loader
@@ -655,18 +666,25 @@
     }
 
     // 4. Users list management
-    function loadUsers() {
-      usersList = [
-        { uid: "u_1", displayName: "Elvis Yaounde", email: "elvis@domain.cm", phone: "+237 670 111 222", role: "viewer" },
-        { uid: "u_2", displayName: "Chevalier Ndole", email: "ndole@domain.cm", phone: "+237 677 123 456", role: "creator" },
-        { uid: "u_3", displayName: "Root Admin CM", email: "admin@monacam.cm", phone: "+237 699 999 999", role: "admin" }
-      ];
+    async function loadUsers() {
+      usersTable.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">Loading users...</td></tr>`;
+      usersList = [];
+      try {
+        const q = query(collection(db, "users"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(docSnap => {
+          usersList.push({ uid: docSnap.id, ...docSnap.data() });
+        });
+      } catch (err) {
+        console.error("Error loading users:", err);
+      }
 
-      usersTable.innerHTML = usersList.map(u => `
-        <tr>
-          <td style="font-weight:700;">${u.displayName}</td>
-          <td>${u.email}</td>
-          <td><code>${u.phone}</code></td>
+      if (usersList.length > 0) {
+        usersTable.innerHTML = usersList.map(u => `
+          <tr>
+            <td style="font-weight:700;">${u.displayName || 'Unknown'}</td>
+            <td>${u.email || 'N/A'}</td>
+            <td><code>${u.phone || 'N/A'}</code></td>
           <td>
             <select class="form-control role-select-dropdown" data-uid="${u.uid}" style="padding:6px 12px; font-size:12px; min-width:110px;">
               <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer</option>
@@ -681,31 +699,53 @@
       `).join("");
 
       document.querySelectorAll(".role-select-dropdown").forEach(select => {
-        select.addEventListener("change", (e) => {
+        select.addEventListener("change", async (e) => {
           const uid = select.dataset.uid;
           const role = e.target.value;
-          alert(`User Role updated for ${uid} to ${role}`);
+          try {
+            select.disabled = true;
+            await updateDoc(doc(db, "users", uid), { role });
+            alert(`User Role updated to ${role}`);
+          } catch (err) {
+            alert("Error updating role: " + err.message);
+          } finally {
+            select.disabled = false;
+          }
         });
       });
 
       document.querySelectorAll(".delete-user-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           const uid = btn.dataset.uid;
           if (confirm("Are you sure you want to delete this user?")) {
-            usersList = usersList.filter(u => u.uid !== uid);
-            loadUsers();
+            try {
+              btn.disabled = true;
+              await deleteDoc(doc(db, "users", uid));
+              loadUsers();
+            } catch (err) {
+              alert("Error deleting user: " + err.message);
+              btn.disabled = false;
+            }
           }
         });
       });
+    } else {
+      usersTable.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">No users found.</td></tr>`;
     }
+  }
 
     // 5. Financial volume loader
-    function loadRevenue() {
-      transactionsList = [
-        { id: "TX_01", buyer: "Elvis Yaounde", type: "Monthly Pass", amount: 2500, method: "mtn", date: "2026-06-12" },
-        { id: "TX_02", buyer: "Vanessa Ngoue", type: "Video: Ndole cooking", amount: 1500, method: "orange", date: "2026-06-15" },
-        { id: "TX_03", buyer: "Amadou Diallo", type: "Weekly Pass", amount: 1000, method: "mtn", date: "2026-06-16" }
-      ];
+    async function loadRevenue() {
+      transactionsList = [];
+      try {
+        const q = query(collection(db, "transactions"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(docSnap => {
+          transactionsList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+      } catch (err) {
+        console.error("Error loading transactions:", err);
+      }
 
       let totalVolume = 0;
       transactionsList.forEach(t => totalVolume += t.amount);
@@ -714,22 +754,27 @@
       revenueVolume.innerText = `${totalVolume.toLocaleString()} FCFA`;
       revenueAdminCut.innerText = `${adminCommission.toLocaleString()} FCFA`;
 
-      transactionsTable.innerHTML = transactionsList.map(tx => {
-        const adminShare = Math.floor(tx.amount * 0.2);
-        const creatorShare = Math.floor(tx.amount * 0.8);
-        return `
-          <tr>
-            <td><code>${tx.id}</code></td>
-            <td>${tx.buyer}</td>
-            <td>${tx.type}</td>
-            <td style="font-weight:700;">${tx.amount.toLocaleString()} FCFA</td>
-            <td style="color:var(--text-muted);">${adminShare.toLocaleString()} FCFA</td>
-            <td style="color:var(--primary); font-weight:700;">${creatorShare.toLocaleString()} FCFA</td>
-            <td><span style="text-transform:uppercase;">${tx.method}</span></td>
-            <td>${tx.date}</td>
-          </tr>
-        `;
-      }).join("");
+      if (transactionsList.length > 0) {
+        transactionsTable.innerHTML = transactionsList.map(tx => {
+          const amount = tx.amount || 0;
+          const adminShare = Math.floor(amount * 0.2);
+          const creatorShare = Math.floor(amount * 0.8);
+          return `
+            <tr>
+              <td><code>${tx.id}</code></td>
+              <td>${tx.buyer || 'Unknown'}</td>
+              <td>${tx.type || 'N/A'}</td>
+              <td style="font-weight:700;">${amount.toLocaleString()} FCFA</td>
+              <td style="color:var(--text-muted);">${adminShare.toLocaleString()} FCFA</td>
+              <td style="color:var(--primary); font-weight:700;">${creatorShare.toLocaleString()} FCFA</td>
+              <td><span style="text-transform:uppercase;">${tx.method || 'N/A'}</span></td>
+              <td>${tx.date || new Date().toISOString().split('T')[0]}</td>
+            </tr>
+          `;
+        }).join("");
+      } else {
+        transactionsTable.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">No transactions found.</td></tr>`;
+      }
     }
 
     // 6. Global settings managers
@@ -754,36 +799,26 @@
     }
 
     // Status helpers
-    function handleApprove(videoId) {
-      updateVideoStatus(videoId, "approved");
+    async function handleApprove(videoId) {
+      await updateVideoStatus(videoId, "approved");
       loadApprovalsQueue();
     }
 
-    function handleReject(videoId, reason) {
-      updateVideoStatus(videoId, "rejected", reason);
+    async function handleReject(videoId, reason) {
+      await updateVideoStatus(videoId, "rejected", reason);
       loadApprovalsQueue();
       rejectionModal.style.display = "none";
       rejectReasonInput.value = "";
     }
 
-    function updateVideoStatus(videoId, status, reason = "") {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith("uploads_")) {
-          let v = JSON.parse(localStorage.getItem(key)) || [];
-          let updated = false;
-          v = v.map(video => {
-            if (video.videoId === videoId) {
-              video.status = status;
-              if (status === "rejected") video.rejectionReason = reason;
-              updated = true;
-            }
-            return video;
-          });
-          if (updated) {
-            localStorage.setItem(key, JSON.stringify(v));
-          }
-        }
+    async function updateVideoStatus(videoId, status, reason = "") {
+      try {
+        const updateData = { status };
+        if (status === "rejected") updateData.rejectionReason = reason;
+        await updateDoc(doc(db, "videos", videoId), updateData);
+      } catch (err) {
+        console.error("Error updating video status:", err);
+        alert("Failed to update status: " + err.message);
       }
     }
 

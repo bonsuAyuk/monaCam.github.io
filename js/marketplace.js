@@ -193,10 +193,6 @@ async function loadVideos(isReset = false) {
       let q = collection(db, "videos");
       let conditions = [where("status", "==", "approved")];
 
-      if (currentCategory !== "all") {
-        conditions.push(where("category", "==", currentCategory));
-      }
-
       // Add ordering logic based on sort filter - BYPASSED to avoid Firestore Composite Index errors
       // We will fetch all matching videos (up to 50) and sort client-side.
       q = query(q, ...conditions, limit(50));
@@ -225,13 +221,21 @@ async function loadVideos(isReset = false) {
       console.error("Firestore error loading videos:", dbErr);
     }
 
-    // Client-side search filtering if currentSearch exists
-    if (currentSearch && videos.length > 0) {
-      videos = videos.filter(v => 
-        (v.title && v.title.toLowerCase().includes(currentSearch.toLowerCase())) ||
-        (v.description && v.description.toLowerCase().includes(currentSearch.toLowerCase())) ||
-        (v.creatorName && v.creatorName.toLowerCase().includes(currentSearch.toLowerCase()))
-      );
+    // Client-side filtering (Category & Search)
+    if (videos.length > 0) {
+      // Filter by category
+      if (currentCategory !== "all") {
+        videos = videos.filter(v => v.category === currentCategory);
+      }
+      
+      // Filter by search
+      if (currentSearch) {
+        videos = videos.filter(v => 
+          (v.title && v.title.toLowerCase().includes(currentSearch.toLowerCase())) ||
+          (v.description && v.description.toLowerCase().includes(currentSearch.toLowerCase())) ||
+          (v.creatorName && v.creatorName.toLowerCase().includes(currentSearch.toLowerCase()))
+        );
+      }
     }
 
     // Client-side sorting

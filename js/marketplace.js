@@ -128,18 +128,30 @@ async function loadFeaturedCreators() {
     // Attempt to read from Firestore
     let creators = [];
     try {
-      const q = query(
+      // First try to get manually featured creators
+      let q = query(
         collection(db, "users"), 
         where("role", "==", "creator"), 
         where("featured", "==", true), 
         limit(4)
       );
-      const snapshot = await getDocs(q);
+      let snapshot = await getDocs(q);
+      
+      // If none found, just grab any 4 creators to populate the section
+      if (snapshot.empty) {
+        q = query(
+          collection(db, "users"), 
+          where("role", "==", "creator"), 
+          limit(4)
+        );
+        snapshot = await getDocs(q);
+      }
+
       snapshot.forEach(doc => {
         const d = doc.data();
         creators.push({
           uid: d.uid || doc.id,
-          displayName: d.displayName,
+          displayName: d.displayName || "Unknown Creator",
           handle: d.creatorProfile?.handle || `@${(d.displayName || 'creator').toLowerCase().replace(/\s+/g, '')}`,
           subscribersCount: "0",
           videosCount: d.creatorProfile?.weeklyUploadCount || 0,
@@ -147,7 +159,25 @@ async function loadFeaturedCreators() {
         });
       });
     } catch (dbErr) {
-      console.warn("Firestore error loading featured creators:", dbErr);
+      console.warn("Featured creators query failed (possibly missing index), falling back to simple query...", dbErr);
+      // Fallback if composite index is missing
+      try {
+        const fallbackQ = query(collection(db, "users"), where("role", "==", "creator"), limit(4));
+        const fallbackSnap = await getDocs(fallbackQ);
+        fallbackSnap.forEach(doc => {
+          const d = doc.data();
+          creators.push({
+            uid: d.uid || doc.id,
+            displayName: d.displayName || "Unknown Creator",
+            handle: d.creatorProfile?.handle || `@${(d.displayName || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+            subscribersCount: "0",
+            videosCount: d.creatorProfile?.weeklyUploadCount || 0,
+            avatar: d.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
+          });
+        });
+      } catch (e) {
+        console.error("Complete failure loading creators:", e);
+      }
     }
 
     creators.forEach(creator => {

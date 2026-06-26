@@ -19,20 +19,22 @@
  * service cloud.firestore {
  *   match /databases/{database}/documents {
  *
- *     // Users: read/write own profile
+ *     // Users: Public can read to see featured creators
  *     match /users/{uid} {
- *       allow read, write: if request.auth != null && request.auth.uid == uid;
- *       // Admin can read all profiles
- *       allow read: if request.auth != null &&
- *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+ *       allow read: if true;
+ *       allow write: if request.auth != null && request.auth.uid == uid;
+ *       allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
  *     }
  *
- *     // Videos: public read; creator writes own; admin writes all
+ *     // Videos: Public read, anyone can increment views
  *     match /videos/{videoId} {
  *       allow read: if true;
  *       allow create: if request.auth != null;
+ *       // Allow anyone to update just the view counts
+ *       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'paidViews']);
+ *       // Creators and admins can update or delete fully
  *       allow update, delete: if request.auth != null && (
- *         resource.data.creatorUid == request.auth.uid ||
+ *         resource.data.creatorId == request.auth.uid ||
  *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
  *       );
  *     }

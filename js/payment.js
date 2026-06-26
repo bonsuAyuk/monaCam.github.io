@@ -13,7 +13,7 @@ import {
   db, doc, setDoc, collection, query, where, getDocs, orderBy,
 } from "./db-config.js";
 import {
-  uploadScreenshotToDrive, isUploadConfigured,
+  uploadScreenshotToImgBB,
 } from "./drive-upload.js";
 
 // ─────────────────────────────────────────────────────────────────
@@ -73,18 +73,12 @@ export async function submitPaymentRequest(opts) {
   let screenshotURL;
   let storageMethod;
 
-  if (isUploadConfigured()) {
-    try {
-      const result = await uploadScreenshotToDrive(screenshotFile, requestId);
-      screenshotURL = result.url; // Google Drive direct view URL
-      storageMethod = "google-drive";
-    } catch (driveErr) {
-      console.warn("Drive upload failed, using base64 fallback:", driveErr.message);
-      screenshotURL = await compressImageToBase64(screenshotFile);
-      storageMethod = "firestore-base64";
-    }
-  } else {
-    // Fallback: compress and store as base64 in Firestore
+  try {
+    const result = await uploadScreenshotToImgBB(screenshotFile);
+    screenshotURL = result.url; // ImgBB direct view URL
+    storageMethod = "imgbb";
+  } catch (err) {
+    console.warn("ImgBB upload failed, using base64 fallback:", err.message);
     screenshotURL = await compressImageToBase64(screenshotFile);
     storageMethod = "firestore-base64";
   }

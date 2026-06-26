@@ -35,7 +35,7 @@
         <span>Mona<span class="text-gradient">Cam</span></span>
       </a>
       <div class="nav-links">
-        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="exclusives.html" class="nav-link">Exclusives</a>
         <a href="pricing.html" class="nav-link">Pricing Plans</a>
         <span id="nav-dashboard-link-container"></span>
       </div>
@@ -398,7 +398,20 @@
         }
       }
 
-      const hasAccess = isAdmin || isCreator || hasPass || hasPPV || videoData.priceFCFA === 0;
+      let hasAccess = false;
+      if (videoData.isExclusive) {
+        hasAccess = isAdmin || isCreator || hasPPV;
+        if (currentUser && !isAdmin && !isCreator && videoData.exclusiveViewerId !== currentUser.uid) {
+          alert("This is an exclusive video for another user.");
+          window.location.href = "index.html";
+          return;
+        }
+        if (!currentUser) {
+          // Keep hasAccess false, they will hit logged out paywall
+        }
+      } else {
+        hasAccess = isAdmin || isCreator || hasPass || hasPPV || videoData.priceFCFA === 0;
+      }
       const source    = resolveVideoSource(videoData, hasAccess);
 
 

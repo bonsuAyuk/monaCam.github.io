@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Discover premium content from the best Cameroonian creators. Video marketplace supporting Mobile Money and Orange Money payments.">
-  <title>Creator Marketplace | Cameroon Monetization Platform</title>
+  <meta name="description" content="Discover premium content from the best Cameroonian creators. Video Exclusives supporting Mobile Money and Orange Money payments.">
+  <title>Creator Exclusives | Cameroon Monetization Platform</title>
   
   <!-- Styling Sheets -->
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages/marketplace.css">
+  <link rel="stylesheet" href="css/pages/exclusives.css">
   
   <!-- Font Awesome Icons for premium styling -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -67,16 +67,22 @@
   </section>
 
   <!-- Video Grid Section -->
-  <section class="videos-grid-section container">
-    <div class="video-grid" id="video-grid-container">
+  <main class="container animate-fade-in" style="min-height: 50vh; padding-bottom: 60px; padding-top: 20px;">
+    <div class="videos-grid" id="videos-grid">
       <!-- Cards rendered dynamically by JS -->
     </div>
     
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state" style="display: none; grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+      <i class="fa-solid fa-video-slash" style="font-size: 24px; margin-bottom: 16px;"></i>
+      <h3>No videos found</h3>
+      <p>Try adjusting your search or filters.</p>
+    </div>
+
     <!-- Infinite Scroll Trigger -->
-    <div class="infinite-scroll-trigger" id="infinite-scroll-trigger">
+    <div class="infinite-scroll-trigger" id="infinite-scroll-trigger" style="grid-column: 1/-1; text-align: center; padding: 20px;">
       <div class="spinner" id="loading-spinner"></div>
     </div>
-  </section>
 
   <!-- Featured Creators Section -->
   <section class="featured-creators-section container animate-fade-in" style="margin-top: 60px; margin-bottom: 60px;">
@@ -95,6 +101,7 @@
       </div>
     </div>
   </section>
+  </main>
 
   <!-- Footer -->
   <footer class="footer">
@@ -111,7 +118,7 @@
           <div>
             <h4 class="footer-col-title">Platform</h4>
             <div class="footer-col-links">
-              <a href="marketplace.html">Browse Marketplace</a>
+              <a href="exclusives.html">Browse Exclusives</a>
               <a href="pricing.html">Pricing Plans</a>
               <a href="register.html">Become a Creator</a>
             </div>
@@ -135,7 +142,7 @@
   </footer>
 
   <!-- Core Page Logic (ES Module) -->
-  <script type="module" src="js/marketplace.js"></script>
+  <script type="module" src="js/index.js"></script>
   <script src="js/nav.js"></script>
 </body>
 </html>

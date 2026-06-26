@@ -24,7 +24,7 @@
       </a>
       
       <div class="nav-links">
-        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="exclusives.html" class="nav-link">Exclusives</a>
         <a href="pricing.html" class="nav-link">Pricing Plans</a>
       </div>
       
@@ -45,6 +45,9 @@
         </div>
         <div class="sidebar-menu-item" data-tab="upload">
           <i class="fa-solid fa-cloud-arrow-up"></i> Upload Video
+        </div>
+        <div class="sidebar-menu-item" data-tab="requests">
+          <i class="fa-solid fa-envelope-open-text"></i> Custom Requests
         </div>
         <div class="sidebar-menu-item" data-tab="videos">
           <i class="fa-solid fa-clapperboard"></i> My Videos
@@ -198,6 +201,21 @@
               </div>
             </div>
 
+            <!-- Exclusive Video Options -->
+            <div class="form-group" style="background:rgba(255,107,107,0.05); padding:16px; border-radius:12px; border:1px solid rgba(255,107,107,0.2);">
+              <label class="form-label" style="display:flex; align-items:center; cursor:pointer;">
+                <input type="checkbox" id="is-exclusive-checkbox" style="margin-right:10px; width:18px; height:18px; accent-color:var(--primary);">
+                <strong>Make this an Exclusive Custom Video</strong>
+              </label>
+              
+              <div id="exclusive-request-dropdown-container" style="display:none; margin-top:16px;">
+                <label for="exclusive-request-select" class="form-label">Link to Accepted Request</label>
+                <select id="exclusive-request-select" class="form-control">
+                  <option value="">Select an accepted custom request...</option>
+                </select>
+              </div>
+            </div>
+
             <!-- Video File Picker -->
             <div class="form-group">
               <label class="form-label">
@@ -249,6 +267,38 @@
               <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit for Review
             </button>
           </form>
+        </div>
+      </section>
+
+      <!-- Custom Requests Panel -->
+      <section class="dashboard-panel" id="panel-requests">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Custom Video Requests</h2>
+            <p>Manage incoming exclusive video requests from your superfans.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Viewer</th>
+                  <th>Request Description</th>
+                  <th>Offered Price</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="custom-requests-table">
+                <!-- Dynamically filled by JS -->
+                <tr>
+                  <td colspan="5" style="text-align:center; padding: 24px; color: var(--text-muted);">Loading requests...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -339,6 +389,23 @@
               <i class="fa-solid fa-paper-plane"></i> Send to Wallet
             </button>
           </form>
+        </div>
+      </section>
+
+      <!-- UPGRADE / PENDING PANEL -->
+      <section class="dashboard-panel" id="panel-upgrade">
+        <div style="max-width: 600px; margin: 40px auto; text-align: center; background: var(--bg-secondary); padding: 40px; border-radius: 12px; border: 1px solid var(--card-border);">
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,107,107,0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 24px;">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h2 style="font-size: 24px; margin-bottom: 16px; color: var(--text-primary);">Account Pending Activation</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
+            Your creator profile has been created, but your subscription is currently inactive or pending verification. 
+            To unlock uploads and financial features, please select a plan and complete your payment.
+          </p>
+          <a href="pricing.html" class="btn btn-primary" style="padding: 12px 32px; font-size: 16px; text-decoration: none; display: inline-block;">
+            View Pricing Plans
+          </a>
         </div>
       </section>
 

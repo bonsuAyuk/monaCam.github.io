@@ -26,7 +26,7 @@
  *       allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
  *     }
  *
- *     // Videos: Public read, anyone can increment views
+ *     // Videos: Public read for non-exclusive. Exclusive read only for creator, admin, or the designated viewer.
  *     match /videos/{videoId} {
  *       allow read: if true;
  *       allow create: if request.auth != null;
@@ -56,6 +56,21 @@
  *       allow read: if true;
  *       allow write: if request.auth != null &&
  *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+ *     }
+ *
+ *     // Custom Requests: viewer or creator can read; viewer creates; creator updates status
+ *     match /customRequests/{requestId} {
+ *       allow read: if request.auth != null && (
+ *         resource.data.viewerId == request.auth.uid ||
+ *         resource.data.creatorId == request.auth.uid ||
+ *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+ *       );
+ *       allow create: if request.auth != null && request.resource.data.viewerId == request.auth.uid;
+ *       allow update: if request.auth != null && (
+ *         resource.data.creatorId == request.auth.uid ||
+ *         resource.data.viewerId == request.auth.uid ||
+ *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+ *       );
  *     }
  *   }
  * }

@@ -11,7 +11,7 @@
  */
 import {
   db, auth, onAuthStateChanged,
-  doc, getDoc, setDoc,
+  doc, getDoc, setDoc, updateDoc,
   collection, query, where, getDocs, limit
 } from "./db-config.js";
 import {
@@ -126,9 +126,108 @@ function setupAuthObserver() {
 
     updateDashboardUI();
     await fetchCreatorContent();
+    await fetchCustomRequests();
     await fetchCategories();
     setupUploadFormHandler();
   });
+}
+
+// ── Fetch Custom Requests ───────────────────────────────────────
+async function fetchCustomRequests() {
+  const table = document.getElementById("custom-requests-table");
+  if (!table) return;
+
+  try {
+    const q = query(
+      collection(db, "customRequests"),
+      where("creatorId", "==", currentUser.uid)
+    );
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      table.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-muted);">No custom requests yet.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    const exclusiveSelect = document.getElementById("exclusive-request-select");
+    let optionsHtml = '<option value="">Select an accepted custom request...</option>';
+
+    snap.forEach(docSnap => {
+      const r = docSnap.data();
+      const reqId = docSnap.id;
+      
+      let statusColor = "var(--text-secondary)";
+      if (r.status === "accepted") {
+        statusColor = "var(--success)";
+        optionsHtml += `<option value="${reqId}" data-viewer="${r.viewerId}" data-price="${r.offeredPriceFCFA}">${r.viewerName} - ${r.description.substring(0,30)}...</option>`;
+      }
+      if (r.status === "rejected") statusColor = "var(--danger)";
+      if (r.status === "completed") statusColor = "var(--primary)";
+
+      let actionButtons = "";
+      if (r.status === "pending") {
+        actionButtons = `
+          <button class="btn btn-primary btn-sm accept-req" data-id="${reqId}" style="margin-right:8px; margin-bottom: 4px;">Accept</button>
+          <button class="btn btn-secondary btn-sm negotiate-req" data-id="${reqId}" style="margin-right:8px; margin-bottom: 4px; background:var(--bg-tertiary);">Negotiate</button>
+          <button class="btn btn-secondary btn-sm reject-req" data-id="${reqId}" style="margin-bottom: 4px; color:var(--danger);">Reject</button>
+        `;
+      } else if (r.status === "accepted") {
+        actionButtons = `<span style="font-size:12px;">Link video in Upload tab</span>`;
+      }
+
+      html += `
+        <tr>
+          <td style="font-weight:600;">${r.viewerName}</td>
+          <td style="max-width:300px; white-space:normal;">${r.description}</td>
+          <td style="font-family:var(--font-display); font-weight:700;">${r.offeredPriceFCFA.toLocaleString()} FCFA</td>
+          <td style="color:${statusColor}; font-weight:bold; text-transform:uppercase; font-size:12px;">${r.status}</td>
+          <td>${actionButtons}</td>
+        </tr>
+      `;
+    });
+    table.innerHTML = html;
+    if (exclusiveSelect) exclusiveSelect.innerHTML = optionsHtml;
+
+    // Add event listeners for accept/reject
+    document.querySelectorAll(".accept-req").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        if (confirm("Accept this request for " + e.target.parentElement.previousElementSibling.previousElementSibling.innerText + "?")) {
+          e.target.innerHTML = "Wait...";
+          await updateDoc(doc(db, "customRequests", id), { status: "accepted" });
+          fetchCustomRequests(); // Refresh
+        }
+      });
+    });
+
+    document.querySelectorAll(".negotiate-req").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        const newPrice = prompt("Enter your counter-offer price in FCFA:");
+        if (newPrice && !isNaN(newPrice)) {
+          e.target.innerHTML = "Wait...";
+          await updateDoc(doc(db, "customRequests", id), { offeredPriceFCFA: Number(newPrice) });
+          fetchCustomRequests(); // Refresh
+        }
+      });
+    });
+
+    document.querySelectorAll(".reject-req").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        if (confirm("Reject this request?")) {
+          e.target.innerHTML = "Wait...";
+          await updateDoc(doc(db, "customRequests", id), { status: "rejected" });
+          fetchCustomRequests(); // Refresh
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error("Error fetching custom requests:", error);
+    table.innerHTML = `<tr><td colspan="5" style="color:var(--danger); text-align:center;">Failed to load requests.</td></tr>`;
+  }
 }
 
 // ── Fetch Categories from DB ────────────────────────────────────
@@ -358,7 +457,15 @@ function hideProgress() {
 
 // ── Upload Form Handler ─────────────────────────────────────────
 function setupUploadFormHandler() {
-  uploadForm.addEventListener("submit", async (e) => {
+    const isExclusiveCheckbox = document.getElementById("is-exclusive-checkbox");
+    const exclusiveDropdown = document.getElementById("exclusive-request-dropdown-container");
+    if (isExclusiveCheckbox && exclusiveDropdown) {
+      isExclusiveCheckbox.addEventListener("change", (e) => {
+        exclusiveDropdown.style.display = e.target.checked ? "block" : "none";
+      });
+    }
+
+    uploadForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     uploadErrorAlert.style.display  = "none";
     uploadSuccessAlert.style.display = "none";
@@ -379,8 +486,20 @@ function setupUploadFormHandler() {
 
     const title       = document.getElementById("video-title").value.trim();
     const description = document.getElementById("video-desc").value.trim();
-    const price       = parseInt(document.getElementById("video-price").value) || 0;
+    const price       = Number(document.getElementById("video-price").value);
     const category    = document.getElementById("video-category").value;
+
+    const isExclusive = document.getElementById("is-exclusive-checkbox")?.checked || false;
+    const exclusiveSelect = document.getElementById("exclusive-request-select");
+    let exclusiveViewerId = null;
+    let exclusiveRequestId = null;
+
+    if (isExclusive && exclusiveSelect && exclusiveSelect.value) {
+      exclusiveRequestId = exclusiveSelect.value;
+      const selectedOption = exclusiveSelect.options[exclusiveSelect.selectedIndex];
+      exclusiveViewerId = selectedOption.dataset.viewer;
+    }
+
     const videoFile   = videoFileInput?.files[0];
     const thumbFile   = thumbFileInput?.files[0];
 
@@ -437,9 +556,20 @@ function setupUploadFormHandler() {
         duration:    selectedVideoDuration,
         views:     0,
         createdAt: today.toISOString(),
+        isExclusive: isExclusive,
+        exclusiveViewerId: exclusiveViewerId,
+        exclusiveRequestId: exclusiveRequestId
       };
 
       await setDoc(doc(db, "videos", videoId), newVideo);
+
+      if (isExclusive && exclusiveRequestId) {
+        // Mark request as completed
+        await updateDoc(doc(db, "customRequests", exclusiveRequestId), {
+          status: "completed",
+          videoId: videoId
+        });
+      }
 
       showProgress("Upload complete!", 100, "Your video is pending admin approval. Note: Google Drive may take 5-30 mins to process the video for streaming.");
 

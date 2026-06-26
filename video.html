@@ -338,7 +338,7 @@
 
     // ── Resolve the correct video source URL ─────────────────────
     function resolveVideoSource(video, hasFullAccess) {
-      const driveId = video.driveVideoId;
+      const driveId = video.driveFileId || video.driveVideoId;
       const isRealDriveId = driveId &&
         driveId !== "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE" &&
         driveId.length > 10;
@@ -649,25 +649,46 @@
     }
 
     // ── Related videos ────────────────────────────────────────────
-    function loadRelatedVideos() {
+    async function loadRelatedVideos() {
       const container = document.getElementById("related-videos-list");
-      const related = Object.entries(MOCK_VIDEOS).filter(([id]) => id !== videoId);
-      if (!related.length) {
-        container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
-        return;
-      }
-      container.innerHTML = related.map(([id, v]) => `
-        <div class="related-card" onclick="window.location.href='video.html?id=${id}'" role="button" tabindex="0">
-          <img src="${v.thumbnail}" class="related-thumb" alt="${v.title}" loading="lazy">
-          <div class="related-details">
-            <h4 class="related-title">${v.title}</h4>
-            <div class="related-creator">${v.creatorName}</div>
-            <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">
-              ${v.priceFCFA.toLocaleString()} FCFA
+      try {
+        const q = query(
+          collection(db, "videos"),
+          where("status", "==", "approved"),
+          // limit(4) - Client side limiting for simplicity given index limitations
+        );
+        const snapshot = await getDocs(q);
+        let related = [];
+        snapshot.forEach(doc => {
+          if (doc.id !== videoId) {
+            related.push({ id: doc.id, ...doc.data() });
+          }
+        });
+        
+        // Take up to 4 random or newest ones
+        related = related.slice(0, 4);
+
+        if (!related.length) {
+          container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
+          return;
+        }
+
+        container.innerHTML = related.map(v => `
+          <div class="related-card" onclick="window.location.href='video.html?id=${v.id}'" role="button" tabindex="0">
+            <img src="${v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80'}" class="related-thumb" alt="${v.title}" loading="lazy">
+            <div class="related-details">
+              <h4 class="related-title">${v.title}</h4>
+              <div class="related-creator">${v.creatorName}</div>
+              <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">
+                ${v.priceFCFA.toLocaleString()} FCFA
+              </div>
             </div>
           </div>
-        </div>
-      `).join("");
+        `).join("");
+      } catch (e) {
+        console.error("Error loading related videos:", e);
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
+      }
     }
   </script>
 </body>

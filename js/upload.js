@@ -15,7 +15,7 @@ import {
   collection, query, where, getDocs, limit
 } from "./db-config.js";
 import {
-  uploadVideoToDrive, uploadThumbnailToDrive, isUploadConfigured
+  uploadVideoToDrive, uploadThumbnailToDrive, uploadThumbnailToImgBB, isUploadConfigured
 } from "./drive-upload.js";
 
 // ── State ───────────────────────────────────────────────────────
@@ -525,9 +525,9 @@ function setupUploadFormHandler() {
         showProgress("Uploading video...", Math.round(pct * 0.7), "This may take a moment for larger files.");
       });
 
-      // ── Upload thumbnail to Google Drive ───────────────────
+      // 📸 Upload thumbnail to ImgBB (Free, unbreakable hosting)
       showProgress("Uploading thumbnail...", 70, "Almost there...");
-      const thumbResult = await uploadThumbnailToDrive(thumbFile, videoId, (pct) => {
+      const thumbResult = await uploadThumbnailToImgBB(thumbFile, (pct) => {
         showProgress("Uploading thumbnail...", 70 + Math.round(pct * 0.2), "Almost there...");
       });
 

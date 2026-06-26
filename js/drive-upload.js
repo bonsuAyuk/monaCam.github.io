@@ -273,11 +273,54 @@ export async function uploadVideoToDrive(file, videoId, onProgress) {
 
 /**
  * Upload a thumbnail image (auto-compressed).
+ * (Legacy Drive upload - replaced by ImgBB to prevent 403s)
  */
 export async function uploadThumbnailToDrive(file, videoId, onProgress) {
   return uploadToDrive({
     file, uploadType: "thumbnail", fileId: videoId,
     onProgress, compress: true,
+  });
+}
+
+/**
+ * Upload a thumbnail image to ImgBB (Free Image Hosting API).
+ * Replaces Google Drive for thumbnails to prevent 403 hotlinking issues.
+ */
+export async function uploadThumbnailToImgBB(file, onProgress) {
+  // TODO: Replace with your own free ImgBB API Key (https://api.imgbb.com/)
+  const IMGBB_API_KEY = "8d2f70ebfdbb7713374246ed3f79e8de";
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      onProgress && onProgress(50);
+      try {
+        const base64Data = reader.result.split(',')[1];
+        const formData = new FormData();
+        formData.append("key", IMGBB_API_KEY);
+        formData.append("image", base64Data);
+
+        const res = await fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          onProgress && onProgress(100);
+          resolve({
+            url: json.data.url,       // Direct image URL
+            fileId: json.data.id      // ImgBB ID
+          });
+        } else {
+          reject(new Error("ImgBB upload failed: " + json.error.message));
+        }
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = error => reject(error);
   });
 }
 

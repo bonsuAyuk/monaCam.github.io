@@ -17,9 +17,19 @@ document.addEventListener("DOMContentLoaded", () => {
       // Viewer is visiting a specific creator to request a video
       await loadCreatorProfile(creatorId, user);
     } else {
-      // Viewer is viewing their hub
-      await loadMyRequests(user);
-      await loadMyExclusiveVideos(user);
+      const userRole = localStorage.getItem("userRole");
+      if (userRole === "creator") {
+        document.getElementById("my-requests-section").style.display = "none";
+        const titleElement = document.querySelector("#my-exclusive-videos-section .section-title");
+        if (titleElement) {
+          titleElement.innerHTML = '<i class="fa-solid fa-lock text-gradient"></i> Exclusive Videos I Uploaded';
+        }
+        document.getElementById("hub-desc").innerText = "View all the exclusive videos you have fulfilled and uploaded.";
+        await loadMyExclusiveVideos(user, true); // true = isCreator
+      } else {
+        await loadMyRequests(user);
+        await loadMyExclusiveVideos(user, false);
+      }
     }
   });
 
@@ -169,15 +179,25 @@ async function loadMyRequests(currentUser) {
   }
 }
 
-async function loadMyExclusiveVideos(currentUser) {
+async function loadMyExclusiveVideos(currentUser, isCreator = false) {
   const grid = document.getElementById("exclusive-videos-grid");
   
   try {
-    const q = query(
-      collection(db, "videos"),
-      where("exclusiveViewerId", "==", currentUser.uid),
-      where("isExclusive", "==", true)
-    );
+    let q;
+    if (isCreator) {
+      q = query(
+        collection(db, "videos"),
+        where("creatorId", "==", currentUser.uid),
+        where("isExclusive", "==", true)
+      );
+    } else {
+      q = query(
+        collection(db, "videos"),
+        where("exclusiveViewerId", "==", currentUser.uid),
+        where("isExclusive", "==", true)
+      );
+    }
+    
     const snap = await getDocs(q);
     
     if (snap.empty) {

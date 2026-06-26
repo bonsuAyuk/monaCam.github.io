@@ -9,8 +9,11 @@
     const authActions = document.getElementById("auth-nav-actions");
     const exclusivesLink = document.querySelector('a.nav-link[href="exclusives.html"]');
     
+    const mobileExclusivesLink = document.querySelector('a.mobile-nav-link[href="exclusives.html"]');
+    
     if (user) {
       if (exclusivesLink) exclusivesLink.style.display = "inline-block";
+      if (mobileExclusivesLink) mobileExclusivesLink.style.display = "block";
       const role = localStorage.getItem("userRole") || "viewer";
       let url = "viewer-dashboard.html";
       if (role === "creator") url = "creator-dashboard.html";
@@ -22,6 +25,7 @@
       `;
     } else {
       if (exclusivesLink) exclusivesLink.style.display = "none";
+      if (mobileExclusivesLink) mobileExclusivesLink.style.display = "none";
       if (dashboardLink) dashboardLink.innerHTML = "";
       if (authActions) authActions.innerHTML = `
         <a href="login.html" class="btn btn-ghost">Log In</a>
@@ -40,6 +44,9 @@
       a.href = link.href;
       a.className = "mobile-nav-link";
       a.innerHTML = `<i class="${link.icon}"></i> ${link.label}`;
+      if (link.label === "Exclusives") {
+        a.style.display = "none"; // Hidden by default, unhidden by updateNavAuthUI
+      }
       // Highlight active page
       if (window.location.pathname.endsWith(link.href)) {
         a.style.color = "var(--primary)";

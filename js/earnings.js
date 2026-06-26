@@ -39,14 +39,6 @@ const withdrawAmountInput = document.getElementById("withdraw-amount");
 const withdrawProviderSelect = document.getElementById("withdraw-provider");
 const withdrawPhoneInput = document.getElementById("withdraw-phone");
 
-// Prefilled Mock Database data (merges with user items)
-const MOCK_SALES_TX = [
-  { id: "TX_NDOLE_1", type: "Video Sale: Cook perfect Ndole", amount: 1500, date: "2026-06-10T12:00:00Z", method: "mtn" },
-  { id: "TX_NDOLE_2", type: "Video Sale: Cook perfect Ndole", amount: 1500, date: "2026-06-14T15:30:00Z", method: "orange" },
-  { id: "TX_NDOLE_3", type: "Video Sale: Cook perfect Ndole", amount: 1500, date: "2026-06-15T09:15:00Z", method: "mtn" },
-  { id: "TX_BIKUT_1", type: "Video Sale: Bikutsi Guitar Basics", amount: 2500, date: "2026-06-17T18:45:00Z", method: "orange" },
-  { id: "TX_SHARE_1", type: "Viewer Pass Commission Split", amount: 8000, date: "2026-06-01T00:00:00Z", method: "mtn" }
-];
 
 document.addEventListener("DOMContentLoaded", () => {
   setupAuthObserver();
@@ -111,47 +103,53 @@ function updateSidebarUI() {
 }
 
 // Calculate metrics and populate tables
-function loadEarningsData() {
+async function loadEarningsData() {
   // Reset counters
   totalGrossRevenue = 0;
   totalNetRevenue = 0;
   
-  // Retrieve gross sales logs
-  const salesLog = [...MOCK_SALES_TX];
-  
-  // Merge customized uploaded videos checkout counts
-  const userUploads = JSON.parse(localStorage.getItem(`uploads_${currentUser.uid}`)) || [];
-  
-  // Calculate mock sales counts for custom uploads
-  const performanceBreakdown = [
-    { title: "How to Cook Perfect Cameroonian Ndole", price: 1500, views: 1240, salesCount: 3, earnings: 4500 },
-    { title: "Bikutsi Rhythm Guitar Basics", price: 2500, views: 45, salesCount: 1, earnings: 2500 }
-  ];
+  let salesLog = [];
+  let performanceBreakdown = [];
 
-  userUploads.forEach(video => {
-    // Generate mock views and sales for local display purposes
-    const mockViews = Math.floor(Math.random() * 80) + 12;
-    const mockSales = Math.floor(mockViews * 0.15); // 15% conversion rate
-    const gross = mockSales * video.priceFCFA;
+  // Fetch real videos for this creator
+  try {
+    const q = query(
+      collection(db, "videos"),
+      where("creatorId", "==", currentUser.uid),
+      where("status", "==", "approved")
+    );
+    const snapshot = await getDocs(q);
+    
+    snapshot.forEach(docSnap => {
+      const video = docSnap.data();
+      const views = video.views || 0;
+      const price = video.priceFCFA || 0;
+      
+      // For now, assuming 1 view = 1 sale to generate real-time metrics based on live views
+      const salesCount = views; 
+      const gross = salesCount * price;
 
-    performanceBreakdown.push({
-      title: video.title,
-      price: video.priceFCFA,
-      views: mockViews,
-      salesCount: mockSales,
-      earnings: gross
-    });
-
-    if (gross > 0) {
-      salesLog.push({
-        id: "TX_" + Math.random().toString(36).substring(2, 9).toUpperCase(),
-        type: `Video Sale: ${video.title}`,
-        amount: gross,
-        date: video.createdAt || new Date().toISOString(),
-        method: "mtn"
+      performanceBreakdown.push({
+        title: video.title,
+        price: price,
+        views: views,
+        salesCount: salesCount,
+        earnings: gross
       });
-    }
-  });
+
+      if (gross > 0) {
+        salesLog.push({
+          id: "TX_" + docSnap.id.substring(0, 8).toUpperCase(),
+          type: `Video Sale: ${video.title}`,
+          amount: gross,
+          date: video.createdAt || new Date().toISOString(),
+          method: "momo"
+        });
+      }
+    });
+  } catch (err) {
+    console.error("Error loading real earnings from Firestore:", err);
+  }
 
   // Calculate gross, monthly splits
   const now = new Date();

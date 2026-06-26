@@ -625,58 +625,53 @@
     }
 
     // 3. Subscriptions loader
-    function loadSubscriptions() {
-      subscriptionsList = [
-        { id: "sub_01", username: "Elvis Yaounde", email: "elvis@domain.cm", type: "Monthly Viewer Pass", start: "2026-06-01", end: "2026-07-01", status: "active" },
-        { id: "sub_02", username: "Vanessa Ngoue", email: "vanessa@domain.cm", type: "Weekly Viewer Pass", start: "2026-06-15", end: "2026-06-22", status: "active" },
-        { id: "sub_03", username: "Chevalier Ndole", email: "ndole@domain.cm", type: "Starter Creator Plan", start: "2026-05-10", end: "2026-06-10", status: "expired" }
-      ];
-
-      subscriptionsTable.innerHTML = subscriptionsList.map(sub => {
-        const badgeClass = sub.status === "active" ? "badge badge-success" : "badge";
-        return `
-          <tr>
-            <td>
-              <div style="font-weight:700;">${sub.username}</div>
-              <div style="font-size:11px; color:var(--text-muted);">${sub.email}</div>
-            </td>
-            <td>${sub.type}</td>
-            <td>${sub.start}</td>
-            <td>${sub.end}</td>
-            <td><span class="${badgeClass}">${sub.status}</span></td>
-            <td style="display:flex; gap:8px;">
-              ${sub.status === 'active' 
-                ? `<button class="btn btn-secondary btn-sm cancel-sub-btn" data-id="${sub.id}" style="color:var(--error); border-color:rgba(255,23,68,0.25);">Cancel</button>`
-                : `<button class="btn btn-secondary btn-sm extend-sub-btn" data-id="${sub.id}">Reactivate</button>`}
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      document.querySelectorAll(".cancel-sub-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.id;
-          subscriptionsList = subscriptionsList.map(s => {
-            if (s.id === id) s.status = "expired";
-            return s;
-          });
-          loadSubscriptions();
+    async function loadSubscriptions() {
+      subscriptionsList = [];
+      try {
+        const q = query(collection(db, "users"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(docSnap => {
+          const user = docSnap.data();
+          if (user.plan && user.plan !== "none") {
+            subscriptionsList.push({
+              id: docSnap.id,
+              username: user.displayName || "Unknown",
+              email: user.email || "N/A",
+              type: user.plan === "starter" ? "Starter Creator Plan" : user.plan === "premium" ? "Premium Creator Plan" : user.plan,
+              start: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
+              end: "Active",
+              status: "active"
+            });
+          }
         });
-      });
+      } catch (err) {
+        console.error("Error loading subscriptions:", err);
+      }
 
-      document.querySelectorAll(".extend-sub-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.id;
-          subscriptionsList = subscriptionsList.map(s => {
-            if (s.id === id) {
-              s.status = "active";
-              s.end = "2026-07-22"; // Extend
-            }
-            return s;
-          });
-          loadSubscriptions();
-        });
-      });
+      if (subscriptionsList.length > 0) {
+        subscriptionsTable.innerHTML = subscriptionsList.map(sub => {
+          const badgeClass = sub.status === "active" ? "badge badge-success" : "badge";
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:700;">${sub.username}</div>
+                <div style="font-size:11px; color:var(--text-muted);">${sub.email}</div>
+              </td>
+              <td>${sub.type}</td>
+              <td>${sub.start}</td>
+              <td>${sub.end}</td>
+              <td><span class="${badgeClass}">${sub.status}</span></td>
+              <td style="display:flex; gap:8px;">
+                ${sub.status === 'active' 
+                  ? `<button class="btn btn-secondary btn-sm" disabled style="opacity:0.5;">Cancel</button>`
+                  : `<button class="btn btn-secondary btn-sm" disabled style="opacity:0.5;">Reactivate</button>`}
+              </td>
+            </tr>
+          `;
+        }).join("");
+      } else {
+        subscriptionsTable.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">No active subscriptions found.</td></tr>`;
+      }
     }
 
     // 4. Users list management
@@ -815,6 +810,7 @@
     // Status helpers
     async function handleApprove(videoId) {
       await updateVideoStatus(videoId, "approved");
+      alert("Video approved! Note: If the video was recently uploaded, Google Drive may still take a few minutes to process it for streaming.");
       loadApprovalsQueue();
     }
 

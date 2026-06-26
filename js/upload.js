@@ -423,7 +423,7 @@ function setupUploadFormHandler() {
 
       await setDoc(doc(db, "videos", videoId), newVideo);
 
-      showProgress("Upload complete!", 100, "Your video is pending admin approval.");
+      showProgress("Upload complete!", 100, "Your video is pending admin approval. Note: Google Drive may take 5-30 mins to process the video for streaming.");
 
       uploadSuccessAlert.style.display = "flex";
       uploadForm.reset();

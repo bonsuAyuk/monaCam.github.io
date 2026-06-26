@@ -124,16 +124,7 @@
             <button class="btn btn-secondary" id="post-comment-btn">Post</button>
           </div>
           <div class="comments-list" id="comments-list">
-            <div class="comment-item">
-              <div class="comment-avatar" style="background-image:url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80);"></div>
-              <div class="comment-body">
-                <div class="comment-header">
-                  <span class="comment-username">Elvis Yaounde</span>
-                  <span class="comment-date">1 day ago</span>
-                </div>
-                <p class="comment-text">Super helpful content, worth every franc!</p>
-              </div>
-            </div>
+            <p style="color:var(--text-muted); font-size:13px; text-align:center; padding: 20px 0;">No comments yet. Be the first to comment!</p>
           </div>
         </div>
       </section>
@@ -303,37 +294,6 @@
     let selectedProvider = "MTN";
     const videoId = new URLSearchParams(window.location.search).get("id") || "vid_1";
 
-    // ── Mock video catalog (replace with Firestore queries in production)
-    // driveVideoId: paste the Google Drive file ID or full share URL
-    const MOCK_VIDEOS = {
-      "vid_1": {
-        title: "How to Cook Perfect Cameroonian Ndole",
-        description: "The ultimate guide to preparing Ndole with bitterleaves, groundnuts, beef, and prawns — cooked the authentic way. Perfect for any occasion.",
-        priceFCFA: 1500,
-        category: "Culinary",
-        views: 1240,
-        creatorName: "Chevalier Ndole",
-        thumbnail: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=800&q=80",
-        // ← Replace with your actual Google Drive file ID or share URL:
-        driveVideoId: "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE",
-        // Fallback direct video URL (used if driveVideoId is a placeholder):
-        fallbackUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        previewUrl:  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-        previewSeconds: 30,
-      },
-      "vid_2": {
-        title: "La Famille Camerounaise — Episode 5 (Comedy)",
-        description: "Hilarious home jokes that everyone in Cameroon knows too well. Share with family!",
-        priceFCFA: 500,
-        category: "Comedy",
-        views: 4890,
-        creatorName: "Murielle Comedy",
-        thumbnail: "https://images.unsplash.com/photo-1516280440614-37939bbacd6a?auto=format&fit=crop&w=800&q=80",
-        driveVideoId: "PASTE_YOUR_GOOGLE_DRIVE_FILE_ID_HERE",
-        fallbackUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        previewUrl:  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-        previewSeconds: 30,
-      },
     };
 
     // ── Resolve the correct video source URL ─────────────────────
@@ -396,8 +356,6 @@
         }
       } catch (err) {
         console.error("Error loading video from Firestore:", err);
-        // Fallback for UI testing if Firestore is unavailable
-        videoData = MOCK_VIDEOS[videoId] || Object.values(MOCK_VIDEOS)[0];
       }
 
       document.getElementById("video-title").innerText        = videoData.title || "Untitled";

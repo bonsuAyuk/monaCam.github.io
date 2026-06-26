@@ -209,33 +209,44 @@ export async function getAllPaymentRequests(status) {
 // ─────────────────────────────────────────────────────────────────
 export async function approvePaymentRequest(requestId) {
   const reqRef = doc(db, "paymentRequests", requestId);
-
+  
   await setDoc(reqRef,
     { status: "approved", reviewedAt: new Date().toISOString() },
     { merge: true }
   );
 
-  // Handle automatic plan upgrades for creators
+  // Handle automatic plan upgrades for BOTH viewers and creators
   try {
     const snap = await getDoc(reqRef);
     if (snap.exists()) {
       const data = snap.data();
       const type = data.type;
+      
+      const userRef = doc(db, "users", data.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        let updates = {};
 
-      if (type === "starter_creator" || type === "premium_creator") {
-        const newPlan = type === "premium_creator" ? "premium" : "starter";
-        const userRef = doc(db, "users", data.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
+        if (type === "starter_creator" || type === "premium_creator") {
+          const newPlan = type === "premium_creator" ? "premium" : "starter";
           let updatedProfile = userData.creatorProfile || {};
           updatedProfile.plan = newPlan;
-
-          await updateDoc(userRef, {
+          
+          updates = {
+            plan: newPlan,
             creatorProfile: updatedProfile,
-            role: "creator" // Ensure they have the creator role
-          });
+            role: "creator"
+          };
+        } else if (type === "weekly" || type === "monthly") {
+          // If they are a creator, don't accidentally downgrade their role, just update their active viewer plan.
+          // For simplicity in the admin dashboard, we update their top-level plan attribute.
+          updates = { plan: type };
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await updateDoc(userRef, updates);
         }
       }
     }

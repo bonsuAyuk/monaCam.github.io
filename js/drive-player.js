@@ -61,12 +61,14 @@ export class DrivePlayer {
    *   previewSeconds {number}   - How many seconds the preview lasts (default 30)
    *   watermarkText  {string}   - Text shown on the watermark
    *   onPreviewEnd   {function} - Called when preview time is up
+   *   onPlay         {function} - Called when user clicks the play overlay
    */
   constructor(container, options = {}) {
     this.container      = container;
     this.previewSeconds = options.previewSeconds || 30;
     this.watermarkText  = options.watermarkText  || "MonaCam";
     this.onPreviewEnd   = options.onPreviewEnd   || (() => {});
+    this.onPlay         = options.onPlay         || null;
 
     this._previewTimer   = null;
     this._elapsed        = 0;
@@ -92,8 +94,38 @@ export class DrivePlayer {
       this._loadVideoElement(source, hasFullAccess);
     }
 
-    if (!hasFullAccess) {
-      this._startPreviewTimer();
+    this._showPlayOverlay();
+  }
+
+  // ── Explicit Play Overlay ─────────────────────────────────────
+  _showPlayOverlay() {
+    let overlay = this.container.querySelector(".drive-play-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "drive-play-overlay";
+      overlay.innerHTML = `<i class="fa-solid fa-play" style="font-size:48px; color:white; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8));"></i>`;
+      overlay.style.cssText = `
+        position: absolute; inset: 0; z-index: 20;
+        background: rgba(0,0,0,0.3);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        backdrop-filter: blur(2px);
+        transition: opacity 0.2s ease;
+      `;
+      this.container.appendChild(overlay);
+      
+      overlay.addEventListener("click", () => {
+        overlay.style.opacity = "0";
+        setTimeout(() => overlay.remove(), 200);
+        
+        if (this.onPlay) this.onPlay();
+        if (this._isPreviewMode) {
+          this._startPreviewTimer();
+        }
+        
+        const video = this.container.querySelector("video");
+        if (video) video.play().catch(() => {});
+      });
     }
   }
 

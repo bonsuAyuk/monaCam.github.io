@@ -106,18 +106,20 @@ export async function submitPaymentRequest(opts) {
 
   // Send email notification silently in the background
   try {
-    // IMPORTANT: Change this to your actual admin email address
-    const adminEmail = "bonsufr@gmail.com";
+    // IMPORTANT: Get a free Access Key from https://web3forms.com and paste it here
+    const WEB3FORMS_ACCESS_KEY = "310d3af6-753f-402b-af95-8c175ffe5d37";
 
-    if (adminEmail !== "bonsufr@gmail.com") {
-      fetch(`https://formsubmit.co/ajax/${adminEmail}`, {
+    if (WEB3FORMS_ACCESS_KEY !== "YOUR_ACCESS_KEY_HERE" && WEB3FORMS_ACCESS_KEY.length > 10) {
+      fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          _subject: `New Payment Request: ${amount} FCFA`,
+          access_key: WEB3FORMS_ACCESS_KEY,
+          from_name: "MonaCam Notifications",
+          subject: `New Payment Request: ${amount} FCFA`,
           message: `A new payment request (${requestId}) was submitted by ${displayName} for a ${type} pass.`,
           amount: `${amount} FCFA`,
           sender_phone: phone,

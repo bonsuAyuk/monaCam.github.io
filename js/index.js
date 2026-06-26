@@ -1,4 +1,4 @@
-import { db, auth, onAuthStateChanged, collection, query, orderBy, limit, getDocs, getDoc, doc, where } from "./db-config.js";
+import { db, auth, onAuthStateChanged, collection, query, orderBy, limit, getDocs, getDoc, doc, where, startAfter } from "./db-config.js";
 
 let lastVisible = null;
 let currentSort = "newest";
@@ -133,6 +133,10 @@ async function loadVideos(reset = false) {
     if (currentSort === "price-high") constraints.push(orderBy("priceFCFA", "desc"));
 
     constraints.push(limit(30)); // Increased limit slightly to account for client-side filtering
+
+    if (lastVisible && !reset) {
+      constraints.push(startAfter(lastVisible));
+    }
 
     const q = query(videosRef, ...constraints);
     const snapshot = await getDocs(q);

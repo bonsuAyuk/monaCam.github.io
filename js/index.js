@@ -33,10 +33,51 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadVideos(true);
   });
 
-  // Filters setup
-  document.getElementById("sort-filter")?.addEventListener("change", (e) => {
-    currentSort = e.target.value;
+  // Filters setup - Custom Dropdown Logic
+  function setupDropdown(wrapperId, triggerId, optionsId, onSelect) {
+    const wrapper = document.getElementById(wrapperId);
+    const trigger = document.getElementById(triggerId);
+    const optionsContainer = document.getElementById(optionsId);
+    if (!wrapper || !trigger || !optionsContainer) return;
+    
+    const textSpan = trigger.querySelector('.custom-select-text');
+    
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Close others
+      document.querySelectorAll('.custom-select.open').forEach(el => {
+        if (el !== trigger) el.classList.remove('open');
+      });
+      trigger.classList.toggle('open');
+    });
+    
+    optionsContainer.addEventListener('click', (e) => {
+      const option = e.target.closest('.custom-option');
+      if (!option) return;
+      if (option.id === 'loading-categories-text') return; // prevent selecting loader
+      
+      optionsContainer.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+      textSpan.textContent = option.textContent;
+      trigger.classList.remove('open');
+      
+      onSelect(option.dataset.value);
+    });
+  }
+
+  setupDropdown('sort-wrapper', 'sort-trigger', 'sort-options', (val) => {
+    currentSort = val;
     loadVideos(true);
+  });
+
+  setupDropdown('categories-wrapper', 'categories-trigger', 'categories-options', (val) => {
+    currentCategory = val;
+    loadVideos(true);
+  });
+  
+  // Close dropdowns on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.custom-select.open').forEach(el => el.classList.remove('open'));
   });
   
   document.getElementById("search-bar")?.addEventListener("input", debounce((e) => {
@@ -48,8 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
     currentCategory = "all";
     currentSearch = "";
     document.getElementById("search-bar").value = "";
-    const catList = document.getElementById("categories-list");
-    if (catList) catList.value = "all";
+    
+    const catOptions = document.getElementById("categories-options");
+    if (catOptions) {
+      catOptions.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+      const allOpt = catOptions.querySelector('[data-value="all"]');
+      if (allOpt) allOpt.classList.add('selected');
+      const textSpan = document.querySelector('#categories-trigger .custom-select-text');
+      if (textSpan) textSpan.textContent = "All Content";
+    }
     loadVideos(true);
   });
 
@@ -61,24 +109,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 200));
 });
 
-// Category dropdown listener
-document.getElementById("categories-list")?.addEventListener("change", (e) => {
-  currentCategory = e.target.value;
-  loadVideos(true);
-});
+// (Old Category dropdown listener removed)
 
 async function fetchCategories() {
   try {
     const snap = await getDocs(collection(db, "categories"));
     if (!snap.empty) {
-      const list = document.getElementById("categories-list");
+      const list = document.getElementById("categories-options");
       if (!list) return;
-      let html = '<option value="all">All Content</option>';
+      let html = '<div class="custom-option selected" data-value="all">All Content</div>';
       snap.forEach(doc => {
         const cat = doc.data();
-        html += `<option value="${doc.id}">${cat.name}</option>`;
+        html += `<div class="custom-option" data-value="${doc.id}">${cat.name}</div>`;
       });
       list.innerHTML = html;
+      
+      // Keep selected state if category was pre-selected
+      if (currentCategory !== "all") {
+        list.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+        const activeOpt = list.querySelector(`[data-value="${currentCategory}"]`);
+        if (activeOpt) {
+          activeOpt.classList.add('selected');
+          document.querySelector('#categories-trigger .custom-select-text').textContent = activeOpt.textContent;
+        }
+      }
     }
   } catch(e) { console.error(e); }
 }

@@ -66,7 +66,8 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json; charset=UTF-8',
           'Content-Length': Buffer.byteLength(metadataString),
-          'X-Upload-Content-Type': mimeType
+          'X-Upload-Content-Type': mimeType,
+          'Origin': req.headers.origin || 'https://bonsuayuk.github.io'
         }
       };
 

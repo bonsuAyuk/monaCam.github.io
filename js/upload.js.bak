@@ -500,69 +500,8 @@ function setupUploadFormHandler() {
     }
 
     const videoFile   = videoFileInput?.files[0];
-    const thumbFile   = thumbFileInput?.files[0];\n
-    if (!videoFile) {
-      uploadErrorMsg.innerText = "Please select a video file to upload.";
-      uploadErrorAlert.style.display = "flex";
-      return;
-    }
-    if (!thumbFile) {
-      uploadErrorMsg.innerText = "Please select a thumbnail image.";
-      uploadErrorAlert.style.display = "flex";
-      return;
-    }
+    const thumbFile   = thumbFileInput?.files[0];
 
-    const submitBtn = document.getElementById("upload-submit-btn");
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...`;
-
-    const videoId = "v_" + Math.random().toString(36).substring(2, 11);
-
-    try {
-      // ── Upload video to Google Drive ───────────────────────
-      showProgress("Uploading video...", 0, "Please keep this page open.");
-      const videoResult = await uploadVideoToDrive(videoFile, videoId, (pct) => {
-        showProgress("Uploading video...", Math.round(pct * 0.7), "This may take a moment for larger files.");
-      });
-
-      // 🖼️ Upload thumbnail to Google Drive
-      showProgress("Uploading thumbnail...", 70, "Almost there...");
-      const thumbResult = await uploadThumbnailToDrive(thumbFile, videoId, (pct) => {
-        showProgress("Uploading thumbnail...", 70 + Math.round(pct * 0.2), "Almost there...");
-      });
-
-      // ── Save metadata to Firestore ─────────────────────────
-      showProgress("Saving metadata...", 92, "Finalizing...");
-
-      const today     = new Date();
-      const weekToken = `${today.getFullYear()}-${getWeekNumber(today)}`;
-
-      const newVideo = {
-        videoId,
-        creatorId:   currentUser.uid,
-        creatorName: userProfile.displayName,
-        title,
-        description,
-        priceFCFA:   price,
-        category,
-        status:      "pending",
-        driveFileId:   videoResult.fileId,   // Google Drive video file ID
-        driveEmbedUrl: videoResult.embedUrl, // Embed URL for the player
-        thumbnailUrl:  thumbResult.url,      // Direct view URL for thumbnail
-        thumbDriveId:  thumbResult.fileId,   // Thumbnail Drive file ID
-        weeklyUploadWeekToken: weekToken,
-        duration:    selectedVideoDuration,
-        views:     0,
-        createdAt: today.toISOString(),
-        isExclusive: isExclusive,
-        exclusiveViewerId: exclusiveViewerId,
-        exclusiveRequestId: exclusiveRequestId
-      };
-
-      await setDoc(doc(db, "videos", videoId), newVideo);
-
-      if (isExclusive && exclusiveRequestId) {
-        // Mark request as completed
         await updateDoc(doc(db, "customRequests", exclusiveRequestId), {
           status: "completed",
           videoId: videoId

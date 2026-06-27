@@ -130,79 +130,18 @@ export async function uploadThumbnailToDrive(file, videoId, onProgress) {
  * Upload a thumbnail image to ImgBB (Free Image Hosting API).
  */
 export async function uploadThumbnailToImgBB(file, onProgress) {
-  const IMGBB_API_KEY = "8d2f70ebfdbb7713374246ed3f79e8de";
-
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-      onProgress && onProgress(50);
-      try {
-        const base64Data = reader.result.split(',')[1];
-        const formData = new FormData();
-        formData.append("key", IMGBB_API_KEY);
-        formData.append("image", base64Data);
-
-        const res = await fetch("https://api.imgbb.com/1/upload", {
-          method: "POST",
-          body: formData
-        });
-
-        const json = await res.json();
-        if (json.success) {
-          onProgress && onProgress(100);
-          resolve({
-            url: json.data.url,       // Direct image URL
-            fileId: json.data.id      // ImgBB ID
-          });
-        } else {
-          reject(new Error("ImgBB upload failed: " + json.error.message));
-        }
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = error => reject(error);
-  });
+  // Redirect to Google Drive to bypass broken ImgBB keys
+  return uploadThumbnailToDrive(file, null, onProgress);
 }
 
 /**
  * Upload a payment screenshot to ImgBB.
  */
 export async function uploadScreenshotToImgBB(file, onProgress) {
-  const IMGBB_API_KEY = "8d2f70ebfdbb7713374246ed3f79e8de";
-
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-      onProgress && onProgress(50);
-      try {
-        const base64Data = reader.result.split(',')[1];
-        const formData = new FormData();
-        formData.append("key", IMGBB_API_KEY);
-        formData.append("image", base64Data);
-
-        const res = await fetch("https://api.imgbb.com/1/upload", {
-          method: "POST",
-          body: formData
-        });
-
-        const json = await res.json();
-        if (json.success) {
-          onProgress && onProgress(100);
-          resolve({
-            url: json.data.url,
-            fileId: json.data.id
-          });
-        } else {
-          reject(new Error("ImgBB upload failed: " + json.error.message));
-        }
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = error => reject(error);
+  // Redirect to Google Drive to bypass broken ImgBB keys
+  return uploadToDrive({
+    file, uploadType: "screenshot", fileId: null,
+    onProgress, compress: false,
   });
 }
 

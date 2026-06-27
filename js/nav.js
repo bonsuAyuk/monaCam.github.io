@@ -20,6 +20,15 @@
       if (role === "admin") url = "admin-dashboard.html";
       
       if (dashboardLink) dashboardLink.innerHTML = `<a href="${url}" class="nav-link">Dashboard</a>`;
+      
+      const mDashLinks = document.querySelectorAll('.mobile-nav-link');
+      mDashLinks.forEach(a => {
+        if (a.textContent.includes("Dashboard")) {
+          a.style.display = "block";
+          a.href = url;
+        }
+      });
+
       if (authActions) authActions.innerHTML = `
         <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> My Profile</a>
       `;
@@ -48,6 +57,14 @@
       if (exclusivesLink) exclusivesLink.style.display = "none";
       if (mobileExclusivesLink) mobileExclusivesLink.style.display = "none";
       if (dashboardLink) dashboardLink.innerHTML = "";
+      
+      const mDashLinks = document.querySelectorAll('.mobile-nav-link');
+      mDashLinks.forEach(a => {
+        if (a.textContent.includes("Dashboard")) {
+          a.style.display = "none";
+        }
+      });
+
       if (authActions) authActions.innerHTML = `
         <a href="login.html" class="btn btn-ghost">Log In</a>
         <a href="register.html" class="btn btn-primary">Join as Creator</a>
@@ -75,7 +92,7 @@
       a.href = link.href;
       a.className = "mobile-nav-link";
       a.innerHTML = `<i class="${link.icon}"></i> ${link.label}`;
-      if (link.label === "Exclusives") {
+      if (link.label === "Exclusives" || link.label === "Dashboard") {
         a.style.display = "none"; // Hidden by default, unhidden by updateNavAuthUI
       }
       // Highlight active page
@@ -121,6 +138,7 @@
     ).map(function (el) {
       return { href: el.getAttribute("href"), label: el.textContent.trim(), icon: "fa-solid fa-link" };
     });
+    desktopLinks.push({ href: "#", label: "Dashboard", icon: "fa-solid fa-gauge" });
 
     // Map icon names
     const iconMap = {

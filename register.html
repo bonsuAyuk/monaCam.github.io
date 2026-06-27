@@ -163,6 +163,12 @@
         nameGroup.style.display = "none";
         phoneGroup.style.display = "none";
         
+        // Remove required attributes so form can submit without them
+        document.getElementById("reg-email").removeAttribute("required");
+        document.getElementById("reg-password").removeAttribute("required");
+        document.getElementById("reg-name").removeAttribute("required");
+        document.getElementById("reg-phone").removeAttribute("required");
+        
         // Show creator fields automatically
         creatorFields.style.display = "block";
       } else {

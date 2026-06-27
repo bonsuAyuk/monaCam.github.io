@@ -5,12 +5,12 @@
  */
 (function () {
   window.performLogout = function() {
-    import("./js/auth.js").then(function(module) {
+    import("./auth.js").then(function(module) {
       module.signOutUser();
     }).catch(function(err) {
       console.error("Logout dynamic import error:", err);
       // Direct fallback just in case
-      import("./js/db-config.js").then(function(dbModule) {
+      import("./db-config.js").then(function(dbModule) {
         dbModule.signOut(dbModule.auth).then(function() {
           window.location.href = "index.html";
         });

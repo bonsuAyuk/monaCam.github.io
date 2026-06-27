@@ -345,6 +345,16 @@
       document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category || 'Uncategorized'}`;
       document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${(videoData.views || 0).toLocaleString()} views`;
       document.getElementById("ppv-price-label").innerText    = `${(videoData.priceFCFA || 0).toLocaleString()} FCFA`;
+      
+      let dateStr = "Unknown";
+      if (videoData.createdAt) {
+        const d = videoData.createdAt.toDate ? videoData.createdAt.toDate() : new Date(videoData.createdAt);
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        dateStr = `${yy}-${mm}-${dd}`;
+      }
+      document.getElementById("video-upload-date").innerHTML = `<i class="fa-solid fa-calendar"></i> ${dateStr}`;
 
       const previewSec = videoData.previewSeconds || 30;
       document.getElementById("preview-limit-text").innerText = `${previewSec} seconds`;
@@ -372,7 +382,7 @@
 
       // Init DrivePlayer (handles both Drive and regular video)
       drivePlayer = new DrivePlayer(wrapper, {
-        previewSeconds: videoData.previewSeconds || 30,
+        previewSeconds: videoData.isExclusive ? 0 : (videoData.previewSeconds || 30),
         watermarkText:  "MonaCam",
         onPreviewEnd:   () => currentUser ? showLockedPaywall() : showLoggedOutPaywall(),
         onPlay:         () => trackView(hasAccess)
@@ -413,10 +423,15 @@
 
 
 
-      document.getElementById("preview-mode-bar").style.display = hasAccess ? "none" : "flex";
+      if (videoData.isExclusive) {
+        document.getElementById("preview-mode-bar").style.display = "none";
+      } else {
+        document.getElementById("preview-mode-bar").style.display = hasAccess ? "none" : "flex";
+      }
+      
       document.getElementById("pending-notice").style.display   = hasPending ? "flex" : "none";
 
-      if (!hasAccess && hasPending) {
+      if (!hasAccess && hasPending && !videoData.isExclusive) {
         // Show "your payment is being reviewed" instead of aggressive paywall
         document.getElementById("preview-mode-bar").style.display = "flex";
       }
@@ -677,6 +692,7 @@
   </script>
 </body>
 </html>
+
 
 
 

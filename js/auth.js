@@ -57,6 +57,20 @@ export async function signUpUser(email, password, displayName, phoneNumber, role
 /**
  * Login user and retrieve their role.
  */
+export async function upgradeToCreator(uid, bio) {
+  const { updateDoc } = await import("./db-config.js");
+  const userRef = doc(db, "users", uid);
+  await updateDoc(userRef, {
+    role: "creator",
+    creatorProfile: {
+      plan: "none",
+      bio: bio || "Welcome to my creator profile!",
+      featured: false,
+      weeklyUploadCount: 0
+    }
+  });
+}
+
 export async function signInUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -118,3 +132,4 @@ export function observeAuthState(callback) {
     }
   });
 }
+

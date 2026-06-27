@@ -24,11 +24,13 @@
       </a>
       
       <div class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
         <a href="exclusives.html" class="nav-link" style="display: none;">Exclusives</a>
         <a href="pricing.html" class="nav-link">Pricing Plans</a>
+        <span id="nav-dashboard-link-container"></span>
       </div>
       
-      <div class="nav-actions">
+      <div class="nav-actions" id="auth-nav-actions">
         <a href="login.html" class="btn btn-ghost">Log In</a>
         <a href="register.html" class="btn btn-primary">Join as Creator</a>
       </div>
@@ -113,9 +115,12 @@
 
   <!-- Module Script Execution -->
   <script type="module">
-    import { signUpUser } from "./js/auth.js";
+    import { signUpUser, upgradeToCreator } from "./js/auth.js";
+    import { auth, onAuthStateChanged } from "./js/db-config.js";
 
     let selectedRole = "viewer";
+    let isUpgrading = false;
+    let currentUser = null;
 
     const roleViewerCard = document.getElementById("role-viewer");
     const roleCreatorCard = document.getElementById("role-creator");
@@ -125,8 +130,49 @@
     const successAlert = document.getElementById("auth-success-alert");
     const errorMsg = document.getElementById("auth-error-msg");
 
+    // Upgrade elements
+    const pageTitle = document.querySelector(".auth-title");
+    const pageSubtitle = document.querySelector(".auth-subtitle");
+    const roleToggleContainer = document.querySelector(".role-toggle-container");
+    const roleToggleLabel = document.querySelector(".form-label");
+    const emailGroup = document.getElementById("reg-email").parentElement;
+    const passGroup = document.getElementById("reg-password").parentElement;
+    const nameGroup = document.getElementById("reg-name").parentElement;
+    const phoneGroup = document.getElementById("reg-phone").parentElement;
+
+    // Observe Auth State
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        if (window.updateNavAuthUI) window.updateNavAuthUI(user);
+        
+        // We are upgrading!
+        isUpgrading = true;
+        selectedRole = "creator";
+        
+        // Update texts
+        pageTitle.innerText = "Become a Creator";
+        pageSubtitle.innerText = "Upgrade your account to publish and earn money.";
+        document.querySelector("button[type='submit']").innerText = "Upgrade Account";
+        
+        // Hide irrelevant fields
+        roleToggleContainer.style.display = "none";
+        roleToggleLabel.style.display = "none";
+        emailGroup.style.display = "none";
+        passGroup.style.display = "none";
+        nameGroup.style.display = "none";
+        phoneGroup.style.display = "none";
+        
+        // Show creator fields automatically
+        creatorFields.style.display = "block";
+      } else {
+        if (window.updateNavAuthUI) window.updateNavAuthUI(null);
+      }
+    });
+
     // Toggle Role Actions
     roleViewerCard.addEventListener("click", () => {
+      if (isUpgrading) return;
       selectedRole = "viewer";
       roleViewerCard.classList.add("selected");
       roleCreatorCard.classList.remove("selected");
@@ -134,6 +180,7 @@
     });
 
     roleCreatorCard.addEventListener("click", () => {
+      if (isUpgrading) return;
       selectedRole = "creator";
       roleCreatorCard.classList.add("selected");
       roleViewerCard.classList.remove("selected");
@@ -146,25 +193,31 @@
       errorAlert.style.display = "none";
       successAlert.style.display = "none";
 
-      const name = document.getElementById("reg-name").value;
-      const email = document.getElementById("reg-email").value;
-      const phone = document.getElementById("reg-phone").value;
-      const password = document.getElementById("reg-password").value;
-
       try {
-        const user = await signUpUser(email, password, name, phone, selectedRole);
-        
-        // Save role details locally for fast UI routing before full DB checks
-        localStorage.setItem("userRole", selectedRole);
-
-        successAlert.style.display = "flex";
-        setTimeout(() => {
-          if (selectedRole === "creator") {
-            window.location.href = "creator-dashboard.html";
-          } else {
-            window.location.href = "viewer-dashboard.html";
-          }
-        }, 1500);
+        if (isUpgrading) {
+           const bio = document.getElementById("creator-bio").value;
+           await upgradeToCreator(currentUser.uid, bio);
+           localStorage.setItem("userRole", "creator");
+           successAlert.querySelector('span').innerText = "Account upgraded successfully! Redirecting...";
+           successAlert.style.display = "flex";
+           setTimeout(() => { window.location.href = "creator-dashboard.html"; }, 1500);
+        } else {
+           const name = document.getElementById("reg-name").value;
+           const email = document.getElementById("reg-email").value;
+           const phone = document.getElementById("reg-phone").value;
+           const password = document.getElementById("reg-password").value;
+           
+           const user = await signUpUser(email, password, name, phone, selectedRole);
+           localStorage.setItem("userRole", selectedRole);
+           successAlert.style.display = "flex";
+           setTimeout(() => {
+             if (selectedRole === "creator") {
+               window.location.href = "creator-dashboard.html";
+             } else {
+               window.location.href = "viewer-dashboard.html";
+             }
+           }, 1500);
+        }
       } catch (error) {
         let displayError = error.message;
         if (displayError.includes("email-already-in-use")) {

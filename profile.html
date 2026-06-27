@@ -64,6 +64,72 @@
           <input type="tel" id="prof-phone" class="form-control">
         </div>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Update your profile and Mobile Money payout settings.">
+  <title>Account Settings | MonaCam</title>
+  
+  <!-- Styling Sheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">C</div>
+        <span>Mona<span class="text-gradient">Cam</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="exclusives.html" class="nav-link" style="display: none;">Exclusives</a>
+        <a href="pricing.html" class="nav-link">Pricing Plans</a>
+        <span id="nav-dashboard-link-container"></span>
+      </div>
+      
+      <div class="nav-actions">
+        <button id="logout-nav-btn" class="btn btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Log Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content Workspace -->
+  <main class="container" style="padding: 60px 24px; max-width:680px;">
+    <div class="card glass animate-fade-in" style="border-radius:24px;">
+      
+      <h2 style="font-family:var(--font-display); font-size:28px; font-weight:800; margin-bottom:8px;">Account Profile Settings</h2>
+      <p style="color:var(--text-secondary); font-size:14px; margin-bottom:32px;">Manage details for your channel subscription payouts and authentication options.</p>
+
+      <!-- Alert indicators -->
+      <div class="auth-alert auth-alert-success" id="settings-success-alert" style="margin-bottom:24px;">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Profile configurations updated successfully!</span>
+      </div>
+
+      <form id="profile-settings-form">
+        <div class="form-group">
+          <label for="prof-name" class="form-label">Full Name</label>
+          <input type="text" id="prof-name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-email" class="form-label">Email Address</label>
+          <input type="email" id="prof-email" class="form-control" disabled>
+          <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Email address cannot be changed self-service.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-phone" class="form-label">Contact Phone Number</label>
+          <input type="tel" id="prof-phone" class="form-control">
+        </div>
+
         <!-- Custom Avatar selector url -->
         <div class="form-group">
           <label for="prof-avatar" class="form-label">Profile Avatar Image URL</label>
@@ -71,7 +137,7 @@
         </div>
 
         <!-- Payment details box (Momo/OM configuration) -->
-        <div style="border-top:1px solid var(--card-border); margin:32px 0; padding-top:24px;">
+        <div id="disbursement-wallet-section" style="border-top:1px solid var(--card-border); margin:32px 0; padding-top:24px; display:none;">
           <h3 style="font-family:var(--font-display); font-size:18px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-money-bill-transfer text-gradient"></i> Mobile Money Disbursement Wallet
           </h3>
@@ -99,7 +165,7 @@
     </div>
   </main>
 
-  <!-- Profile controller logic module -->
+    <!-- Profile controller logic module -->
   <script type="module">
     import { auth, onAuthStateChanged, db, doc, setDoc, getDoc } from "./js/db-config.js";
     import { signOutUser } from "./js/auth.js";
@@ -139,9 +205,14 @@
         const dashboardLink = document.getElementById("nav-dashboard-link-container");
         const role = localStorage.getItem("userRole") || "viewer";
         let url = "viewer-dashboard.html";
-        if (role === "creator") url = "creator-dashboard.html";
+        
+        if (role === "creator") {
+          url = "creator-dashboard.html";
+          document.getElementById("disbursement-wallet-section").style.display = "block";
+        }
+        
         if (role === "admin") url = "admin-dashboard.html";
-        dashboardLink.innerHTML = `<a href="${url}" class="nav-link">Dashboard</a>`;
+        dashboardLink.innerHTML = <a href="" class="nav-link">Dashboard</a>;
 
         // Load Firestore user doc
         try {
@@ -153,63 +224,42 @@
           console.warn("Firestore error loading profile settings. Reading from local profile.");
         }
 
-        if (!userProfile) {
-          userProfile = {
-            displayName: user.displayName || "Chevalier Ndole",
-            email: user.email,
-            phoneNumber: "+237 677 123 456",
-            photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80",
-            creatorProfile: {
-              paymentDetails: {
-                provider: "MTN",
-                number: "+237 677 123 456"
-              }
-            }
-          };
-        }
-
-        prefillForm();
+        populateForm();
       });
     }
 
-    function prefillForm() {
-      nameInput.value = userProfile.displayName || "";
-      emailInput.value = userProfile.email || "";
-      phoneInput.value = userProfile.phoneNumber || "";
-      avatarInput.value = userProfile.photoURL || "";
+    function populateForm() {
+      if (!currentUser) return;
       
-      const payDetails = userProfile.creatorProfile?.paymentDetails || {};
-      providerSelect.value = payDetails.provider || "MTN";
-      walletNumInput.value = payDetails.number || "";
+      nameInput.value = userProfile?.displayName || currentUser.displayName || "";
+      emailInput.value = currentUser.email || "";
+      phoneInput.value = userProfile?.phone || "";
+      avatarInput.value = userProfile?.photoURL || "";
+
+      // Load wallet configuration
+      if (userProfile?.payoutWallet) {
+        providerSelect.value = userProfile.payoutWallet.provider || "MTN";
+        walletNumInput.value = userProfile.payoutWallet.number || "";
+      }
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       successAlert.style.display = "none";
-
+      
       const updatedProfile = {
         displayName: nameInput.value,
-        phoneNumber: phoneInput.value,
+        phone: phoneInput.value,
         photoURL: avatarInput.value,
-        creatorProfile: {
-          ...userProfile.creatorProfile,
-          paymentDetails: {
-            provider: providerSelect.value,
-            number: walletNumInput.value
-          }
-        }
+        payoutWallet: {
+          provider: providerSelect.value,
+          number: walletNumInput.value
+        },
+        updatedAt: new Date().toISOString()
       };
 
       try {
-        // Write to Firestore
-        try {
-          await setDoc(doc(db, "users", currentUser.uid), updatedProfile, { merge: true });
-        } catch (dbErr) {
-          console.warn("Firestore save failed. Simulating local update.");
-        }
-
-        // Cache update locally
-        userProfile = { ...userProfile, ...updatedProfile };
+        await setDoc(doc(db, "users", currentUser.uid), updatedProfile, { merge: true });
         
         successAlert.style.display = "flex";
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -218,9 +268,9 @@
       }
     });
   </script>
-  <script src="js/nav.js"></script>
 </body>
 </html>
+
 
 
 

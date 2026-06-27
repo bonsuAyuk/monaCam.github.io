@@ -194,14 +194,30 @@ export async function getUserPaymentRequests(uid) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-// ADMIN: Get all payment requests
-// ─────────────────────────────────────────────────────────────────
 export async function getAllPaymentRequests(status) {
   const constraints = [orderBy("createdAt", "desc")];
   if (status) constraints.unshift(where("status", "==", status));
-  const snap = await getDocs(query(collection(db, "paymentRequests"), ...constraints));
-  return snap.docs.map((d) => d.data());
+  
+  // Now fetching from the automatic 'transactions' collection used by Vercel / SebPay
+  const snap = await getDocs(query(collection(db, "transactions"), ...constraints));
+  
+  return snap.docs.map((d) => {
+    const data = d.data();
+    // Map the new SebPay transaction fields to what the admin dashboard expects
+    return {
+      requestId: data.id || d.id,
+      uid: data.userId,
+      email: data.userId, // We might not have email directly in tx, use ID
+      displayName: "User ID: " + (data.userId || "").substring(0, 8),
+      type: data.planId,
+      amount: data.amount,
+      provider: data.operator,
+      phone: data.phone,
+      screenshotURL: "", // No screenshot for automatic payments
+      status: data.status,
+      createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate().toISOString() : new Date(data.createdAt._seconds * 1000).toISOString()) : new Date().toISOString()
+    };
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────

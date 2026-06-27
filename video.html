@@ -99,6 +99,7 @@
           <div class="video-info-meta">
             <span id="video-views-count"><i class="fa-solid fa-eye"></i> 0 views</span>
             <span id="video-category"><i class="fa-solid fa-tag"></i> —</span>
+            <span id="video-duration" style="display:none;"><i class="fa-solid fa-clock"></i> <span id="duration-text"></span></span>
             <span id="video-upload-date"><i class="fa-solid fa-calendar"></i> —</span>
           </div>
           <div class="video-creator-widget">
@@ -347,6 +348,20 @@
 
       const previewSec = videoData.previewSeconds || 30;
       document.getElementById("preview-limit-text").innerText = `${previewSec} seconds`;
+      
+      if (videoData.isExclusive) {
+        // Hide views and comments for exclusive videos
+        const viewsEl = document.getElementById("video-views-count");
+        if (viewsEl) viewsEl.style.display = 'none';
+        
+        const commentsSection = document.querySelector(".comments-section");
+        if (commentsSection) commentsSection.style.display = 'none';
+        
+        // Show duration
+        const durationEl = document.getElementById("video-duration");
+        if (durationEl) durationEl.style.display = 'inline-block';
+        document.getElementById("duration-text").innerText = videoData.duration || "Unknown";
+      }
 
       checkAndInitPlayer();
     }

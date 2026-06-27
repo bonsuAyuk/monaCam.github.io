@@ -163,72 +163,42 @@
     <div class="card glass" style="width: 100%; max-width: 440px; background:var(--bg-secondary); border-color:var(--card-hover-border); padding:24px; max-height:90vh; overflow-y:auto;">
       <h3 style="margin-bottom:12px; font-family:var(--font-display);" id="checkout-title">Purchase Plan Pass</h3>
       
-      <!-- STEP 1: Instructions -->
+      <!-- SebPay Automatic Checkout -->
       <div id="checkout-step-1">
-        <p style="color:var(--text-secondary); font-size:13px; margin-bottom:24px;" id="checkout-subtitle">Please make a manual transfer to one of our official numbers below.</p>
+        <p style="color:var(--text-secondary); font-size:13px; margin-bottom:24px;" id="checkout-subtitle">Pay securely via Mobile Money. Your plan will be activated automatically.</p>
         
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-          <div style="font-weight: bold; margin-bottom: 8px;">MTN Mobile Money</div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: monospace; font-size: 16px;" id="official-mtn-number">+237 670 000 000</span>
-            <span style="color: var(--text-muted); font-size: 12px;" id="official-mtn-name">Platform Admin</span>
+        <div style="text-align: center; margin-bottom: 24px; font-weight: bold; font-size: 24px;">
+          <span id="checkout-amount-display" style="color: var(--primary);"></span>
+        </div>
+
+        <form id="sebpay-checkout-form">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="checkout-operator" class="form-label">Select Operator</label>
+            <select id="checkout-operator" class="form-control" required style="padding: 12px; width: 100%; border-radius: 8px; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color);">
+              <option value="MTN">MTN Mobile Money</option>
+              <option value="ORANGE">Orange Money</option>
+            </select>
           </div>
-        </div>
 
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-          <div style="font-weight: bold; margin-bottom: 8px;">Orange Money</div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: monospace; font-size: 16px;" id="official-orange-number">+237 690 000 000</span>
-            <span style="color: var(--text-muted); font-size: 12px;" id="official-orange-name">Platform Admin</span>
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label for="checkout-sender-phone" class="form-label">Phone Number</label>
+            <input type="tel" id="checkout-sender-phone" class="form-control" placeholder="6XX XXX XXX" required style="padding: 12px; width: 100%; border-radius: 8px; background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">Do not include +237, just the 9 digit number.</div>
           </div>
-        </div>
 
-        <div style="text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 18px;">
-          Amount to Pay: <span id="checkout-amount-display" style="color: var(--primary);"></span>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:12px;">
-          <button type="button" id="close-checkout-btn" class="btn btn-secondary btn-sm">Cancel</button>
-          <button type="button" id="btn-next-step" class="btn btn-primary btn-sm">I have made the transfer</button>
-        </div>
+          <div style="display:flex; justify-content:flex-end; gap:12px;">
+            <button type="button" id="close-checkout-btn" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="submit-checkout-btn" class="btn btn-primary">Pay Now</button>
+          </div>
+        </form>
       </div>
 
-      <!-- STEP 2: Proof Upload -->
-      <form id="checkout-step-2" style="display: none;">
-        <p style="color:var(--text-secondary); font-size:13px; margin-bottom:24px;">Upload your payment screenshot and provide your details to verify the transaction.</p>
-        
-        <div class="form-group">
-          <label for="checkout-sender-name" class="form-label">Sender Name (as it appears on receipt)</label>
-          <input type="text" id="checkout-sender-name" class="form-control" placeholder="John Doe" required>
-        </div>
-
-        <div class="form-group">
-          <label for="checkout-sender-phone" class="form-label">Sender Phone Number</label>
-          <input type="tel" id="checkout-sender-phone" class="form-control" placeholder="+237 6xx xxx xxx" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Payment Screenshot</label>
-          <div class="upload-area" id="screenshot-upload-area" style="padding: 20px; text-align: center; border: 2px dashed var(--card-border); border-radius: 12px; cursor: pointer; margin-bottom: 10px;">
-            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i>
-            <div style="font-size: 13px;" id="screenshot-filename">Click to upload screenshot</div>
-            <input type="file" id="screenshot-file" accept="image/*" style="display: none;">
-          </div>
-          <div id="screenshot-error" style="color: var(--error); font-size: 12px; display: none;">Please select a screenshot.</div>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:30px;">
-          <button type="button" id="btn-back-step" class="btn btn-secondary btn-sm">Back</button>
-          <button type="submit" id="submit-checkout-btn" class="btn btn-primary btn-sm">Submit for Verification</button>
-        </div>
-      </form>
-
-      <!-- SUCCESS -->
+      <!-- SUCCESS / PENDING STATE -->
       <div id="checkout-success" style="display: none; text-align: center; padding: 20px 0;">
-        <i class="fa-solid fa-circle-check" style="font-size: 48px; color: var(--success); margin-bottom: 16px;"></i>
-        <h3 style="margin-bottom: 8px;">Payment Submitted!</h3>
-        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">Transactions take up to 3 minutes to verify. Your plan will be activated automatically once approved.</p>
-        <button type="button" id="btn-done-checkout" class="btn btn-primary">Return to Dashboard</button>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"></i>
+        <h3 style="margin-bottom: 8px;">Awaiting Payment...</h3>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">Please check your phone and enter your PIN to confirm the transaction.</p>
+        <button type="button" id="btn-done-checkout" class="btn btn-secondary">Close Window</button>
       </div>
     </div>
   </div>
@@ -268,21 +238,7 @@
       loadPlatformSettings();
     });
 
-    async function loadPlatformSettings() {
-      try {
-        const docRef = doc(db, "settings", "platform");
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.mtnNumber) document.getElementById("official-mtn-number").innerText = data.mtnNumber;
-          if (data.mtnName) document.getElementById("official-mtn-name").innerText = data.mtnName;
-          if (data.orangeNumber) document.getElementById("official-orange-number").innerText = data.orangeNumber;
-          if (data.orangeName) document.getElementById("official-orange-name").innerText = data.orangeName;
-        }
-      } catch (err) {
-        console.error("Failed to load platform settings", err);
-      }
-    }
+    // Removed loadPlatformSettings since we no longer display manual numbers
 
     function setupToggles() {
       toggleViewers.addEventListener("click", () => {
@@ -334,6 +290,14 @@
     }
 
     function setupPaymentFlows() {
+      // Map frontend data-plan to API planId
+      const planMap = {
+        "weekly": "viewer_weekly",
+        "monthly": "viewer_monthly",
+        "starter_creator": "creator_tier1",
+        "premium_creator": "creator_tier2"
+      };
+
       // Open Checkout triggers
       document.querySelectorAll(".buy-pass-btn").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -344,27 +308,17 @@
           }
 
           selectedPlan = btn.dataset.plan;
+          
+          // Get the price dynamically from the button (which should be updated from DB)
           selectedPrice = parseInt(btn.dataset.price);
 
           document.getElementById("checkout-title").innerText = "Subscribe: " + selectedPlan.toUpperCase().replace('_', ' ');
           amountDisplay.innerText = selectedPrice.toLocaleString() + " FCFA";
           
           step1.style.display = "block";
-          step2.style.display = "none";
           successStep.style.display = "none";
           checkoutModal.style.display = "flex";
         });
-      });
-
-      // Wizard Navigation
-      document.getElementById("btn-next-step").addEventListener("click", () => {
-        step1.style.display = "none";
-        step2.style.display = "block";
-      });
-
-      document.getElementById("btn-back-step").addEventListener("click", () => {
-        step2.style.display = "none";
-        step1.style.display = "block";
       });
 
       document.getElementById("close-checkout-btn").addEventListener("click", () => {
@@ -373,64 +327,96 @@
       
       document.getElementById("btn-done-checkout").addEventListener("click", () => {
         checkoutModal.style.display = "none";
+        // Let the user go back to their dashboard where the access should be unlocked soon
         if (selectedPlan.endsWith("_creator")) {
           window.location.href = "creator-dashboard.html";
         } else {
-          window.location.href = "viewer-dashboard.html";
-        }
-      });
-
-      // Screenshot Upload handling
-      screenshotUploadArea.addEventListener("click", () => screenshotFileInput.click());
-      screenshotFileInput.addEventListener("change", (e) => {
-        if (e.target.files && e.target.files[0]) {
-          screenshotFile = e.target.files[0];
-          screenshotFilename.innerText = screenshotFile.name;
-          screenshotFilename.style.color = "var(--primary)";
-          screenshotError.style.display = "none";
+          window.location.href = "index.html";
         }
       });
 
       // Form submit
-      document.getElementById("checkout-step-2").addEventListener("submit", async (e) => {
+      document.getElementById("sebpay-checkout-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         
-        if (!screenshotFile) {
-          screenshotError.style.display = "block";
-          return;
-        }
-
         const senderPhone = document.getElementById("checkout-sender-phone").value;
+        const operator = document.getElementById("checkout-operator").value;
         const submitBtn = document.getElementById("submit-checkout-btn");
         
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading Receipt...`;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Initiating Payment...`;
 
         try {
-          // Use unified payment submit function
-          const requestId = await submitPaymentRequest({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || "Unknown",
-            type: selectedPlan,
-            amount: selectedPrice,
-            provider: selectedMethod, 
-            phone: senderPhone,
-            screenshotFile
+          // Call our Vercel Serverless Function
+          const response = await fetch("/api/initiate-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              userId: currentUser.uid,
+              planId: planMap[selectedPlan],
+              phone: senderPhone,
+              operator: operator
+            })
           });
-          
-          // Show Success Step
-          step2.style.display = "none";
-          successStep.style.display = "block";
-          
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Show Awaiting Payment State
+            step1.style.display = "none";
+            successStep.style.display = "block";
+            console.log("SebPay Transaction Reference:", data.externalReference);
+          } else {
+            alert("Payment initiation failed: " + (data.error || data.details || "Unknown error"));
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Pay Now";
+          }
         } catch (err) {
-          console.error("Payment submission failed:", err);
-          alert("Failed to submit payment. Please try again.");
+          console.error("Payment API call failed:", err);
+          alert("Failed to connect to the payment server. Please try again.");
           submitBtn.disabled = false;
-          submitBtn.innerText = "Submit for Verification";
+          submitBtn.innerText = "Pay Now";
         }
       });
     }
+
+    // Load dynamic pricing from Firestore
+    async function loadDynamicPricing() {
+      try {
+        const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
+        if (pricingDoc.exists()) {
+          const prices = pricingDoc.data();
+          
+          // Update buttons
+          const updateBtn = (plan, dbKey) => {
+            const btn = document.querySelector(`.buy-pass-btn[data-plan="${plan}"]`);
+            if (btn && prices[dbKey]) {
+              btn.dataset.price = prices[dbKey];
+              // Traverse up to find the price display element and update it
+              const card = btn.closest(".plan-card");
+              if (card) {
+                const amountEl = card.querySelector(".plan-amount");
+                if (amountEl) {
+                  amountEl.innerText = parseInt(prices[dbKey]).toLocaleString() + " FCFA";
+                }
+              }
+            }
+          };
+
+          updateBtn("weekly", "viewer_weekly");
+          updateBtn("monthly", "viewer_monthly");
+          updateBtn("starter_creator", "creator_tier1");
+          updateBtn("premium_creator", "creator_tier2");
+        }
+      } catch (err) {
+        console.error("Failed to load dynamic pricing", err);
+      }
+    }
+    
+    // Call loadDynamicPricing on startup
+    loadDynamicPricing();
   </script>
   <script src="js/nav.js"></script>
 </body>

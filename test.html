@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <nav class='navbar'>
+    <div class='navbar-content'>
+      <div class='nav-links'>
+        <a href='index.html' class='nav-link active'>Home</a>
+        <a href='pricing.html' class='nav-link'>Pricing Plans</a>
+      </div>
+    </div>
+  </nav>
+  <script src='js/nav.js'></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        window.updateNavAuthUI({ uid: "123" });
+        console.log("Drawer HTML:");
+        console.log(document.querySelector('.mobile-nav-drawer').innerHTML);
+      }, 500);
+    });
+  </script>
+</body>
+</html>

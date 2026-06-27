@@ -347,8 +347,12 @@
         submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Initiating Payment...`;
 
         try {
+          // If hosting HTML on GitHub and API on Vercel, change this to your Vercel domain!
+          // Example: const VERCEL_API_URL = "https://my-vercel-app.vercel.app/api/initiate-payment";
+          const VERCEL_API_URL = "https://mona-cam-github-io.vercel.app/api/initiate-payment";
+          
           // Call our Vercel Serverless Function
-          const response = await fetch("/api/initiate-payment", {
+          const response = await fetch(VERCEL_API_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"

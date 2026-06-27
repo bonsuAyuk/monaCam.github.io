@@ -44,18 +44,30 @@
         <input type="text" id="search-bar" class="form-control search-input" placeholder="Search videos by title, creator, or topic...">
       </div>
       
-      <div class="filter-actions">
-        <select id="categories-list" class="form-control sort-select">
-          <option value="all">All Content</option>
-          <option value="loading" id="loading-categories-text">Loading categories...</option>
-        </select>
-        
-        <select id="sort-filter" class="form-control sort-select">
-          <option value="newest">Newest First</option>
-          <option value="popular">Most Viewed</option>
-          <option value="oldest">Oldest</option>
-        </select>
-      </div>
+      <div class="filter-actions" style="position: relative; z-index: 50;">
+          <div class="custom-select-wrapper" id="categories-wrapper">
+            <div class="custom-select" id="categories-trigger">
+              <span class="custom-select-text">All Content</span>
+              <i class="fa-solid fa-chevron-down custom-select-icon"></i>
+            </div>
+            <div class="custom-options" id="categories-options">
+              <div class="custom-option selected" data-value="all">All Content</div>
+              <div class="custom-option" data-value="loading" id="loading-categories-text">Loading categories...</div>
+            </div>
+          </div>
+          
+          <div class="custom-select-wrapper" id="sort-wrapper">
+            <div class="custom-select" id="sort-trigger">
+              <span class="custom-select-text">Latest</span>
+              <i class="fa-solid fa-chevron-down custom-select-icon"></i>
+            </div>
+            <div class="custom-options" id="sort-options">
+              <div class="custom-option selected" data-value="newest">Latest</div>
+              <div class="custom-option" data-value="popular">Most Viewed</div>
+              <div class="custom-option" data-value="oldest">Oldest</div>
+            </div>
+          </div>
+        </div>
     </div>
   </section>
 

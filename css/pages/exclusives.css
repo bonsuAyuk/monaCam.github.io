@@ -196,9 +196,93 @@
   border-color: var(--text-primary);
 }
 
-.sort-select {
-  width: auto;
+/* Custom Dropdown Styling */
+.custom-select-wrapper {
+  position: relative;
+  user-select: none;
+  flex: 1;
   min-width: 160px;
+}
+
+.custom-select {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.custom-select:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--card-hover-border);
+}
+
+.custom-select.open {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 10px rgba(255, 179, 0, 0.1);
+}
+
+.custom-select-icon {
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.custom-select.open .custom-select-icon {
+  transform: rotate(180deg);
+}
+
+.custom-options {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.custom-select.open + .custom-options {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.custom-option {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.custom-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.custom-option.selected {
+  color: var(--primary);
+  background: rgba(255, 179, 0, 0.05);
+  font-weight: 600;
 }
 
 /* Video Cards Grid */
@@ -391,10 +475,12 @@
     flex-wrap: nowrap;
     gap: 12px;
   }
-  .sort-select {
+  .custom-select-wrapper {
     flex: 1;
     min-width: 0;
     width: 100%;
+  }
+  .custom-select {
     font-size: 13px;
     padding: 10px 12px;
   }

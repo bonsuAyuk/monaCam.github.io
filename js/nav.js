@@ -4,6 +4,20 @@
  * Include as: <script src="js/nav.js"></script> (plain script, not module)
  */
 (function () {
+  window.performLogout = function() {
+    import("./js/auth.js").then(function(module) {
+      module.signOutUser();
+    }).catch(function(err) {
+      console.error("Logout dynamic import error:", err);
+      // Direct fallback just in case
+      import("./js/db-config.js").then(function(dbModule) {
+        dbModule.signOut(dbModule.auth).then(function() {
+          window.location.href = "index.html";
+        });
+      });
+    });
+  };
+
   window.updateNavAuthUI = function(user) {
     const dashboardLink = document.getElementById("nav-dashboard-link-container");
     const authActions = document.getElementById("auth-nav-actions");
@@ -31,6 +45,7 @@
 
       if (authActions) authActions.innerHTML = `
         <a href="profile.html" class="btn btn-secondary"><i class="fa-solid fa-user"></i> My Profile</a>
+        <button onclick="window.performLogout()" class="btn btn-ghost" style="border: none; cursor: pointer; color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Log Out</button>
       `;
       
       if (window.updateMobileNavAuth) {
@@ -38,20 +53,10 @@
           <a href="profile.html" class="btn btn-secondary" style="justify-content:flex-start; width:100%; margin-bottom:10px;">
             <i class="fa-solid fa-user"></i> My Profile
           </a>
-          <button id="mobile-logout-btn" class="btn btn-ghost" style="justify-content:flex-start; width:100%; color:var(--danger); text-align:left; border: none; background: transparent; padding: 12px 16px; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+          <button onclick="window.performLogout()" class="btn btn-ghost" style="justify-content:flex-start; width:100%; color:var(--danger); text-align:left; border: none; background: transparent; padding: 12px 16px; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
             <i class="fa-solid fa-right-from-bracket"></i> Log Out
           </button>
         `);
-        setTimeout(function() {
-            var logoutBtn = document.getElementById("mobile-logout-btn");
-            if (logoutBtn) {
-                logoutBtn.addEventListener("click", function() {
-                    import("./js/auth.js").then(function(module) {
-                        module.signOutUser();
-                    });
-                });
-            }
-        }, 50);
       }
     } else {
       if (exclusivesLink) exclusivesLink.style.display = "none";

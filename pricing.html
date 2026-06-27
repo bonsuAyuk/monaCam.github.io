@@ -228,14 +228,12 @@
     let currentUser = null;
     let selectedPlan = "";
     let selectedPrice = 0;
-    let screenshotFile = null;
-    let selectedMethod = "mtn"; // Added this back
-
+    let selectedMethod = "mtn"; // Initial setup
+    
     document.addEventListener("DOMContentLoaded", () => {
       setupToggles();
       setupAuthObserver();
       setupPaymentFlows();
-      loadPlatformSettings();
     });
 
     // Removed loadPlatformSettings since we no longer display manual numbers
@@ -372,6 +370,43 @@
             step1.style.display = "none";
             successStep.style.display = "block";
             console.log("SebPay Transaction Reference:", data.externalReference);
+            
+            // Poll for payment success
+            const VERCEL_POLL_URL = "https://mona-cam-github-io.vercel.app/api/check-payment-status";
+            const pollInterval = setInterval(async () => {
+              try {
+                const statusRes = await fetch(`${VERCEL_POLL_URL}?reference=${data.externalReference}`);
+                const statusData = await statusRes.json();
+                
+                if (statusData.success && statusData.status === "approved") {
+                  clearInterval(pollInterval);
+                  
+                  // Update UI to Success
+                  successStep.innerHTML = `
+                    <i class="fa-solid fa-circle-check" style="font-size: 48px; color: var(--success); margin-bottom: 16px;"></i>
+                    <h3 style="margin-bottom: 8px;">Payment Successful!</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">Your plan has been activated.</p>
+                    <button type="button" id="btn-done-checkout-success" class="btn btn-primary">Return to Dashboard</button>
+                  `;
+                  
+                  document.getElementById("btn-done-checkout-success").addEventListener("click", () => {
+                    checkoutModal.style.display = "none";
+                    if (selectedPlan.endsWith("_creator")) {
+                      window.location.href = "creator-dashboard.html";
+                    } else {
+                      window.location.href = "index.html";
+                    }
+                  });
+                } else if (statusData.success && (statusData.status === "failed" || statusData.status === "rejected" || statusData.status === "cancelled")) {
+                  clearInterval(pollInterval);
+                  alert("Payment was rejected or cancelled. Please try again.");
+                  checkoutModal.style.display = "none";
+                }
+              } catch (e) {
+                console.error("Polling error:", e);
+              }
+            }, 5000); // Check every 5 seconds
+            
           } else {
             alert("Payment initiation failed: " + (data.error || data.details || "Unknown error"));
             submitBtn.disabled = false;

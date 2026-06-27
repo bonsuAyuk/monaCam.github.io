@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     const uploadUrl = await new Promise((resolve, reject) => {
       const options = {
         hostname: 'www.googleapis.com',
-        path: '/upload/drive/v3/files?uploadType=resumable',
+        path: '/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true',
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

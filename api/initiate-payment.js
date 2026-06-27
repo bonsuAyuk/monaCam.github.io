@@ -52,6 +52,11 @@ module.exports = async (req, res) => {
     // Generate a unique external reference
     const externalReference = `TXN-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
 
+    // Dynamically get the host to construct the callback URL automatically
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const callbackUrl = `${protocol}://${host}/api/sebpay-webhook`;
+
     // Prepare SebPay Request
     const sebpayBody = {
       amount: price,
@@ -60,7 +65,7 @@ module.exports = async (req, res) => {
       operator: operator,
       country: "CM",
       external_reference: externalReference,
-      callback_url: `${process.env.PUBLIC_SITE_URL}/api/sebpay-webhook`
+      callback_url: callbackUrl
     };
 
     const sebpayResponse = await fetch('https://newapi.sebpay.bj/api/v1/collections', {

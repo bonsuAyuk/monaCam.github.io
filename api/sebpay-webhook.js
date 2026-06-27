@@ -9,9 +9,14 @@ module.exports = async (req, res) => {
     const admin = initFirebaseAdmin();
     const db = admin.firestore();
 
-    const { transaction_id, external_reference, status } = req.body;
+    // Safely extract the external reference, checking if it's nested in a 'data' object
+    let external_reference = req.body.external_reference;
+    if (!external_reference && req.body.data && req.body.data.external_reference) {
+      external_reference = req.body.data.external_reference;
+    }
 
     if (!external_reference) {
+      console.error('Webhook Error: Missing external_reference in body', req.body);
       return res.status(400).json({ error: 'Missing external_reference' });
     }
 

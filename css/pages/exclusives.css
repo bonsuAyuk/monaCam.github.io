@@ -383,6 +383,21 @@
   .marketplace-header h1 {
     font-size: 28px;
   }
+  .filter-bar {
+    padding: 16px;
+    gap: 16px;
+  }
+  .filter-actions {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .sort-select {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    font-size: 13px;
+    padding: 10px 12px;
+  }
   .video-grid {
     grid-template-columns: 1fr;
     gap: 16px;

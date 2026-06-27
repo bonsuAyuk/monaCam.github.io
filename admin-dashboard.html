@@ -154,8 +154,8 @@
       <section class="dashboard-panel active" id="panel-payments">
         <div class="dashboard-header">
           <div class="dashboard-title">
-            <h2>Payment Verification</h2>
-            <p>Review payment screenshots submitted by users and grant or deny access</p>
+            <h2>Payment Logs</h2>
+            <p>Review automatic SebPay transactions (Mobile Money / Orange Money)</p>
           </div>
           <button class="btn btn-secondary btn-sm" id="refresh-payments-btn">
             <i class="fa-solid fa-arrows-rotate"></i> Refresh
@@ -201,19 +201,17 @@
             <table class="data-table" style="min-width:700px;">
               <thead>
                 <tr>
-                  <th>User</th>
-                  <th>Type</th>
+                  <th>User ID</th>
+                  <th>Plan Type</th>
                   <th>Amount</th>
-                  <th>Provider</th>
-                  <th>Submitted</th>
-                  <th>Screenshot</th>
+                  <th>Operator</th>
+                  <th>Date</th>
                   <th>Status</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="payments-table-body">
                 <tr>
-                  <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+                  <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">
                     <i class="fa-solid fa-spinner fa-spin" style="font-size:20px; margin-bottom:10px; display:block;"></i>
                     Loading payment requests...
                   </td>
@@ -910,46 +908,8 @@
         const { getAllPaymentRequests } = await import("./js/payment.js");
         allPaymentRequests = await getAllPaymentRequests();
       } catch (e) {
-        // Fallback demo data when Firebase not yet configured
-        allPaymentRequests = [
-          {
-            requestId: "PAY_DEMO_001",
-            displayName: "Amara Diallo",
-            email: "amara@mail.com",
-            type: "monthly",
-            amount: 2500,
-            provider: "MTN",
-            phone: "+237 670 123 456",
-            screenshotURL: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
-            status: "pending",
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-          },
-          {
-            requestId: "PAY_DEMO_002",
-            displayName: "Vanessa Ngoue",
-            email: "vanessa@mail.com",
-            type: "ppv",
-            videoTitle: "How to Cook Ndole",
-            amount: 1500,
-            provider: "Orange",
-            phone: "+237 695 987 654",
-            screenshotURL: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
-            status: "pending",
-            createdAt: new Date(Date.now() - 7200000).toISOString(),
-          },
-          {
-            requestId: "PAY_DEMO_003",
-            displayName: "Elvis Yaounde",
-            email: "elvis@mail.com",
-            type: "weekly",
-            amount: 1000,
-            provider: "MTN",
-            phone: "+237 677 000 111",
-            screenshotURL: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400",
-            status: "approved",
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-          },
-        ];
+        console.error("Error loading transactions:", e);
+        allPaymentRequests = [];
       }
 
       renderPaymentTable();
@@ -958,8 +918,8 @@
     function renderPaymentTable() {
       const tbody   = document.getElementById("payments-table-body");
       const pending  = allPaymentRequests.filter(r => r.status === "pending");
-      const approved = allPaymentRequests.filter(r => r.status === "approved");
-      const rejected = allPaymentRequests.filter(r => r.status === "rejected");
+      const approved = allPaymentRequests.filter(r => r.status === "approved" || r.status === "success" || r.status === "completed");
+      const rejected = allPaymentRequests.filter(r => r.status === "rejected" || r.status === "failed");
 
       // Update stats
       document.getElementById("pay-stat-pending").innerText  = pending.length;
@@ -970,107 +930,54 @@
       const badge = document.getElementById("sidebar-pending-badge");
       if (badge) badge.innerText = pending.length > 0 ? pending.length : "";
 
-      // Filter
-      const filtered = currentFilter === "all" ? allPaymentRequests
-                     : allPaymentRequests.filter(r => r.status === currentFilter);
+      // Filter logic mapping
+      let filtered = allPaymentRequests;
+      if (currentFilter === "approved") {
+        filtered = approved;
+      } else if (currentFilter === "rejected") {
+        filtered = rejected;
+      } else if (currentFilter === "pending") {
+        filtered = pending;
+      }
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">No ${currentFilter} requests found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">No ${currentFilter} requests found.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = filtered.map(req => {
         const date    = new Date(req.createdAt).toLocaleString();
-        const typeMap = { ppv: "Pay-per-view", weekly: "Weekly Pass", monthly: "Monthly Pass" };
-        const typeLabel = typeMap[req.type] || req.type;
-        const videoInfo = req.videoTitle ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${req.videoTitle}</div>` : "";
-
-        const statusBadge = req.status === "pending"
-          ? `<span class="badge badge-pending">Pending</span>`
-          : req.status === "approved"
-          ? `<span class="badge badge-success">Approved</span>`
-          : `<span class="badge" style="background:rgba(255,23,68,0.1);color:var(--error);border-color:rgba(255,23,68,0.2);">Rejected</span>`;
-
-        const actions = req.status === "pending" ? `
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-sm" style="background:rgba(0,200,83,0.1);color:var(--success);border:1px solid rgba(0,200,83,0.3);"
-              onclick="approvePayment('${req.requestId}')">
-              <i class="fa-solid fa-check"></i> Approve
-            </button>
-            <button class="btn btn-secondary btn-sm"
-              onclick="promptRejectPayment('${req.requestId}')">
-              <i class="fa-solid fa-xmark"></i> Reject
-            </button>
-          </div>
-        ` : `<span style="font-size:12px; color:var(--text-muted);">Reviewed</span>`;
+        
+        let statusClass = "";
+        let statusLabel = req.status;
+        if (req.status === "pending") {
+          statusClass = "badge-pending";
+        } else if (req.status === "success" || req.status === "approved" || req.status === "completed") {
+          statusClass = "badge-success";
+          statusLabel = "Success";
+        } else {
+          statusClass = "badge-error";
+          statusLabel = "Failed";
+        }
+        
+        const statusBadge = `<span class="badge ${statusClass}">${statusLabel}</span>`;
 
         return `
           <tr>
             <td>
-              <div style="font-weight:700;">${req.displayName || "Unknown"}</div>
-              <div style="font-size:11px; color:var(--text-muted);">${req.email}</div>
-              <div style="font-size:11px; color:var(--text-muted);">${req.phone}</div>
+              <div style="font-weight:700; font-family:monospace;">${req.requestId || req.userId || "Unknown"}</div>
             </td>
-            <td>${typeLabel}${videoInfo}</td>
+            <td><span style="font-weight:600;">${req.type || "Subscription"}</span></td>
             <td style="font-weight:700; color:var(--primary);">${(req.amount||0).toLocaleString()} FCFA</td>
             <td>
-              <span class="badge ${req.provider==='MTN' ? 'badge-featured' : 'badge-premium'}">${req.provider}</span>
+              <span class="badge ${req.provider==='MTN' ? 'badge-featured' : 'badge-premium'}">${req.provider || "MOMO"}</span>
             </td>
             <td style="font-size:12px; color:var(--text-muted); white-space:nowrap;">${date}</td>
-            <td>
-              <img src="${req.screenshotURL}" alt="Screenshot"
-                class="payment-screenshot-preview"
-                onclick="openScreenshotLightbox('${req.screenshotURL}')"
-                title="Click to enlarge">
-            </td>
             <td>${statusBadge}</td>
-            <td>${actions}</td>
           </tr>
         `;
       }).join("");
     }
-
-    // Approve
-    window.approvePayment = async function(requestId) {
-      if (!confirm(`Approve payment request ${requestId}?`)) return;
-      try {
-        const { approvePaymentRequest } = await import("./js/payment.js");
-        await approvePaymentRequest(requestId);
-      } catch (e) {
-        // Demo fallback
-        const req = allPaymentRequests.find(r => r.requestId === requestId);
-        if (req) { req.status = "approved"; req.reviewedAt = new Date().toISOString(); }
-      }
-      renderPaymentTable();
-    };
-
-    // Reject
-    let rejectTargetId = null;
-    window.promptRejectPayment = function(requestId) {
-      rejectTargetId = requestId;
-      const note = prompt("Enter rejection reason (shown to user):", "Payment screenshot could not be verified. Please resubmit.");
-      if (note === null) return; // cancelled
-      rejectPaymentAsync(requestId, note);
-    };
-
-    async function rejectPaymentAsync(requestId, note) {
-      try {
-        const { rejectPaymentRequest } = await import("./js/payment.js");
-        await rejectPaymentRequest(requestId, note);
-      } catch (e) {
-        const req = allPaymentRequests.find(r => r.requestId === requestId);
-        if (req) { req.status = "rejected"; req.rejectionNote = note; req.reviewedAt = new Date().toISOString(); }
-      }
-      renderPaymentTable();
-    }
-
-    // Screenshot lightbox
-    window.openScreenshotLightbox = function(url) {
-      const lb  = document.getElementById("screenshot-lightbox");
-      const img = document.getElementById("lightbox-img");
-      img.src = url;
-      lb.classList.add("open");
-    };
 
     document.getElementById("screenshot-lightbox").addEventListener("click", () => {
       document.getElementById("screenshot-lightbox").classList.remove("open");
@@ -1234,16 +1141,11 @@
     loadPricingSettings();
   </script>
 
-  <!-- Screenshot Lightbox -->
-  <div class="screenshot-lightbox" id="screenshot-lightbox">
-    <img src="" alt="Payment Screenshot" id="lightbox-img">
-  </div>
-
   <!-- Mobile nav hamburger -->
   <script src="js/nav.js"></script>
 
 </body>
-</html>
+
 
 
 

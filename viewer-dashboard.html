@@ -55,8 +55,13 @@
         <img id="sidebar-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="sidebar-user-avatar" alt="Avatar">
         <div class="sidebar-user-info">
           <div class="sidebar-user-name" id="sidebar-username">Viewer Profile</div>
-          <div class="sidebar-user-role" id="viewer-plan-badge">Free Viewer</div>
+          <div class="sidebar-user-role" id="viewer-plan-badge">Loading...</div>
         </div>
+      </div>
+      <div style="padding: 16px; padding-top: 0; margin-bottom: 10px;">
+        <a href="register.html" class="btn btn-ghost" style="width: 100%; border: 1px solid var(--primary); color: var(--primary);">
+          <i class="fa-solid fa-user-plus"></i> Become a Creator
+        </a>
       </div>
     </aside>
 
@@ -86,12 +91,12 @@
         </div>
 
         <div class="stats-row">
-          <div class="card" style="flex:1; display:flex; align-items:center; justify-content:space-between; gap:20px;">
-            <div>
-              <span class="badge badge-premium" style="margin-bottom:8px;" id="current-pass-badge">No Active Pass</span>
-              <h3 style="font-family:var(--font-display); font-size:22px; font-weight:700;">Premium Viewer Pass</h3>
-              <p style="color:var(--text-secondary); font-size:13px; margin-top:4px;" id="current-pass-status-text">Unlock full access to all video uploads by purchasing a Weekly or Monthly Pass.</p>
-            </div>
+            <div class="card" style="flex:1; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+              <div>
+                <span class="badge badge-premium" style="margin-bottom:8px;" id="current-pass-badge">Loading...</span>
+                <h3 style="font-family:var(--font-display); font-size:22px; font-weight:700;">Premium Viewer Pass</h3>
+                <p style="color:var(--text-secondary); font-size:13px; margin-top:4px;" id="current-pass-status-text">Fetching your plan details...</p>
+              </div>
             <div>
               <a href="pricing.html" class="btn btn-primary" id="pass-action-btn">Subscribe Now</a>
             </div>

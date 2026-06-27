@@ -88,10 +88,14 @@
       
       <!-- Overview Section Panel -->
       <section class="dashboard-panel active" id="panel-overview">
-        <div class="dashboard-header">
+        <div class="dashboard-header" style="flex-wrap: wrap; gap: 12px;">
           <div class="dashboard-title">
             <h2>Creator Dashboard</h2>
             <p>Monitor your performance, uploads quota, and mobile money revenue</p>
+          </div>
+          <!-- Mobile Plan Badge (visible only on mobile via dashboard.css) -->
+          <div class="mobile-plan-badge" id="mobile-plan-badge-container" style="display: none; align-items: center; background: rgba(255, 179, 0, 0.1); color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(255, 179, 0, 0.3);">
+            <span id="mobile-creator-plan">Loading...</span>
           </div>
         </div>
 
@@ -417,5 +421,7 @@
   <script src="js/nav.js"></script>
 </body>
 </html>
+
+
 
 

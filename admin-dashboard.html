@@ -494,6 +494,7 @@
 
     function setupAuthObserver() {
       onAuthStateChanged(auth, (user) => {
+        if (window.updateNavAuthUI) window.updateNavAuthUI(user);
         if (!user) {
           window.location.href = "login.html";
           return;
@@ -1147,4 +1148,7 @@
 
 </body>
 </html>
+
+
+
 

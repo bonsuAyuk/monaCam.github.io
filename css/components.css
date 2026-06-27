@@ -4,7 +4,7 @@
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 999;
   height: 70px;
   display: flex;
   align-items: center;
@@ -120,7 +120,7 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--card-border);
-  z-index: 99;
+  z-index: 998;
   padding: 20px 24px 24px;
   flex-direction: column;
   gap: 8px;

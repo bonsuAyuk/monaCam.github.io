@@ -431,6 +431,10 @@
     display: flex;
   }
 
+  .mobile-plan-badge {
+    display: flex !important;
+  }
+
   .dashboard-content {
     padding: 20px 16px;
   }

@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
     currentCategory = "all";
     currentSearch = "";
     document.getElementById("search-bar").value = "";
-    document.querySelectorAll(".category-pill").forEach(p => p.classList.remove("active"));
-    document.querySelector(".category-pill[data-category='all']")?.classList.add("active");
+    const catList = document.getElementById("categories-list");
+    if (catList) catList.value = "all";
     loadVideos(true);
   });
 
@@ -61,14 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 200));
 });
 
-// Category pills listener
-document.getElementById("categories-list")?.addEventListener("click", (e) => {
-  if (e.target.classList.contains("category-pill")) {
-    document.querySelectorAll(".category-pill").forEach(p => p.classList.remove("active"));
-    e.target.classList.add("active");
-    currentCategory = e.target.dataset.category;
-    loadVideos(true);
-  }
+// Category dropdown listener
+document.getElementById("categories-list")?.addEventListener("change", (e) => {
+  currentCategory = e.target.value;
+  loadVideos(true);
 });
 
 async function fetchCategories() {
@@ -77,10 +73,10 @@ async function fetchCategories() {
     if (!snap.empty) {
       const list = document.getElementById("categories-list");
       if (!list) return;
-      let html = '<span class="category-pill active" data-category="all">All Content</span>';
+      let html = '<option value="all">All Content</option>';
       snap.forEach(doc => {
         const cat = doc.data();
-        html += `<span class="category-pill" data-category="${doc.id}">${cat.name}</span>`;
+        html += `<option value="${doc.id}">${cat.name}</option>`;
       });
       list.innerHTML = html;
     }
@@ -129,6 +125,7 @@ async function loadVideos(reset = false) {
     // Sort order
     if (currentSort === "newest") constraints.push(orderBy("createdAt", "desc"));
     if (currentSort === "popular") constraints.push(orderBy("views", "desc"));
+    if (currentSort === "oldest") constraints.push(orderBy("createdAt", "asc"));
     if (currentSort === "price-low") constraints.push(orderBy("priceFCFA", "asc"));
     if (currentSort === "price-high") constraints.push(orderBy("priceFCFA", "desc"));
 

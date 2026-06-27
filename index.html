@@ -36,35 +36,30 @@
     </div>
   </nav>
 
-  <!-- Top padding for layout -->
-  <div style="padding-top: 20px;"></div>
-
-
   <!-- Filters & Search Section -->
-  <section class="filters-section container animate-fade-in">
-    <div class="filter-bar glass">
+  <section class="filters-section container animate-fade-in" style="margin-top: 20px;">
+    <div class="filter-bar glass" style="margin-bottom: 20px;">
       <div class="search-box-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
         <input type="text" id="search-bar" class="form-control search-input" placeholder="Search videos by title, creator, or topic...">
       </div>
       
       <div class="filter-actions">
-        <div class="categories-container" id="categories-list">
-          <span class="category-pill active" data-category="all">All Content</span>
-          <span style="font-size: 13px; color: var(--text-muted); margin-left: 10px;" id="loading-categories-text">Loading categories...</span>
-        </div>
+        <select id="categories-list" class="form-control sort-select" style="min-width: 160px; margin-right: 10px;">
+          <option value="all">All Content</option>
+          <option value="loading" id="loading-categories-text">Loading categories...</option>
+        </select>
         
         <select id="sort-filter" class="form-control sort-select">
           <option value="newest">Newest First</option>
           <option value="popular">Most Viewed</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
+          <option value="oldest">Oldest</option>
         </select>
       </div>
     </div>
   </section>
 
-  <main class="container animate-fade-in" style="min-height: 50vh; padding-bottom: 60px; padding-top: 20px;">
+  <main class="container animate-fade-in" style="min-height: 50vh; padding-bottom: 60px;">
     <div class="video-grid" id="videos-grid">
       <!-- Cards rendered dynamically by JS -->
     </div>
@@ -100,7 +95,7 @@
   </section>
   </main>
 
-    <!-- Footer -->
+  <!-- Footer -->
   <footer class="footer" style="padding: 24px 0; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: auto; background: var(--bg-secondary);">
     <div class="container">
       <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Copyright &copy; 2026 MonaCam. All Rights Reserved.</p>
@@ -112,6 +107,3 @@
   <script src="js/nav.js"></script>
 </body>
 </html>
-
-
-

@@ -126,6 +126,7 @@ function setupAuthObserver() {
     await fetchCreatorContent();
     await fetchCustomRequests();
     await fetchCategories();
+    await renderPaymentLog();
     setupUploadFormHandler();
   });
 }
@@ -631,4 +632,69 @@ function setupPayoutHandler() {
       alert("Could not submit withdrawal request. Please try again.");
     }
   });
+}
+
+// ── Payment Log Renderer ───────────────────────────────────────
+async function renderPaymentLog() {
+  const table = document.getElementById("creator-payment-logs-table");
+  if (!table) return;
+
+  try {
+    const subSnap = await getDocs(
+      query(collection(db, "paymentRequests"), where("uid", "==", currentUser.uid))
+    );
+    const subscriptions = subSnap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: data.requestId || "N/A",
+        type: "Subscription (" + (data.type || "unknown") + ")",
+        amount: data.amount || 0,
+        provider: data.provider || "N/A",
+        status: data.status || "pending",
+        date: data.createdAt
+      };
+    });
+
+    const withSnap = await getDocs(
+      query(collection(db, "withdrawals"), where("creatorId", "==", currentUser.uid))
+    );
+    const withdrawals = withSnap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: data.requestId || "N/A",
+        type: "Withdrawal",
+        amount: data.amount || 0,
+        provider: data.provider || "N/A",
+        status: data.status || "pending",
+        date: data.createdAt
+      };
+    });
+
+    const allLogs = [...subscriptions, ...withdrawals];
+    allLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (allLogs.length > 0) {
+      table.innerHTML = allLogs.map(log => {
+        let statusBadge = `<span class="badge badge-pending">Pending</span>`;
+        if (log.status === "approved" || log.status === "completed") statusBadge = `<span class="badge badge-success">Completed</span>`;
+        if (log.status === "rejected") statusBadge = `<span class="badge" style="background:rgba(255,23,68,0.1);color:var(--error);border-color:rgba(255,23,68,0.2);">Rejected</span>`;
+        
+        return `
+        <tr>
+          <td><code>${log.id}</code></td>
+          <td>${log.type}</td>
+          <td style="font-weight:700;">${Math.abs(log.amount).toLocaleString()} FCFA</td>
+          <td><span style="text-transform:uppercase;">${log.provider}</span></td>
+          <td>${statusBadge}</td>
+          <td>${new Date(log.date).toLocaleDateString()}</td>
+        </tr>
+        `;
+      }).join("");
+    } else {
+      table.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">No payment history found.</td></tr>`;
+    }
+  } catch (err) {
+    console.error("Failed to load payment logs:", err);
+    table.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">Failed to load history.</td></tr>`;
+  }
 }

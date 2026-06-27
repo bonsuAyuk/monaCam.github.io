@@ -55,6 +55,9 @@
         <div class="sidebar-menu-item" data-tab="earnings">
           <i class="fa-solid fa-wallet"></i> Earnings & Payouts
         </div>
+        <div class="sidebar-menu-item" data-tab="history">
+          <i class="fa-solid fa-clock-rotate-left"></i> Payment Log
+        </div>
       </div>
       
       <!-- Profile Widget bottom -->
@@ -76,10 +79,13 @@
         <i class="fa-solid fa-cloud-arrow-up"></i> Upload
       </div>
       <div class="mobile-tab-item" data-tab="videos">
-        <i class="fa-solid fa-clapperboard"></i> Videos
+        <i class="fa-solid fa-clapperboard"></i>
       </div>
       <div class="mobile-tab-item" data-tab="earnings">
-        <i class="fa-solid fa-wallet"></i> Earnings
+        <i class="fa-solid fa-wallet"></i>
+      </div>
+      <div class="mobile-tab-item" data-tab="history">
+        <i class="fa-solid fa-clock-rotate-left"></i>
       </div>
     </div>
 
@@ -413,6 +419,40 @@
         </div>
       </section>
 
+      <!-- Payment Log panel -->
+      <section class="dashboard-panel" id="panel-history">
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <h2>Payment Log</h2>
+            <p>Receipt ledger of your subscriptions and withdrawals</p>
+          </div>
+        </div>
+  
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="creator-payment-logs-table">
+                <tr>
+                  <td colspan="6" style="text-align:center; padding:20px;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -420,8 +460,6 @@
   <script type="module" src="js/upload.js"></script>
   <script src="js/nav.js"></script>
 </body>
+
+
 </html>
-
-
-
-

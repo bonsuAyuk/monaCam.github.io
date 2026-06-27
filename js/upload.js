@@ -500,7 +500,8 @@ function setupUploadFormHandler() {
     }
 
     const videoFile   = videoFileInput?.files[0];
-    const thumbFile   = thumbFileInput?.files[0];\n
+    const thumbFile   = thumbFileInput?.files[0];
+
     if (!videoFile) {
       uploadErrorMsg.innerText = "Please select a video file to upload.";
       uploadErrorAlert.style.display = "flex";
@@ -563,7 +564,7 @@ function setupUploadFormHandler() {
 
       if (isExclusive && exclusiveRequestId) {
         // Mark request as completed
-        await updateDoc(doc(db, "customRequests", exclusiveRequestId), {
+await updateDoc(doc(db, "customRequests", exclusiveRequestId), {
           status: "completed",
           videoId: videoId
         });

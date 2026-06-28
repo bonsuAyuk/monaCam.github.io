@@ -567,64 +567,7 @@
         try {
           const requestId = await submitPaymentRequest({
             uid: currentUser.uid, email: currentUser.email,
-              <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">
-                ${v.priceFCFA.toLocaleString()} FCFA
-              </div>
-            </div>
-          </div>
-        `).join("");
-      } catch (e) {
-        console.error("Error loading related videos:", e);
-        container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
-      }
-    }
-
-    // Toggle comments dropdown
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggleBtn = document.getElementById("comments-toggle-btn");
-      const dropdown = document.getElementById("comments-dropdown");
-      if (toggleBtn && dropdown) {
-        toggleBtn.addEventListener("click", () => {
-          if (dropdown.style.display === "none") {
-            dropdown.style.display = "block";
-            toggleBtn.style.opacity = "0.6";
-          } else {
-            dropdown.style.display = "none";
-            toggleBtn.style.opacity = "1";
-          }
-        });
-      }
-    });
-  </script>
-</body>
-
-
-</html>
-        if (fileInput.files.length > 0) {
-          zone.classList.add("has-file");
-          document.getElementById("upload-zone-icon").className = "fa-solid fa-image";
-          document.getElementById("upload-zone-title").innerText = fileInput.files[0].name;
-          document.getElementById("upload-zone-subtitle").innerText = "Screenshot selected";
-          submitBtn.disabled = false;
-        }
-      });
-
-      document.getElementById("payment-submit-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const phone = document.getElementById("momo-phone").value.trim();
-        const file = fileInput.files[0];
-        if (!phone || !file) return;
-
-        const submitBtn = document.getElementById("submit-payment-btn");
-        const errEl = document.getElementById("payment-error-alert");
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...`;
-        errEl.style.display = "none";
-
-        try {
-          const requestId = await submitPaymentRequest({
-            uid: currentUser.uid, email: currentUser.email,
-            displayName: currentUser.displayName || "User",
+﻿            displayName: currentUser.displayName || "User",
             type: selectedPurchaseType,
             videoId: selectedPurchaseType === "ppv" ? videoId : null,
             videoTitle: selectedPurchaseType === "ppv" ? videoData.title : null,
@@ -664,7 +607,7 @@
       document.getElementById("screenshot-upload-zone").classList.remove("has-file");
       document.getElementById("upload-zone-icon").className = "fa-solid fa-camera";
       document.getElementById("upload-zone-title").innerText = "Tap to Upload Screenshot";
-      document.getElementById("upload-zone-subtitle").innerText = "JPG or PNG � your confirmation message";
+      document.getElementById("upload-zone-subtitle").innerText = "JPG or PNG — your confirmation message";
       document.getElementById("submit-payment-btn").disabled = true;
       document.getElementById("payment-error-alert").style.display = "none";
       document.getElementById("method-mtn").classList.add("selected");
@@ -677,7 +620,7 @@
       document.getElementById("momo-number-text").innerText = PAYMENT_NUMBERS[selectedProvider].number;
     }
 
-    // -- Related videos --------------------------------------------
+    // ── Related videos ────────────────────────────────────────────
     async function loadRelatedVideos() {
       const container = document.getElementById("related-videos-list");
       try {

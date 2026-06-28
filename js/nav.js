@@ -19,6 +19,7 @@
   };
 
   window.updateNavAuthUI = function(user) {
+    window.isUserLoggedIn = !!user;
     const dashboardLink = document.getElementById("nav-dashboard-link-container");
     const authActions = document.getElementById("auth-nav-actions");
     const exclusivesLink = document.querySelector('a.nav-link[href="exclusives.html"]');
@@ -211,11 +212,31 @@
     };
   }
 
+  // ── Auto Logout for Inactivity ────────────────────────────────
+  const INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+  let inactivityTimer;
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      if (window.isUserLoggedIn) {
+        alert("You have been automatically logged out due to inactivity for your security.");
+        window.performLogout();
+      }
+    }, INACTIVITY_LIMIT_MS);
+  }
+
+  ['mousemove', 'mousedown', 'keypress', 'touchmove', 'scroll'].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
+  
+  resetInactivityTimer();
+
   // Run after DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initNav);
   } else {
     initNav();
   }
-})();
 
+})();

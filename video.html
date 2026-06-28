@@ -284,7 +284,7 @@
 
   <script type="module">
     import { auth, onAuthStateChanged, db, collection, query, where, getDocs, getDoc, doc, updateDoc, increment } from "./js/db-config.js";
-    import { DrivePlayer, isDriveUrl, buildDrivePreviewUrl } from "./js/drive-player.js";
+    import { DrivePlayer, isDriveUrl } from "./js/drive-player.js";
     import { PLANS, PAYMENT_NUMBERS, submitPaymentRequest, checkUserAccess } from "./js/payment.js";
 
     // ── State ─────────────────────────────────────────────────────
@@ -394,6 +394,7 @@
 
       if (!drivePlayer) {
         drivePlayer = new DrivePlayer(document.getElementById("player-wrapper"), {
+          previewSeconds: videoData.previewSeconds || 30,
           onPreviewEnd: () => {
             if (!hasAccess) {
               if (currentUser) showLockedPaywall();

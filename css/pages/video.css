@@ -196,6 +196,11 @@
   margin-bottom: 24px;
 }
 
+.comment-input-box input {
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
+}
+
 .comments-list {
   display: flex;
   flex-direction: column;

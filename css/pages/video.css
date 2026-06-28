@@ -509,3 +509,18 @@
     overflow-y: auto;
   }
 }
+
+/* Mobile Video Redesign Updates */
+@media (max-width: 640px) {
+  .video-page-container { padding: 0 !important; }
+  .video-info-box, .comments-section, .related-videos-title { padding: 0 16px; }
+  .video-info-title { font-size: 16px; margin-bottom: 6px; }
+  .video-info-meta { font-size: 12px; border: none; padding-bottom: 0; }
+  .video-creator-widget { border: none; background: transparent; padding: 0; margin: 12px 0; gap: 8px; }
+  .video-creator-avatar { width: 36px; height: 36px; border: none; }
+  .related-list { grid-template-columns: 1fr 1fr !important; gap: 8px; padding: 0 16px; }
+  .related-card { flex-direction: column !important; padding: 0; background: transparent; gap: 6px; }
+  .related-thumb { width: 100% !important; aspect-ratio: 16/9; border-radius: 4px; }
+  .related-title { font-size: 12px; margin-bottom: 2px; }
+  .related-creator { font-size: 10px; }
+}

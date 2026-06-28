@@ -82,7 +82,7 @@
   height: 40px;
   cursor: pointer;
   border: none;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.08);
   border-radius: 8px;
   border: 1px solid var(--card-border);
   padding: 0;
@@ -97,6 +97,11 @@
   background: var(--text-primary);
   border-radius: 2px;
   transition: var(--transition-fast);
+}
+
+.nav-hamburger.open {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .nav-hamburger.open span:nth-child(1) {
@@ -116,9 +121,7 @@
   top: 70px;
   left: 0;
   right: 0;
-  background: rgba(8, 9, 13, 0.97);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  background: #08090d; /* Fully solid to prevent visual confusion on home screen */
   border-bottom: 1px solid var(--card-border);
   z-index: 998;
   padding: 20px 24px 24px;

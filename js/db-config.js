@@ -146,3 +146,5 @@ export {
   serverTimestamp,
   increment,
 };
+
+export const DRIVE_API_KEY = "AIzaSyCFzqtgDTZos4P49em7jZdqreG9Ha9zL3k";

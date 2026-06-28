@@ -1,22 +1,4 @@
-/**
- * drive-player.js — Google Drive Video Player Utility
- *
- * Google Drive videos CANNOT be played in a standard <video> element.
- * Drive serves videos through its own streaming infrastructure,
- * accessible only via the preview iframe URL.
- *
- * This module:
- * - Detects whether a video source is a Google Drive URL
- * - Converts any Drive URL format to the correct embed URL
- * - Swaps the <video> element for an <iframe> when needed
- * - Applies security overlays (right-click block, watermark)
- * - Enforces preview-only mode with a time limit
- *
- * Usage:
- *   import { DrivePlayer } from "./js/drive-player.js";
- *   const player = new DrivePlayer(containerEl, options);
- *   player.load(driveUrlOrFileId, hasFullAccess);
- */
+import { DRIVE_API_KEY } from "./db-config.js";
 
 // ── Detect if a URL is a Google Drive URL ────────────────────────
 export function isDriveUrl(url) {
@@ -32,310 +14,235 @@ export function isDriveUrl(url) {
 export function extractDriveFileId(url) {
   if (!url) return null;
   const s = url.trim();
-  // Bare file ID
   if (/^[a-zA-Z0-9_-]{25,}$/.test(s)) return s;
-  // /file/d/{ID}/...
   const m1 = s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1) return m1[1];
-  // ?id={ID} or &id={ID}
   const m2 = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m2) return m2[1];
   return null;
 }
 
-// ── Build the correct Drive embed URL ────────────────────────────
-export function buildDrivePreviewUrl(fileIdOrUrl) {
+// ── Build the raw streaming API URL ───────────────────────────────
+export function buildDriveStreamUrl(fileIdOrUrl) {
   const id = extractDriveFileId(fileIdOrUrl);
   if (!id) return null;
-  return `https://drive.google.com/file/d/${id}/preview?autoplay=1`;
+  return `https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${DRIVE_API_KEY}`;
 }
 
-/**
- * DrivePlayer — replaces a container with the appropriate player
- * based on whether the source is a Drive URL or a regular video URL.
- */
 export class DrivePlayer {
-  /**
-   * @param {HTMLElement} container - The .player-wrapper element
-   * @param {object} options
-   *   previewSeconds {number}   - How many seconds the preview lasts (default 30)
-   *   watermarkText  {string}   - Text shown on the watermark
-   *   onPreviewEnd   {function} - Called when preview time is up
-   *   onPlay         {function} - Called when user clicks the play overlay
-   */
   constructor(container, options = {}) {
     this.container      = container;
     this.previewSeconds = options.previewSeconds || 30;
     this.watermarkText  = options.watermarkText  || "MonaCam";
     this.onPreviewEnd   = options.onPreviewEnd   || (() => {});
-    this.onPlay         = options.onPlay         || null;
-
-    this._previewTimer   = null;
-    this._elapsed        = 0;
-    this._isPreviewMode  = false;
-    this._isDrive        = false;
-
-    this._applySecurityOverlays();
+    
+    this._isPreviewMode = false;
+    this._hasFullAccess = false;
+    this._isPlaying = false;
+    
+    // Clear container
+    this.container.innerHTML = "";
+    
+    // Build Native Player UI
+    this._buildUI();
+    this._attachEvents();
   }
 
-  // ── Load a video ─────────────────────────────────────────────
-  /**
-   * @param {string} source        - Drive URL/fileId OR direct video URL
-   * @param {boolean} hasFullAccess - false = preview only
-   */
-  load(source, hasFullAccess) {
-    this._clearTimer();
-    this._isDrive       = isDriveUrl(source);
-    this._isPreviewMode = !hasFullAccess;
-    this._source        = source;
-    this._hasFullAccess = hasFullAccess;
+  _buildUI() {
+    this.container.style.position = "relative";
+    this.container.style.backgroundColor = "#000";
+    this.container.style.overflow = "hidden";
+    this.container.style.display = "flex";
+    this.container.style.alignItems = "center";
+    this.container.style.justifyContent = "center";
 
-    if (this._isDrive) {
-      // Defer loading the iframe until play is clicked
-      // this._loadDriveIframe(source, hasFullAccess);
-    } else {
-      // Defer loading the video until play is clicked
-      // this._loadVideoElement(source, hasFullAccess);
-    }
+    // Video Element
+    this.videoEl = document.createElement("video");
+    this.videoEl.className = "monacam-video";
+    this.videoEl.style.width = "100%";
+    this.videoEl.style.height = "100%";
+    this.videoEl.style.objectFit = "contain";
+    this.videoEl.style.cursor = "pointer";
+    // We do NOT use the native "controls" attribute. We build our own.
+    this.videoEl.controls = false;
+    this.videoEl.playsInline = true;
 
-    this._showPlayOverlay();
-  }
+    // Big Center Play Button Overlay
+    this.centerOverlay = document.createElement("div");
+    this.centerOverlay.className = "monacam-center-overlay";
+    this.centerOverlay.innerHTML = `<i class="fa-solid fa-play"></i>`;
+    
+    // Top Watermark
+    const watermark = document.createElement("div");
+    watermark.className = "monacam-watermark";
+    watermark.innerText = this.watermarkText;
 
-  // ── Explicit Play Overlay ─────────────────────────────────────
-  _showPlayOverlay() {
-    let overlay = this.container.querySelector(".drive-play-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "drive-play-overlay";
-      overlay.innerHTML = `<i class="fa-solid fa-play" style="font-size:48px; color:white; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8));"></i>`;
-      overlay.style.cssText = `
-        position: absolute; inset: 0; z-index: 20;
-        background: rgba(0,0,0,0.3);
-        display: flex; align-items: center; justify-content: center;
-        backdrop-filter: blur(2px);
-        transition: opacity 0.2s ease;
-        cursor: pointer;
-      `;
-      this.container.appendChild(overlay);
-      
-      overlay.addEventListener("click", () => {
-        overlay.style.opacity = "0";
-        setTimeout(() => overlay.remove(), 200);
-        
-        if (this._isDrive) {
-          this._loadDriveIframe(this._source, !this._isPreviewMode);
-        } else {
-          this._loadVideoElement(this._source, !this._isPreviewMode);
-        }
-
-        if (this.onPlay) this.onPlay();
-        if (this._isPreviewMode && !this._previewTimer) {
-          this._startPreviewTimer();
-        }
-        
-        const video = this.container.querySelector("video");
-        if (video) {
-          video.play().catch(() => {});
-        }
-      });
-    }
-  }
-
-  // ── Drive iframe player ───────────────────────────────────────
-  _loadDriveIframe(source, hasFullAccess) {
-    // Remove any existing <video> element
-    const existingVideo = this.container.querySelector("video");
-    if (existingVideo) existingVideo.remove();
-
-    // Remove any existing iframe
-    const existingIframe = this.container.querySelector("iframe.drive-player-frame");
-    if (existingIframe) existingIframe.remove();
-
-    const embedUrl = buildDrivePreviewUrl(source);
-    if (!embedUrl) {
-      console.error("Could not build Drive embed URL from:", source);
-      return;
-    }
-
-    const iframe = document.createElement("iframe");
-    iframe.className           = "drive-player-frame";
-    iframe.src                 = embedUrl;
-    iframe.allow               = "autoplay; encrypted-media; fullscreen; picture-in-picture";
-    iframe.setAttribute("allowfullscreen", "");
-    // Security: disable picture-in-picture within the iframe where possible
-    iframe.setAttribute("disablepictureinpicture", "");
-    // Style
-    iframe.style.cssText = `
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-      position: absolute;
-      top: 0; left: 0;
+    // Bottom Controls Bar
+    this.controlsBar = document.createElement("div");
+    this.controlsBar.className = "monacam-controls";
+    this.controlsBar.innerHTML = `
+      <div class="monacam-progress-container">
+        <div class="monacam-progress-bar">
+          <div class="monacam-progress-filled"></div>
+        </div>
+      </div>
+      <div class="monacam-controls-bottom">
+        <button class="monacam-btn-play"><i class="fa-solid fa-play"></i></button>
+        <div class="monacam-time">
+          <span class="monacam-time-current">0:00</span> / <span class="monacam-time-total">0:00</span>
+        </div>
+        <div class="monacam-spacer"></div>
+        <button class="monacam-btn-volume"><i class="fa-solid fa-volume-high"></i></button>
+        <button class="monacam-btn-fullscreen"><i class="fa-solid fa-expand"></i></button>
+      </div>
     `;
 
-    // Make container position relative so iframe fills it
-    this.container.style.position = "relative";
+    this.container.appendChild(this.videoEl);
+    this.container.appendChild(this.centerOverlay);
+    this.container.appendChild(watermark);
+    this.container.appendChild(this.controlsBar);
 
-    // Insert iframe before any overlays
-    const firstOverlay = this.container.querySelector(".paywall-overlay, .security-overlay");
-    if (firstOverlay) {
-      this.container.insertBefore(iframe, firstOverlay);
-    } else {
-      this.container.appendChild(iframe);
-    }
-
-    // Add a semi-transparent preview blocker overlay for preview mode
-    if (!hasFullAccess) {
-      // this._ensurePreviewBlocker(); removed to allow click interactions
-    }
+    // References to UI elements
+    this.btnPlay = this.controlsBar.querySelector(".monacam-btn-play");
+    this.btnVolume = this.controlsBar.querySelector(".monacam-btn-volume");
+    this.btnFullscreen = this.controlsBar.querySelector(".monacam-btn-fullscreen");
+    this.progressBar = this.controlsBar.querySelector(".monacam-progress-container");
+    this.progressFilled = this.controlsBar.querySelector(".monacam-progress-filled");
+    this.timeCurrent = this.controlsBar.querySelector(".monacam-time-current");
+    this.timeTotal = this.controlsBar.querySelector(".monacam-time-total");
   }
 
-  // ── Regular HTML5 video player ────────────────────────────────
-  _loadVideoElement(source, hasFullAccess) {
-    // Remove any Drive iframe
-    const existingIframe = this.container.querySelector("iframe.drive-player-frame");
-    if (existingIframe) existingIframe.remove();
+  _attachEvents() {
+    // Play/Pause toggles
+    const togglePlay = () => {
+      if (this.videoEl.paused) {
+        this.videoEl.play();
+      } else {
+        this.videoEl.pause();
+      }
+    };
 
-    let video = this.container.querySelector("video");
-    if (!video) {
-      video = document.createElement("video");
-      video.id          = "main-video-player";
-      video.controls    = true;
-      video.playsInline = true; // iOS
-      video.style.cssText = "width:100%; height:100%; display:block; object-fit:contain;";
-      this.container.appendChild(video);
-    }
+    this.videoEl.addEventListener("click", togglePlay);
+    this.centerOverlay.addEventListener("click", togglePlay);
+    this.btnPlay.addEventListener("click", togglePlay);
 
-    // Disable controls that expose the URL
-    video.setAttribute("controlslist", "nodownload noremoteplayback");
-    video.setAttribute("disablepictureinpicture", "");
+    // Video Events
+    this.videoEl.addEventListener("play", () => {
+      this._isPlaying = true;
+      this.centerOverlay.style.opacity = "0";
+      this.centerOverlay.style.pointerEvents = "none";
+      this.btnPlay.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+    });
 
-    video.src  = source;
-    video.load();
+    this.videoEl.addEventListener("pause", () => {
+      this._isPlaying = false;
+      this.centerOverlay.style.opacity = "1";
+      this.centerOverlay.innerHTML = `<i class="fa-solid fa-play"></i>`;
+      this.centerOverlay.style.pointerEvents = "auto";
+      this.btnPlay.innerHTML = `<i class="fa-solid fa-play"></i>`;
+    });
 
-    // For preview mode, pause at the limit
-    if (!hasFullAccess) {
-      video.play().catch(() => {});
-    }
+    this.videoEl.addEventListener("loadedmetadata", () => {
+      this.timeTotal.innerText = this._formatTime(this.videoEl.duration);
+    });
+
+    this.videoEl.addEventListener("timeupdate", () => {
+      this.timeCurrent.innerText = this._formatTime(this.videoEl.currentTime);
+      const progressPercent = (this.videoEl.currentTime / this.videoEl.duration) * 100;
+      this.progressFilled.style.width = `${progressPercent}%`;
+
+      // Enforce preview limit
+      if (this._isPreviewMode && this.videoEl.currentTime >= this.previewSeconds) {
+        this.videoEl.pause();
+        this._blockPreview();
+      }
+    });
+
+    // Scrubbing (seeking)
+    this.progressBar.addEventListener("click", (e) => {
+      if (this._isPreviewMode) return; // Prevent seeking in preview
+      const rect = this.progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      this.videoEl.currentTime = pos * this.videoEl.duration;
+    });
+
+    // Volume
+    this.btnVolume.addEventListener("click", () => {
+      this.videoEl.muted = !this.videoEl.muted;
+      if (this.videoEl.muted) {
+        this.btnVolume.innerHTML = `<i class="fa-solid fa-volume-xmark"></i>`;
+      } else {
+        this.btnVolume.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
+      }
+    });
+
+    // Fullscreen
+    this.btnFullscreen.addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        if (this.container.requestFullscreen) {
+          this.container.requestFullscreen();
+        } else if (this.container.webkitRequestFullscreen) {
+          this.container.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    });
+    
+    // Prevent right click
+    this.videoEl.addEventListener('contextmenu', e => e.preventDefault());
   }
 
-  // ── Preview countdown timer (for both Drive and regular videos) ─
-  _startPreviewTimer() {
-    this._elapsed = 0;
+  _formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
 
-    // Create countdown badge
-    let badge = this.container.querySelector(".preview-countdown-badge");
-    if (!badge) {
-      badge = document.createElement("div");
-      badge.className = "preview-countdown-badge";
-      badge.style.cssText = `
-        position: absolute; top: 12px; right: 12px; z-index: 25;
-        background: rgba(0,0,0,0.7); color: #fff;
-        padding: 4px 8px; border-radius: 4px;
-        font-size: 12px; font-weight: bold; font-family: sans-serif;
-        pointer-events: none; backdrop-filter: blur(4px);
-      `;
-      this.container.appendChild(badge);
+  load(source, hasFullAccess) {
+    this._isPreviewMode = !hasFullAccess;
+    this._hasFullAccess = hasFullAccess;
+    
+    // Reset UI
+    this.centerOverlay.innerHTML = `<i class="fa-solid fa-play"></i>`;
+    this.centerOverlay.style.opacity = "1";
+    this.centerOverlay.style.pointerEvents = "auto";
+    this.progressFilled.style.width = "0%";
+    
+    // Resolve stream URL
+    let streamUrl = source;
+    if (isDriveUrl(source)) {
+      streamUrl = buildDriveStreamUrl(source);
     }
     
-    const updateBadge = () => {
-      const remaining = this.previewSeconds - this._elapsed;
-      badge.innerText = `Free Preview: ${remaining}s`;
-    };
-    updateBadge();
-
-    this._previewTimer = setInterval(() => {
-      this._elapsed++;
-      updateBadge();
-      if (this._elapsed >= this.previewSeconds) {
-        this._clearTimer();
-        this._blockPreview();
-        this.onPreviewEnd();
-        if (badge) badge.remove();
-      }
-    }, 1000);
-  }
-
-  _clearTimer() {
-    if (this._previewTimer) {
-      clearInterval(this._previewTimer);
-      this._previewTimer = null;
+    // Load into video element but do NOT autoplay
+    this.videoEl.src = streamUrl;
+    this.videoEl.load();
+    
+    if (this._isPreviewMode) {
+      this.progressBar.style.cursor = "not-allowed";
+    } else {
+      this.progressBar.style.cursor = "pointer";
     }
-    // Also pause any video element
-    const video = this.container.querySelector("video");
-    if (video) video.pause();
   }
 
   _blockPreview() {
-    // Blur/hide the iframe or video
-    const iframe = this.container.querySelector("iframe.drive-player-frame");
-    const video  = this.container.querySelector("video");
-    if (iframe) {
-      // Remove iframe completely to stop playback
-      iframe.remove();
-    }
-    if (video) {
-      video.pause();
-      video.style.filter = "blur(12px) brightness(0.3)";
-    }
-    // Remove the preview blocker overlay so the paywall can show
-    const blocker = this.container.querySelector(".preview-time-blocker");
-    if (blocker) blocker.remove();
-  }
-
-  _ensurePreviewBlocker() {
-    if (!this.container.querySelector(".preview-time-blocker")) {
-      const blocker = document.createElement("div");
-      blocker.className = "preview-time-blocker";
-      blocker.style.cssText = `
-        position: absolute;
-        inset: 0;
-        z-index: 3;
-        background: transparent;
-      `;
-      this.container.appendChild(blocker);
-    }
-  }
-
-  // ── Security overlays (context menu, keyboard shortcuts) ──────
-  _applySecurityOverlays() {
-    // Disable right-click on the container
-    this.container.addEventListener("contextmenu", (e) => e.preventDefault());
-
-    // Watermark
-    if (!this.container.querySelector(".video-watermark")) {
-      const wm = document.createElement("div");
-      wm.className = "video-watermark";
-      wm.innerText = this.watermarkText;
-      wm.style.cssText = `
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        z-index: 10;
-        font-family: var(--font-display, sans-serif);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        color: rgba(255,255,255,0.35);
-        text-transform: uppercase;
-        pointer-events: none;
-        user-select: none;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-      `;
-      this.container.appendChild(wm);
-    }
-
-    // Block DevTools shortcuts
-    document.addEventListener("keydown", (e) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey && e.shiftKey && ["I","J","C","U","K"].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && e.key.toUpperCase() === "U")
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }, true);
+    // Show a blurred overlay over the player
+    const overlay = document.createElement("div");
+    overlay.className = "monacam-preview-blocker";
+    overlay.innerHTML = `
+      <div class="monacam-preview-blocker-content">
+        <i class="fa-solid fa-lock" style="font-size:32px; color:var(--primary); margin-bottom:12px;"></i>
+        <h4 style="margin:0 0 8px 0; color:#fff;">Preview Ended</h4>
+        <p style="margin:0; font-size:13px; color:var(--text-muted);">Please upgrade to watch the full video.</p>
+      </div>
+    `;
+    this.container.appendChild(overlay);
+    this.onPreviewEnd();
   }
 }

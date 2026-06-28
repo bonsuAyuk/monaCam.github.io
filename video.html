@@ -342,8 +342,19 @@
       document.getElementById("video-title").innerText        = videoData.title || "Untitled";
       document.getElementById("video-description").innerText  = videoData.description || "";
       document.getElementById("creator-name").innerText       = videoData.creatorName || "Anonymous";
+      document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category || 'Uncategorized'}`;
+      document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${(videoData.views || 0).toLocaleString()} views`;
+      document.getElementById("ppv-price-label").innerText    = `${(videoData.priceFCFA || 0).toLocaleString()} FCFA`;
+      
+      let dateStr = "Unknown";
+      if (videoData.createdAt) {
+        const d = videoData.createdAt.toDate ? videoData.createdAt.toDate() : new Date(videoData.createdAt);
+        dateStr = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      document.getElementById("video-upload-date").innerHTML = `<i class="fa-solid fa-calendar"></i> ${dateStr}`;
+
       const previewSec = videoData.previewSeconds || 30;
-      document.getElementById('preview-limit-text').innerText = ${previewSec} seconds;
+      document.getElementById('preview-limit-text').innerText = `${previewSec} seconds`;
 
       drivePlayer.load(source, hasAccess);
     }

@@ -100,6 +100,7 @@
             <span id="video-views-count"><i class="fa-solid fa-eye"></i> 0 views</span>
             <span id="video-category"><i class="fa-solid fa-tag"></i> —</span>
             <span id="video-upload-date"><i class="fa-solid fa-calendar"></i> —</span>
+            <span id="comments-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:bold; transition: opacity 0.2s;"><i class="fa-solid fa-comment"></i> Comments</span>
           </div>
           <div class="video-creator-widget">
             <img id="creator-avatar"
@@ -113,9 +114,9 @@
               <i class="fa-solid fa-trash"></i> Delete
             </button>
           </div>
-          <div class="card" style="margin-top:0;">
-            <h3 style="margin-bottom:10px; font-family:var(--font-display); font-size:15px;">Description</h3>
-            <p style="color:var(--text-secondary); font-size:14px; line-height:1.6;" id="video-description">Loading...</p>
+          <div style="margin-top: 15px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <h3 style="margin-bottom:8px; font-family:var(--font-display); font-size:14px; color:var(--text-primary);">Description</h3>
+            <p style="color:var(--text-secondary); font-size:13px; line-height:1.5; white-space:pre-wrap;" id="video-description">Loading...</p>
           </div>
 
         <!-- Comments -->
@@ -127,28 +128,6 @@
           </div>
           <div class="comments-list" id="comments-list">
             <p style="color:var(--text-muted); font-size:13px; text-align:center; padding: 20px 0;">No comments yet. Be the first to comment!</p>
-          </div>
-        </div>
-        </div>
-
-        <!-- Comments -->
-        <div class="comments-section animate-fade-in">
-          <h3 class="comments-title"><i class="fa-solid fa-comments text-gradient"></i> Comments</h3>
-          <div class="comment-input-box">
-            <input type="text" class="form-control" id="comment-input" placeholder="Write a comment..." style="flex:1; font-size:16px;">
-            <button class="btn btn-secondary" id="post-comment-btn">Post</button>
-          </div>
-          <div class="comments-list" id="comments-list">
-            <div class="comment-item">
-              <div class="comment-avatar" style="background-image:url(https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80);"></div>
-              <div class="comment-body">
-                <div class="comment-header">
-                  <span class="comment-username">Elvis Yaounde</span>
-                  <span class="comment-date">1 day ago</span>
-                </div>
-                <p class="comment-text">Super helpful content, worth every franc!</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>

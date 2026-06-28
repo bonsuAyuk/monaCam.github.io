@@ -101,6 +101,7 @@
             <span id="video-category"><i class="fa-solid fa-tag"></i> —</span>
             <span id="video-duration" style="display:none;"><i class="fa-solid fa-clock"></i> <span id="duration-text"></span></span>
             <span id="video-upload-date"><i class="fa-solid fa-calendar"></i> —</span>
+            <span id="comments-toggle-btn" style="cursor:pointer; color:var(--primary); font-weight:bold; transition: opacity 0.2s;"><i class="fa-solid fa-comment"></i> Comments</span>
           </div>
           <div class="video-creator-widget">
             <img id="creator-avatar"
@@ -117,8 +118,8 @@
         </div>
 
         <!-- Comments -->
-        <div class="comments-section animate-fade-in">
-          <h3 class="comments-title"><i class="fa-solid fa-comments text-gradient"></i> Comments</h3>
+        <div class="comments-section animate-fade-in" id="comments-dropdown" style="display:none; margin-top: 10px;">
+          <!-- Comments toggle replaces the h3 title -->
           <div class="comment-input-box">
             <input type="text" class="form-control" id="comment-input" placeholder="Write a comment..." style="flex:1; font-size:16px;">
             <button class="btn btn-secondary" id="post-comment-btn">Post</button>
@@ -638,10 +639,25 @@
         container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
       }
     }
+
+    // Toggle comments dropdown
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById("comments-toggle-btn");
+      const dropdown = document.getElementById("comments-dropdown");
+      if (toggleBtn && dropdown) {
+        toggleBtn.addEventListener("click", () => {
+          if (dropdown.style.display === "none") {
+            dropdown.style.display = "block";
+            toggleBtn.style.opacity = "0.6";
+          } else {
+            dropdown.style.display = "none";
+            toggleBtn.style.opacity = "1";
+          }
+        });
+      }
+    });
   </script>
 </body>
+
+
 </html>
-
-
-
-

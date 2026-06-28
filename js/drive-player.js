@@ -108,24 +108,38 @@ export class DrivePlayer {
         position: absolute; inset: 0; z-index: 20;
         background: rgba(0,0,0,0.3);
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer;
         backdrop-filter: blur(2px);
         transition: opacity 0.2s ease;
+        pointer-events: none;
       `;
       this.container.appendChild(overlay);
       
-      overlay.addEventListener("click", () => {
-        overlay.style.opacity = "0";
-        setTimeout(() => overlay.remove(), 200);
-        
-        if (this.onPlay) this.onPlay();
-        if (this._isPreviewMode) {
-          this._startPreviewTimer();
+      const onBlur = () => {
+        const iframe = this.container.querySelector("iframe.drive-player-frame");
+        if (document.activeElement === iframe) {
+          overlay.style.opacity = "0";
+          setTimeout(() => overlay.remove(), 200);
+          
+          if (this.onPlay) this.onPlay();
+          if (this._isPreviewMode) {
+            this._startPreviewTimer();
+          }
+          window.removeEventListener('blur', onBlur);
         }
-        
-        const video = this.container.querySelector("video");
-        if (video) video.play().catch(() => {});
-      });
+      };
+      window.addEventListener('blur', onBlur);
+
+      const video = this.container.querySelector("video");
+      if (video) {
+        video.addEventListener('play', () => {
+          overlay.style.opacity = "0";
+          setTimeout(() => overlay.remove(), 200);
+          if (this.onPlay) this.onPlay();
+          if (this._isPreviewMode && !this._previewTimer) {
+            this._startPreviewTimer();
+          }
+        }, { once: true });
+      }
     }
   }
 
@@ -211,12 +225,36 @@ export class DrivePlayer {
   // ── Preview countdown timer (for both Drive and regular videos) ─
   _startPreviewTimer() {
     this._elapsed = 0;
+
+    // Create countdown badge
+    let badge = this.container.querySelector(".preview-countdown-badge");
+    if (!badge) {
+      badge = document.createElement("div");
+      badge.className = "preview-countdown-badge";
+      badge.style.cssText = `
+        position: absolute; top: 12px; right: 12px; z-index: 25;
+        background: rgba(0,0,0,0.7); color: #fff;
+        padding: 4px 8px; border-radius: 4px;
+        font-size: 12px; font-weight: bold; font-family: sans-serif;
+        pointer-events: none; backdrop-filter: blur(4px);
+      `;
+      this.container.appendChild(badge);
+    }
+    
+    const updateBadge = () => {
+      const remaining = this.previewSeconds - this._elapsed;
+      badge.innerText = `Free Preview: ${remaining}s`;
+    };
+    updateBadge();
+
     this._previewTimer = setInterval(() => {
       this._elapsed++;
+      updateBadge();
       if (this._elapsed >= this.previewSeconds) {
         this._clearTimer();
         this._blockPreview();
         this.onPreviewEnd();
+        if (badge) badge.remove();
       }
     }, 1000);
   }

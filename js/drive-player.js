@@ -187,7 +187,7 @@ export class DrivePlayer {
 
     // Add a semi-transparent preview blocker overlay for preview mode
     if (!hasFullAccess) {
-      this._ensurePreviewBlocker();
+      // this._ensurePreviewBlocker(); removed to allow click interactions
     }
   }
 

@@ -371,7 +371,7 @@
       const source = resolveVideoSource(videoData, hasAccess);
 
       if (!drivePlayer) {
-        drivePlayer = new DrivePlayer("player-container", {
+        drivePlayer = new DrivePlayer("player-wrapper", {
           onPreviewEnd: () => {
             if (!hasAccess) {
               if (currentUser) showLockedPaywall();

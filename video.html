@@ -23,11 +23,11 @@
       height: 100%;
       border: none;
     }
-    @media (max-width: 640px) {
+    @media (max-width: 640px) and (orientation: portrait) {
       .player-wrapper iframe.drive-player-frame {
-        width: 133.33%;
-        height: 133.33%;
-        transform: scale(0.75);
+        width: 200%;
+        height: 200%;
+        transform: scale(0.5);
         transform-origin: top left;
       }
     }
@@ -658,18 +658,19 @@
           return;
         }
 
-        container.innerHTML = related.map(v => `
-          <div class="related-card" onclick="window.location.href='video.html?id=${v.id}'" role="button" tabindex="0">
+        container.innerHTML = related.map(v => {
+          window.loadedVideos = window.loadedVideos || {};
+          window.loadedVideos[v.id] = v;
+          return `
+          <div class="related-card" onclick="sessionStorage.setItem('preloaded_video_${v.id}', JSON.stringify(window.loadedVideos['${v.id}'])); window.location.href='video.html?id=${v.id}'" role="button" tabindex="0">
             <img src="${v.thumbDriveId ? `https://drive.google.com/uc?export=view&id=${v.thumbDriveId}` : (v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80')}" class="related-thumb" alt="${v.title}" loading="lazy">
             <div class="related-details">
               <h4 class="related-title">${v.title}</h4>
               <div class="related-creator">${v.creatorName}</div>
-              <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">
-                ${v.priceFCFA.toLocaleString()} FCFA
-              </div>
+              ${v.priceFCFA > 0 ? `<div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">${v.priceFCFA.toLocaleString()} FCFA</div>` : ''}
             </div>
           </div>
-        `).join("");
+        `}).join("");
       } catch (e) {
         console.error("Error loading related videos:", e);
         container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;

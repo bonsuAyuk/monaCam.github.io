@@ -345,6 +345,56 @@
       document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category || 'Uncategorized'}`;
       document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${(videoData.views || 0).toLocaleString()} views`;
       document.getElementById("ppv-price-label").innerText    = `${(videoData.priceFCFA || 0).toLocaleString()} FCFA`;
+      if (videoData.isExclusive) {
+        // Hide views and comments for exclusive videos
+        const viewsEl = document.getElementById("video-views-count");
+        if (viewsEl) viewsEl.style.display = 'none';
+        
+        const commentsSection = document.querySelector(".comments-section");
+        if (commentsSection) commentsSection.style.display = 'none';
+      }
+
+      // Check access
+      let hasAccess = false;
+      if (currentUser) {
+        hasAccess = await checkUserAccess(currentUser.uid, videoId);
+        
+        // Hide paywall elements if they have access
+        if (hasAccess) {
+          const previewNotice = document.getElementById("preview-notice");
+          if (previewNotice) previewNotice.style.display = 'none';
+          const ubt = document.getElementById("unlock-btn-top");
+          if (ubt) ubt.style.display = 'none';
+        }
+      }
+
+      const source = resolveVideoSource(videoData, hasAccess);
+
+      if (!drivePlayer) {
+        drivePlayer = new DrivePlayer("player-container", {
+          onPreviewEnd: () => {
+            if (!hasAccess) {
+              if (currentUser) showLockedPaywall();
+              else showLoggedOutPaywall();
+            }
+          }
+        });
+      }
+
+      // Views tracking logic
+      const viewKey = `viewed_${videoId}`;
+      if (!sessionStorage.getItem(viewKey)) {
+        sessionStorage.setItem(viewKey, "true");
+        updateDoc(doc(db, "videos", videoId), { 
+          views: increment(1),
+          ...(hasAccess ? { paidViews: increment(1) } : {}) 
+        }).then(() => {
+          // Instantly update the DOM to show the new view count
+          videoData.views = (videoData.views || 0) + 1;
+          const viewsEl = document.getElementById("video-views-count");
+          if (viewsEl) viewsEl.innerHTML = `<i class="fa-solid fa-eye"></i> ${videoData.views.toLocaleString()} views`;
+        }).catch(e => console.error("Failed to increment views:", e));
+      }
       
       let dateStr = "Unknown";
       if (videoData.createdAt) {

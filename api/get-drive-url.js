@@ -1,4 +1,4 @@
-import { GoogleAuth } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 import https from 'https';
 
 export default async function handler(req, res) {
@@ -27,20 +27,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'fileName and mimeType are required' });
     }
 
-    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-      return res.status(500).json({ error: 'Server missing FIREBASE_SERVICE_ACCOUNT' });
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+    if (!clientId || !clientSecret || !refreshToken) {
+      return res.status(500).json({ error: 'Server missing OAuth credentials' });
     }
 
-    const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    const oauth2Client = new OAuth2Client(clientId, clientSecret);
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-    const auth = new GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/drive.file']
-    });
-
-    const client = await auth.getClient();
-    const tokenObj = await client.getAccessToken();
-    const token = tokenObj.token;
+    const { token } = await oauth2Client.getAccessToken();
 
     // Use environment variable for folder ID if set, otherwise upload to root
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;

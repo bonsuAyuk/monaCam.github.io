@@ -211,7 +211,7 @@ async function loadVideos(reset = false) {
         videosHTML += `
           <a href="video.html?id=${docSnap.id}" class="video-card" onclick="sessionStorage.setItem('preloaded_video_${docSnap.id}', JSON.stringify(window.loadedVideos['${docSnap.id}']))">
             <div class="video-thumbnail-container">
-              <img src="${video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail'}" class="video-thumbnail" alt="${video.title}">
+              <img src="${video.thumbDriveId ? `https://lh3.googleusercontent.com/d/${video.thumbDriveId}` : (video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail')}" class="video-thumbnail" alt="${video.title}" loading="lazy">
               <div class="video-duration">${video.duration || '0:00'}</div>
               <div class="video-price-tag">
                 <i class="fa-solid fa-money-bill"></i> ${video.priceFCFA ? video.priceFCFA.toLocaleString() + ' FCFA' : 'Free'}

@@ -472,7 +472,7 @@
       const previewSec = videoData.previewSeconds || 30;
       document.getElementById('preview-limit-text').innerText = `${previewSec} seconds`;
 
-      const thumbUrl = videoData.thumbDriveId ? `https://www.googleapis.com/drive/v3/files/${videoData.thumbDriveId}?alt=media&key=${DRIVE_API_KEY}` : (videoData.thumbnailUrl || videoData.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&q=80');
+      const thumbUrl = videoData.thumbDriveId ? `https://lh3.googleusercontent.com/d/${videoData.thumbDriveId}` : (videoData.thumbnailUrl || videoData.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&q=80');
       const pw = document.getElementById("player-wrapper");
       pw.style.backgroundImage = `url('${thumbUrl}')`;
       pw.style.backgroundSize = "cover";
@@ -699,7 +699,7 @@
           window.loadedVideos[v.id] = v;
           return `
           <div class="related-card" onclick="sessionStorage.setItem('preloaded_video_${v.id}', JSON.stringify(window.loadedVideos['${v.id}'])); window.location.href='video.html?id=${v.id}'" role="button" tabindex="0">
-            <img src="${v.thumbDriveId ? `https://www.googleapis.com/drive/v3/files/${v.thumbDriveId}?alt=media&key=${DRIVE_API_KEY}` : (v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80')}" class="related-thumb" alt="${v.title}" loading="lazy">
+            <img src="${v.thumbDriveId ? `https://lh3.googleusercontent.com/d/${v.thumbDriveId}` : (v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80')}" class="related-thumb" alt="${v.title}" loading="lazy">
             <div class="related-details">
               <h4 class="related-title">${v.title}</h4>
               <div class="related-creator">${v.creatorName}</div>

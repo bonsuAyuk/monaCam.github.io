@@ -81,7 +81,7 @@ export async function uploadToDrive({ file, uploadType, fileId, onProgress, comp
           resolve({
             success: true,
             fileId: finalId,
-            url: `https://drive.google.com/thumbnail?id=${finalId}`,
+            url: `https://lh3.googleusercontent.com/d/${finalId}`,
             embedUrl: `https://drive.google.com/file/d/${finalId}/preview`,
             fileName: driveFileName,
             size: file.size

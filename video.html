@@ -352,6 +352,28 @@
         
         const commentsSection = document.querySelector(".comments-section");
         if (commentsSection) commentsSection.style.display = 'none';
+        
+        const commentsToggle = document.getElementById("comments-toggle-btn");
+        if (commentsToggle) commentsToggle.style.display = 'none';
+
+        // Check if user is authorized to even see this page
+        const isAuthorizedViewer = currentUser && (currentUser.uid === videoData.exclusiveViewerId || currentUser.uid === videoData.creatorId);
+        if (!isAuthorizedViewer) {
+           document.getElementById("video-title").innerText = "Unauthorized Access";
+           document.getElementById("video-description").innerText = "This is a private exclusive video. You do not have permission to view it.";
+           document.getElementById("player-wrapper").innerHTML = `
+             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:20px; color:#fff;">
+               <i class="fa-solid fa-lock" style="font-size:48px; color:var(--danger); margin-bottom:16px;"></i>
+               <h3>Access Denied</h3>
+               <p style="color:var(--text-muted); font-size:14px; margin-top:8px;">You are not the intended recipient of this exclusive content.</p>
+               <button class="btn btn-primary" style="margin-top:20px;" onclick="window.location.href='index.html'">Go Home</button>
+             </div>
+           `;
+           const ubt = document.getElementById("unlock-btn-top");
+           if (ubt) ubt.style.display = 'none';
+           document.querySelector(".video-creator-widget").style.display = 'none';
+           return; // Stop execution
+        }
       }
 
       // Check access
@@ -545,6 +567,63 @@
         try {
           const requestId = await submitPaymentRequest({
             uid: currentUser.uid, email: currentUser.email,
+              <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">
+                ${v.priceFCFA.toLocaleString()} FCFA
+              </div>
+            </div>
+          </div>
+        `).join("");
+      } catch (e) {
+        console.error("Error loading related videos:", e);
+        container.innerHTML = `<p style="color:var(--text-muted); font-size:13px;">No related videos yet.</p>`;
+      }
+    }
+
+    // Toggle comments dropdown
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggleBtn = document.getElementById("comments-toggle-btn");
+      const dropdown = document.getElementById("comments-dropdown");
+      if (toggleBtn && dropdown) {
+        toggleBtn.addEventListener("click", () => {
+          if (dropdown.style.display === "none") {
+            dropdown.style.display = "block";
+            toggleBtn.style.opacity = "0.6";
+          } else {
+            dropdown.style.display = "none";
+            toggleBtn.style.opacity = "1";
+          }
+        });
+      }
+    });
+  </script>
+</body>
+
+
+</html>
+        if (fileInput.files.length > 0) {
+          zone.classList.add("has-file");
+          document.getElementById("upload-zone-icon").className = "fa-solid fa-image";
+          document.getElementById("upload-zone-title").innerText = fileInput.files[0].name;
+          document.getElementById("upload-zone-subtitle").innerText = "Screenshot selected";
+          submitBtn.disabled = false;
+        }
+      });
+
+      document.getElementById("payment-submit-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const phone = document.getElementById("momo-phone").value.trim();
+        const file = fileInput.files[0];
+        if (!phone || !file) return;
+
+        const submitBtn = document.getElementById("submit-payment-btn");
+        const errEl = document.getElementById("payment-error-alert");
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting...`;
+        errEl.style.display = "none";
+
+        try {
+          const requestId = await submitPaymentRequest({
+            uid: currentUser.uid, email: currentUser.email,
             displayName: currentUser.displayName || "User",
             type: selectedPurchaseType,
             videoId: selectedPurchaseType === "ppv" ? videoId : null,
@@ -578,15 +657,16 @@
       document.getElementById("payment-amount-display").innerText = `${amountMap[selectedPurchaseType].toLocaleString()} FCFA`;
       document.getElementById("payment-plan-label").innerText = labelMap[selectedPurchaseType];
       updatePaymentNumber();
-      // Reset form
+    }
+
+    function resetPaymentForm() {
       document.getElementById("payment-submit-form").reset();
       document.getElementById("screenshot-upload-zone").classList.remove("has-file");
       document.getElementById("upload-zone-icon").className = "fa-solid fa-camera";
       document.getElementById("upload-zone-title").innerText = "Tap to Upload Screenshot";
-      document.getElementById("upload-zone-subtitle").innerText = "JPG or PNG — your confirmation message";
+      document.getElementById("upload-zone-subtitle").innerText = "JPG or PNG � your confirmation message";
       document.getElementById("submit-payment-btn").disabled = true;
       document.getElementById("payment-error-alert").style.display = "none";
-      // Reset provider to MTN
       document.getElementById("method-mtn").classList.add("selected");
       document.getElementById("method-orange").classList.remove("selected");
       selectedProvider = "MTN";
@@ -597,24 +677,23 @@
       document.getElementById("momo-number-text").innerText = PAYMENT_NUMBERS[selectedProvider].number;
     }
 
-    // ── Related videos ────────────────────────────────────────────
+    // -- Related videos --------------------------------------------
     async function loadRelatedVideos() {
       const container = document.getElementById("related-videos-list");
       try {
         const q = query(
           collection(db, "videos"),
-          where("status", "==", "approved"),
-          // limit(4) - Client side limiting for simplicity given index limitations
+          where("status", "==", "approved")
         );
         const snapshot = await getDocs(q);
         let related = [];
         snapshot.forEach(doc => {
-          if (doc.id !== videoId) {
-            related.push({ id: doc.id, ...doc.data() });
+          const data = doc.data();
+          if (doc.id !== videoId && !data.isExclusive) {
+            related.push({ id: doc.id, ...data });
           }
         });
         
-        // Take up to 4 random or newest ones
         related = related.slice(0, 4);
 
         if (!related.length) {
@@ -648,16 +727,25 @@
         toggleBtn.addEventListener("click", () => {
           if (dropdown.style.display === "none") {
             dropdown.style.display = "block";
-            toggleBtn.style.opacity = "0.6";
+            // Ensure bottom margin is added to container
+            document.querySelector(".video-page-container").style.paddingBottom = "80px";
+            // Check if user is logged in
+            if (!auth.currentUser) {
+              const input = document.getElementById("new-comment-text");
+              if (input) {
+                input.placeholder = "Log in to post a comment...";
+                input.disabled = true;
+                const postBtn = document.getElementById("post-comment-btn");
+                if (postBtn) postBtn.disabled = true;
+              }
+            }
           } else {
             dropdown.style.display = "none";
-            toggleBtn.style.opacity = "1";
+            document.querySelector(".video-page-container").style.paddingBottom = "20px";
           }
         });
       }
     });
   </script>
 </body>
-
-
 </html>

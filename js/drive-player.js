@@ -47,7 +47,7 @@ export function extractDriveFileId(url) {
 export function buildDrivePreviewUrl(fileIdOrUrl) {
   const id = extractDriveFileId(fileIdOrUrl);
   if (!id) return null;
-  return `https://drive.google.com/file/d/${id}/preview`;
+  return `https://drive.google.com/file/d/${id}/preview?autoplay=1`;
 }
 
 /**
@@ -110,36 +110,24 @@ export class DrivePlayer {
         display: flex; align-items: center; justify-content: center;
         backdrop-filter: blur(2px);
         transition: opacity 0.2s ease;
-        pointer-events: none;
+        cursor: pointer;
       `;
       this.container.appendChild(overlay);
       
-      const onBlur = () => {
-        const iframe = this.container.querySelector("iframe.drive-player-frame");
-        if (document.activeElement === iframe) {
-          overlay.style.opacity = "0";
-          setTimeout(() => overlay.remove(), 200);
-          
-          if (this.onPlay) this.onPlay();
-          if (this._isPreviewMode) {
-            this._startPreviewTimer();
-          }
-          window.removeEventListener('blur', onBlur);
+      overlay.addEventListener("click", () => {
+        overlay.style.opacity = "0";
+        setTimeout(() => overlay.remove(), 200);
+        
+        if (this.onPlay) this.onPlay();
+        if (this._isPreviewMode && !this._previewTimer) {
+          this._startPreviewTimer();
         }
-      };
-      window.addEventListener('blur', onBlur);
-
-      const video = this.container.querySelector("video");
-      if (video) {
-        video.addEventListener('play', () => {
-          overlay.style.opacity = "0";
-          setTimeout(() => overlay.remove(), 200);
-          if (this.onPlay) this.onPlay();
-          if (this._isPreviewMode && !this._previewTimer) {
-            this._startPreviewTimer();
-          }
-        }, { once: true });
-      }
+        
+        const video = this.container.querySelector("video");
+        if (video) {
+          video.play().catch(() => {});
+        }
+      });
     }
   }
 

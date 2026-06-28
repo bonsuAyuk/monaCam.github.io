@@ -87,11 +87,15 @@ export class DrivePlayer {
     this._clearTimer();
     this._isDrive       = isDriveUrl(source);
     this._isPreviewMode = !hasFullAccess;
+    this._source        = source;
+    this._hasFullAccess = hasFullAccess;
 
     if (this._isDrive) {
-      this._loadDriveIframe(source, hasFullAccess);
+      // Defer loading the iframe until play is clicked
+      // this._loadDriveIframe(source, hasFullAccess);
     } else {
-      this._loadVideoElement(source, hasFullAccess);
+      // Defer loading the video until play is clicked
+      // this._loadVideoElement(source, hasFullAccess);
     }
 
     this._showPlayOverlay();
@@ -118,6 +122,12 @@ export class DrivePlayer {
         overlay.style.opacity = "0";
         setTimeout(() => overlay.remove(), 200);
         
+        if (this._isDrive) {
+          this._loadDriveIframe(this._source, !this._isPreviewMode);
+        } else {
+          this._loadVideoElement(this._source, !this._isPreviewMode);
+        }
+
         if (this.onPlay) this.onPlay();
         if (this._isPreviewMode && !this._previewTimer) {
           this._startPreviewTimer();
@@ -262,8 +272,8 @@ export class DrivePlayer {
     const iframe = this.container.querySelector("iframe.drive-player-frame");
     const video  = this.container.querySelector("video");
     if (iframe) {
-      iframe.style.filter = "blur(12px) brightness(0.3)";
-      iframe.style.pointerEvents = "none";
+      // Remove iframe completely to stop playback
+      iframe.remove();
     }
     if (video) {
       video.pause();

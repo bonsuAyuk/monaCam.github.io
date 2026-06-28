@@ -523,7 +523,7 @@
   .related-thumb { width: 100% !important; aspect-ratio: 16/9; border-radius: 4px; }
   .related-title { font-size: 12px; margin-bottom: 2px; }
   .related-creator { font-size: 10px; }
-  .player-wrapper { border-radius: 0 !important; }
+  .player-wrapper { border-radius: 0 !important; aspect-ratio: 16/11 !important; min-height: 260px !important; }
   .paywall-overlay { padding: 12px !important; }
   .paywall-title { font-size: 16px !important; margin-bottom: 4px !important; }
   .paywall-description { font-size: 12px !important; margin-bottom: 12px !important; }

@@ -228,8 +228,16 @@ export class DrivePlayer {
       streamUrl = buildDriveStreamUrl(source);
     }
     
-    // Load into video element but do NOT autoplay
-    this.videoEl.src = streamUrl;
+    // Load into video element with multiple fallbacks
+    if (isDriveUrl(source)) {
+      const id = extractDriveFileId(source);
+      this.videoEl.innerHTML = `
+        <source src="https://drive.google.com/uc?export=download&confirm=t&id=${id}" type="video/mp4">
+        <source src="https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${DRIVE_API_KEY}" type="video/mp4">
+      `;
+    } else {
+      this.videoEl.src = streamUrl;
+    }
     this.videoEl.load();
     
     if (this._isPreviewMode) {

@@ -127,6 +127,14 @@ export class DrivePlayer {
     this.btnPlay.addEventListener("click", togglePlay);
 
     // Video Events
+    this.videoEl.addEventListener("error", (e) => {
+      console.error("Video Error:", this.videoEl.error);
+      this.centerOverlay.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ff4444; font-size: 32px;"></i><p style="color: white; font-size: 13px; font-weight: 500; margin-top: 10px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">Failed to load video.</p>`;
+      this.centerOverlay.style.opacity = "1";
+      this.centerOverlay.style.pointerEvents = "none";
+      this.btnPlay.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ff4444;"></i>`;
+    });
+
     this.videoEl.addEventListener("play", () => {
       this._isPlaying = true;
       this.centerOverlay.style.opacity = "0";

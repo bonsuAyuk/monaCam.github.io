@@ -286,7 +286,7 @@
   <script src="js/nav.js"></script>
 
   <script type="module">
-    import { auth, onAuthStateChanged, db, collection, query, where, getDocs, getDoc, doc, updateDoc, increment, deleteDoc } from "./js/db-config.js";
+    import { auth, onAuthStateChanged, db, collection, query, where, getDocs, getDoc, doc, updateDoc, increment, deleteDoc, addDoc, serverTimestamp, orderBy, DRIVE_API_KEY } from "./js/db-config.js";
     import { DrivePlayer, isDriveUrl } from "./js/drive-player.js";
     import { PLANS, PAYMENT_NUMBERS, submitPaymentRequest, checkUserAccess } from "./js/payment.js";
 
@@ -460,7 +460,7 @@
       const previewSec = videoData.previewSeconds || 30;
       document.getElementById('preview-limit-text').innerText = `${previewSec} seconds`;
 
-      const thumbUrl = videoData.thumbDriveId ? `https://drive.google.com/uc?export=view&id=${videoData.thumbDriveId}` : (videoData.thumbnailUrl || videoData.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&q=80');
+      const thumbUrl = videoData.thumbDriveId ? `https://www.googleapis.com/drive/v3/files/${videoData.thumbDriveId}?alt=media&key=${DRIVE_API_KEY}` : (videoData.thumbnailUrl || videoData.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1280&q=80');
       const pw = document.getElementById("player-wrapper");
       pw.style.backgroundImage = `url('${thumbUrl}')`;
       pw.style.backgroundSize = "cover";
@@ -687,7 +687,7 @@
           window.loadedVideos[v.id] = v;
           return `
           <div class="related-card" onclick="sessionStorage.setItem('preloaded_video_${v.id}', JSON.stringify(window.loadedVideos['${v.id}'])); window.location.href='video.html?id=${v.id}'" role="button" tabindex="0">
-            <img src="${v.thumbDriveId ? `https://drive.google.com/uc?export=view&id=${v.thumbDriveId}` : (v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80')}" class="related-thumb" alt="${v.title}" loading="lazy">
+            <img src="${v.thumbDriveId ? `https://www.googleapis.com/drive/v3/files/${v.thumbDriveId}?alt=media&key=${DRIVE_API_KEY}` : (v.thumbnailUrl || v.thumbnail || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80')}" class="related-thumb" alt="${v.title}" loading="lazy">
             <div class="related-details">
               <h4 class="related-title">${v.title}</h4>
               <div class="related-creator">${v.creatorName}</div>
@@ -701,33 +701,148 @@
       }
     }
 
-    // Toggle comments dropdown
+    // Toggle comments dropdown and load comments
     document.addEventListener("DOMContentLoaded", () => {
       const toggleBtn = document.getElementById("comments-toggle-btn");
       const dropdown = document.getElementById("comments-dropdown");
+      const postBtn = document.getElementById("post-comment-btn");
+      const input = document.getElementById("comment-input");
+      
       if (toggleBtn && dropdown) {
         toggleBtn.addEventListener("click", () => {
           if (dropdown.style.display === "none") {
             dropdown.style.display = "block";
-            // Ensure bottom margin is added to container
             document.querySelector(".video-page-container").style.paddingBottom = "80px";
-            // Check if user is logged in
+            
             if (!auth.currentUser) {
-              const input = document.getElementById("new-comment-text");
               if (input) {
                 input.placeholder = "Log in to post a comment...";
                 input.disabled = true;
-                const postBtn = document.getElementById("post-comment-btn");
-                if (postBtn) postBtn.disabled = true;
               }
+              if (postBtn) postBtn.disabled = true;
+            } else {
+              if (input) {
+                input.placeholder = "Write a comment...";
+                input.disabled = false;
+              }
+              if (postBtn) postBtn.disabled = false;
             }
+            
+            loadComments();
           } else {
             dropdown.style.display = "none";
             document.querySelector(".video-page-container").style.paddingBottom = "20px";
           }
         });
       }
+
+      if (postBtn && input) {
+        postBtn.addEventListener("click", postComment);
+        input.addEventListener("keypress", (e) => {
+          if (e.key === 'Enter') postComment();
+        });
+      }
     });
+
+    async function loadComments() {
+      const list = document.getElementById("comments-list");
+      if (!list) return;
+      list.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding: 20px 0;"><i class="fa-solid fa-spinner fa-spin"></i> Loading comments...</p>`;
+      
+      try {
+        const q = query(collection(db, "comments"), where("videoId", "==", videoId), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          list.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding: 20px 0;">No comments yet. Be the first to comment!</p>`;
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+          html += `
+            <div style="display:flex; gap:10px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05);">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&q=80" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                  <span style="font-weight:600; font-size:13px; color:var(--text-primary);">${data.userName || 'User'}</span>
+                  <span style="font-size:11px; color:var(--text-muted);">${date}</span>
+                </div>
+                <p style="font-size:13px; color:var(--text-secondary); line-height:1.4; margin:0; word-break:break-word;">${data.text}</p>
+              </div>
+            </div>
+          `;
+        });
+        list.innerHTML = html;
+      } catch (e) {
+        console.error("Error loading comments:", e);
+        if (e.message && e.message.includes("index")) {
+          console.warn("Falling back to unordered query due to missing index.");
+          try {
+            const qFallback = query(collection(db, "comments"), where("videoId", "==", videoId));
+            const snapFallback = await getDocs(qFallback);
+            if (snapFallback.empty) {
+               list.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding: 20px 0;">No comments yet. Be the first to comment!</p>`;
+               return;
+            }
+            let html = '';
+            snapFallback.forEach(docSnap => {
+              const data = docSnap.data();
+              html += `
+                <div style="display:flex; gap:10px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                  <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&q=80" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+                  <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <span style="font-weight:600; font-size:13px; color:var(--text-primary);">${data.userName || 'User'}</span>
+                    </div>
+                    <p style="font-size:13px; color:var(--text-secondary); line-height:1.4; margin:0; word-break:break-word;">${data.text}</p>
+                  </div>
+                </div>
+              `;
+            });
+            list.innerHTML = html;
+          } catch(err2) {
+             list.innerHTML = `<p style="text-align:center; color:#ff4444; font-size:13px;">Failed to load comments.</p>`;
+          }
+        } else {
+           list.innerHTML = `<p style="text-align:center; color:#ff4444; font-size:13px;">Failed to load comments.</p>`;
+        }
+      }
+    }
+
+    async function postComment() {
+      if (!auth.currentUser) return;
+      const input = document.getElementById("comment-input");
+      const postBtn = document.getElementById("post-comment-btn");
+      const text = input.value.trim();
+      
+      if (!text) return;
+      
+      input.disabled = true;
+      postBtn.disabled = true;
+      postBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      
+      try {
+        await addDoc(collection(db, "comments"), {
+          videoId: videoId,
+          userId: auth.currentUser.uid,
+          userName: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+          text: text,
+          createdAt: serverTimestamp()
+        });
+        input.value = "";
+        loadComments(); // Refresh list
+      } catch (e) {
+        console.error("Error posting comment:", e);
+        alert("Failed to post comment.");
+      } finally {
+        input.disabled = false;
+        postBtn.disabled = false;
+        postBtn.innerHTML = 'Post';
+      }
+    }
   </script>
 </body>
 </html>

@@ -30,32 +30,34 @@
  *     match /videos/{videoId} {
  *       allow read: if true;
  *       allow create: if request.auth != null;
- *       // Allow anyone to update just the view counts
  *       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'paidViews']);
- *       // Creators and admins can update or delete fully
  *       allow update, delete: if request.auth != null && (
  *         resource.data.creatorId == request.auth.uid ||
  *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
  *       );
  *     }
  *
+ *     // Comments: Public read. Authenticated users can create. Owners can delete.
+ *     match /comments/{commentId} {
+ *       allow read: if true;
+ *       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+ *       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+ *     }
+ *
  *     // Payment requests: user creates/reads own; admin reads+writes all
  *     match /paymentRequests/{requestId} {
- *       allow create: if request.auth != null
- *         && request.resource.data.uid == request.auth.uid;
+ *       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
  *       allow read: if request.auth != null && (
  *         resource.data.uid == request.auth.uid ||
  *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
  *       );
- *       allow update: if request.auth != null &&
- *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+ *       allow update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
  *     }
  *
  *     // Categories: read all; admin creates/updates/deletes
  *     match /categories/{categoryId} {
  *       allow read: if true;
- *       allow write: if request.auth != null &&
- *         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+ *       allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
  *     }
  *
  *     // Custom Requests: viewer or creator can read; viewer creates; creator updates status
@@ -73,8 +75,7 @@
  *       );
  *     }
  *   }
- * }
- */
+ * } */
 
 // ── TODO: Replace with your actual Firebase project config ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";

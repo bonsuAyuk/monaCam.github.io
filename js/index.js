@@ -205,9 +205,11 @@ async function loadVideos(reset = false) {
         // Client-side filtering
         if (currentSearch && !video.title.toLowerCase().includes(currentSearch)) return;
         if (video.isExclusive === true) return; // Hide exclusives (handles older videos missing the field)
+        window.loadedVideos = window.loadedVideos || {};
+        window.loadedVideos[docSnap.id] = video;
 
         videosHTML += `
-          <a href="video.html?id=${docSnap.id}" class="video-card">
+          <a href="video.html?id=${docSnap.id}" class="video-card" onclick="sessionStorage.setItem('preloaded_video_${docSnap.id}', JSON.stringify(window.loadedVideos['${docSnap.id}']))">
             <div class="video-thumbnail-container">
               <img src="${video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail'}" class="video-thumbnail" alt="${video.title}">
               <div class="video-duration">${video.duration || '0:00'}</div>

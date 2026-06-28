@@ -364,7 +364,7 @@ function renderVideosTable() {
     };
     const thumb = v.thumbnailUrl || "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=100&q=80";
     const price = v.priceFCFA === 0 ? "Pass Only" : `${(v.priceFCFA || 0).toLocaleString()} FCFA`;
-    const date  = new Date(v.createdAt).toLocaleDateString();
+    const date  = new Date(v.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
     return `
       <tr>
@@ -686,7 +686,7 @@ async function renderPaymentLog() {
           <td style="font-weight:700;">${Math.abs(log.amount).toLocaleString()} FCFA</td>
           <td><span style="text-transform:uppercase;">${log.provider}</span></td>
           <td>${statusBadge}</td>
-          <td>${new Date(log.date).toLocaleDateString()}</td>
+          <td>${new Date(log.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
         </tr>
         `;
       }).join("");

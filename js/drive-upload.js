@@ -81,7 +81,7 @@ export async function uploadToDrive({ file, uploadType, fileId, onProgress, comp
           resolve({
             success: true,
             fileId: finalId,
-            url: `https://drive.google.com/uc?export=view&id=${finalId}`,
+            url: `https://drive.google.com/thumbnail?id=${finalId}`,
             embedUrl: `https://drive.google.com/file/d/${finalId}/preview`,
             fileName: driveFileName,
             size: file.size
@@ -149,7 +149,7 @@ export async function uploadScreenshotToImgBB(file, onProgress) {
  * Google Drive direct view URL from file ID.
  */
 export function driveViewUrl(driveFileId) {
-  return `https://drive.google.com/uc?export=view&id=${driveFileId}`;
+  return `https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1000`;
 }
 
 /**

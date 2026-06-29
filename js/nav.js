@@ -213,14 +213,14 @@
   }
 
   // ── Auto Logout for Inactivity ────────────────────────────────
-  const INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+  const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; // 10 minutes
   let inactivityTimer;
 
   function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => {
       if (window.isUserLoggedIn) {
-        alert("You have been automatically logged out due to inactivity for your security.");
+        // Log out immediately without blocking (alert() suspends background tabs)
         window.performLogout();
       }
     }, INACTIVITY_LIMIT_MS);

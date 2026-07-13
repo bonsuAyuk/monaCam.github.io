@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Watch premium content on MonaCam. Powered by Google Drive streaming.">
-  <title>Watch Video | MonaCam</title>
+  
+  
 
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components.css">
@@ -24,6 +24,22 @@
       border: none;
     }
   </style>
+
+  <!-- SEO & Adult Compliance Meta Tags -->
+  <meta name="rating" content="adult">
+  <meta name="rating" content="RTA-5042-1996-1400-1577-RTA">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://monakamer.com/images/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="canonical" href="https://monakamer.com/video.html">
+  <meta property="og:url" content="https://monakamer.com/video.html">
+  <meta property="og:title" content="Watch Premium Video | MonaKamer">
+  <meta property="og:description" content="Watch exclusive premium content on MonaKamer.">
+  <meta name="twitter:title" content="Watch Premium Video | MonaKamer">
+  <meta name="twitter:description" content="Watch exclusive premium content on MonaKamer.">
+  <title>Watch Premium Video | MonaKamer</title>
+  <meta name="description" content="Watch exclusive premium content on MonaKamer.">
 </head>
 <body>
 
@@ -154,15 +170,7 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-          <div class="checkout-method-card" id="opt-ppv" style="text-align:left; padding:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-              <div>
-                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Buy This Video</div>
-                <div style="font-size:12px; color:var(--text-muted);">One-time, lifetime access to this video</div>
-              </div>
-              <div style="font-family:var(--font-display); font-size:18px; font-weight:800; color:var(--primary); white-space:nowrap;" id="ppv-price-label">0 FCFA</div>
-            </div>
-          </div>
+
           <div class="checkout-method-card" id="opt-weekly" style="text-align:left; padding:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
               <div>
@@ -359,7 +367,6 @@
       document.getElementById("creator-name").innerText       = videoData.creatorName || "Anonymous";
       document.getElementById("video-category").innerHTML     = `<i class="fa-solid fa-tag"></i> ${videoData.category || 'Uncategorized'}`;
       document.getElementById("video-views-count").innerHTML  = `<i class="fa-solid fa-eye"></i> ${(videoData.views || 0).toLocaleString()} views`;
-      document.getElementById("ppv-price-label").innerText    = `${(videoData.priceFCFA || 0).toLocaleString()} FCFA`;
       if (videoData.isExclusive) {
         // Hide views and comments for exclusive videos
         const viewsEl = document.getElementById("video-views-count");
@@ -394,7 +401,8 @@
       // Check access
       let hasAccess = false;
       if (currentUser) {
-        hasAccess = await checkUserAccess(currentUser.uid, videoId);
+        const accessState = await checkUserAccess(currentUser.uid, videoId);
+        hasAccess = accessState.hasPass || currentUser.uid === videoData.creatorId || currentUser.role === 'admin';
         
         // Hide paywall elements if they have access
         if (hasAccess) {
@@ -499,16 +507,16 @@
       document.getElementById("paywall-title").innerText = "Preview Ended";
       document.getElementById("paywall-desc").innerText  = "Pay with MTN MoMo or Orange Money to watch the full video.";
       document.getElementById("paywall-options-container").innerHTML = `
-        <div class="paywall-card" id="paywall-ppv-btn">
-          <div class="paywall-card-price">${videoData.priceFCFA.toLocaleString()} FCFA</div>
-          <div style="font-size:12px; font-weight:600; margin-top:4px;">Buy This Video</div>
+        <div class="paywall-card" id="paywall-weekly-btn">
+          <div class="paywall-card-price">1,000 FCFA</div>
+          <div style="font-size:12px; font-weight:600; margin-top:4px;">Weekly Pass</div>
         </div>
         <div class="paywall-card" id="paywall-pass-btn">
           <div class="paywall-card-price">2,500 FCFA</div>
           <div style="font-size:12px; font-weight:600; margin-top:4px;">Monthly Pass</div>
         </div>
       `;
-      document.getElementById("paywall-ppv-btn")?.addEventListener("click",  () => openCheckout("ppv"));
+      document.getElementById("paywall-weekly-btn")?.addEventListener("click", () => openCheckout("weekly"));
       document.getElementById("paywall-pass-btn")?.addEventListener("click", () => openCheckout("monthly"));
     }
 
@@ -527,18 +535,18 @@
 
     function selectPurchaseType(type) {
       selectedPurchaseType = type;
-      ["opt-ppv","opt-weekly","opt-monthly"].forEach(id =>
+      ["opt-weekly","opt-monthly"].forEach(id =>
         document.getElementById(id).classList.remove("selected")
       );
-      const map = { ppv:"opt-ppv", weekly:"opt-weekly", monthly:"opt-monthly" };
+      const map = { weekly:"opt-weekly", monthly:"opt-monthly" };
       document.getElementById(map[type])?.classList.add("selected");
       document.getElementById("continue-to-payment-btn").disabled = false;
     }
 
     function setupCheckoutModal() {
-      ["opt-ppv","opt-weekly","opt-monthly"].forEach(id => {
+      ["opt-weekly","opt-monthly"].forEach(id => {
         document.getElementById(id)?.addEventListener("click", () => {
-          selectPurchaseType({ "opt-ppv":"ppv","opt-weekly":"weekly","opt-monthly":"monthly" }[id]);
+          selectPurchaseType({ "opt-weekly":"weekly","opt-monthly":"monthly" }[id]);
         });
       });
 
@@ -612,15 +620,15 @@
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...`;
 
-        const amountMap = { ppv: videoData.priceFCFA, weekly: 1000, monthly: 2500 };
+        const amountMap = { weekly: 1000, monthly: 2500 };
 
         try {
           const requestId = await submitPaymentRequest({
             uid: currentUser.uid, email: currentUser.email,
-﻿            displayName: currentUser.displayName || "User",
+            displayName: currentUser.displayName || "User",
             type: selectedPurchaseType,
-            videoId: selectedPurchaseType === "ppv" ? videoId : null,
-            videoTitle: selectedPurchaseType === "ppv" ? videoData.title : null,
+            videoId: null,
+            videoTitle: null,
             amount: amountMap[selectedPurchaseType],
             provider: selectedProvider, phone, screenshotFile: file,
           });
@@ -641,9 +649,8 @@
     }
 
     function populateStep2() {
-      const amountMap = { ppv: videoData.priceFCFA, weekly: 1000, monthly: 2500 };
+      const amountMap = { weekly: 1000, monthly: 2500 };
       const labelMap  = {
-        ppv:     `"${videoData.title.substring(0, 40)}..."`,
         weekly:  "Weekly Viewer Pass (7 days)",
         monthly: "Monthly Viewer Pass (30 days)",
       };
@@ -703,7 +710,6 @@
             <div class="related-details">
               <h4 class="related-title">${v.title}</h4>
               <div class="related-creator">${v.creatorName}</div>
-              ${v.priceFCFA > 0 ? `<div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px;">${v.priceFCFA.toLocaleString()} FCFA</div>` : ''}
             </div>
           </div>
         `}).join("");

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Manage your videos, monetization, and withdrawals on MonaCam.">
-  <title>Creator Dashboard | MonaCam</title>
+  
+  
   
   <!-- Styling Sheets -->
   <link rel="stylesheet" href="css/main.css">
@@ -12,6 +12,22 @@
   <link rel="stylesheet" href="css/pages/dashboard.css">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- SEO & Adult Compliance Meta Tags -->
+  <meta name="rating" content="adult">
+  <meta name="rating" content="RTA-5042-1996-1400-1577-RTA">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://monakamer.com/images/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="canonical" href="https://monakamer.com/creator-dashboard.html">
+  <meta property="og:url" content="https://monakamer.com/creator-dashboard.html">
+  <meta property="og:title" content="Dashboard | MonaKamer">
+  <meta property="og:description" content="Manage your MonaKamer account.">
+  <meta name="twitter:title" content="Dashboard | MonaKamer">
+  <meta name="twitter:description" content="Manage your MonaKamer account.">
+  <title>Dashboard | MonaKamer</title>
+  <meta name="description" content="Manage your MonaKamer account.">
 </head>
 <body>
 
@@ -184,8 +200,7 @@
           <i class="fa-solid fa-circle-check"></i>
           <span>Video uploaded successfully and is pending admin approval!</span>
         </div>
-
-        <div class="card">
+        <div class="card">
           <form id="upload-video-form">
             <div class="form-group">
               <label for="video-title" class="form-label">Video Title</label>
@@ -198,10 +213,9 @@
             </div>
 
             <div class="upload-two-col">
-              <div class="form-group">
+              <div class="form-group" style="display:none;">
                 <label for="video-price" class="form-label">Access Price (FCFA)</label>
-                <input type="number" id="video-price" class="form-control" placeholder="1000" min="0" required>
-                <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Enter 0 to make it available via active Viewer Passes only.</small>
+                <input type="number" id="video-price" class="form-control" value="0">
               </div>
               <div class="form-group">
                 <label for="video-category" class="form-label">Category</label>

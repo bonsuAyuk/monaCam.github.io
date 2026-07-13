@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Moderation, video approvals, subscriptions, user management, and financials.">
-  <title>Admin Dashboard Console | MonaCam</title>
+  
+  
   
   <!-- Styling Sheets -->
   <link rel="stylesheet" href="css/main.css">
@@ -12,6 +12,22 @@
   <link rel="stylesheet" href="css/pages/dashboard.css">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- SEO & Adult Compliance Meta Tags -->
+  <meta name="rating" content="adult">
+  <meta name="rating" content="RTA-5042-1996-1400-1577-RTA">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://monakamer.com/images/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="canonical" href="https://monakamer.com/admin-dashboard.html">
+  <meta property="og:url" content="https://monakamer.com/admin-dashboard.html">
+  <meta property="og:title" content="Dashboard | MonaKamer">
+  <meta property="og:description" content="Manage your MonaKamer account.">
+  <meta name="twitter:title" content="Dashboard | MonaKamer">
+  <meta name="twitter:description" content="Manage your MonaKamer account.">
+  <title>Dashboard | MonaKamer</title>
+  <meta name="description" content="Manage your MonaKamer account.">
 </head>
 <body>
 
@@ -461,6 +477,32 @@
             <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Save Settings</button>
           </form>
         </div>
+        <div class="card" style="max-width:540px;">
+          <h3 style="margin-bottom:20px; font-family:var(--font-display);"><i class="fa-brands fa-google-drive text-gradient"></i> Google Drive Sync</h3>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Automatically import new videos from a public Google Drive folder. The folder must be set to "Anyone with the link can view".</p>
+          
+          <div class="auth-alert auth-alert-success" id="sync-success-alert" style="margin-bottom:20px;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="sync-success-msg">Sync complete!</span>
+          </div>
+          <div class="auth-alert auth-alert-error" id="sync-error-alert" style="margin-bottom:20px;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="sync-error-msg">Sync failed.</span>
+          </div>
+
+          <form id="drive-sync-form">
+            <div class="form-group">
+              <label for="drive-folder-id" class="form-label">Google Drive Folder ID</label>
+              <input type="text" id="drive-folder-id" class="form-control" placeholder="e.g. 1aBcDeFgHiJkLmNoPqRsTuVwXyZ" required>
+              <small style="color:var(--text-muted); font-size:11px; margin-top:6px; display:block;">Found in the URL of your Google Drive folder: drive.google.com/drive/folders/<b>[FOLDER_ID]</b></small>
+            </div>
+            
+            <button type="submit" id="btn-sync-drive" class="btn btn-primary" style="width:100%; margin-top:10px;">
+              <i class="fa-solid fa-rotate"></i> Sync Now
+            </button>
+          </form>
+        </div>
+
       </section>
 
     </main>
@@ -1142,11 +1184,9 @@
   </script>
 
   <!-- Mobile nav hamburger -->
-  <script src="js/nav.js"></script>
+  <script type="module" src="js/nav.js"></script>
+  
+  <!-- Google Drive Auto-Sync Tool -->
+  <script type="module" src="js/admin-sync.js"></script>
 
 </body>
-
-
-
-
-

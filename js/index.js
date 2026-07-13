@@ -180,8 +180,6 @@ async function loadVideos(reset = false) {
     if (currentSort === "newest") constraints.push(orderBy("createdAt", "desc"));
     if (currentSort === "popular") constraints.push(orderBy("views", "desc"));
     if (currentSort === "oldest") constraints.push(orderBy("createdAt", "asc"));
-    if (currentSort === "price-low") constraints.push(orderBy("priceFCFA", "asc"));
-    if (currentSort === "price-high") constraints.push(orderBy("priceFCFA", "desc"));
 
     constraints.push(limit(30)); // Increased limit slightly to account for client-side filtering
 
@@ -213,9 +211,6 @@ async function loadVideos(reset = false) {
             <div class="video-thumbnail-container">
               <img src="${video.thumbDriveId ? `https://lh3.googleusercontent.com/d/${video.thumbDriveId}` : (video.thumbnailUrl || 'https://placehold.co/640x360?text=No+Thumbnail')}" class="video-thumbnail" alt="${video.title}" loading="lazy">
               <div class="video-duration">${video.duration || '0:00'}</div>
-              <div class="video-price-tag">
-                <i class="fa-solid fa-money-bill"></i> ${video.priceFCFA ? video.priceFCFA.toLocaleString() + ' FCFA' : 'Free'}
-              </div>
             </div>
             <div class="video-info">
               <h3 class="video-title">${video.title}</h3>

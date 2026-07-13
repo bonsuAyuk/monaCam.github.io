@@ -363,7 +363,6 @@ function renderVideosTable() {
       rejected: `<span class="badge" style="background:rgba(255,23,68,0.1); color:var(--error); border-color:rgba(255,23,68,0.25);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`
     };
     const thumb = v.thumbnailUrl || "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=100&q=80";
-    const price = v.priceFCFA === 0 ? "Pass Only" : `${(v.priceFCFA || 0).toLocaleString()} FCFA`;
     const date  = new Date(v.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
     return `
@@ -378,7 +377,6 @@ function renderVideosTable() {
           </div>
         </td>
         <td style="text-transform:capitalize;">${v.category}</td>
-        <td>${price}</td>
         <td><i class="fa-solid fa-eye" style="font-size:12px; color:var(--text-muted);"></i> ${v.views || 0}</td>
         <td>${badges[v.status] || v.status}</td>
       </tr>
@@ -485,7 +483,7 @@ function setupUploadFormHandler() {
 
     const title       = document.getElementById("video-title").value.trim();
     const description = document.getElementById("video-desc").value.trim();
-    const price       = Number(document.getElementById("video-price").value);
+    const price       = 0; // Hardcoded to 0 for VIP Pass model
     const category    = document.getElementById("video-category").value;
 
     const isExclusive = document.getElementById("is-exclusive-checkbox")?.checked || false;
